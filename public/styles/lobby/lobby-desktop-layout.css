@@ -37,7 +37,7 @@ body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__title {
 body.page-context--lobby[data-lobby-ticket-stub="top"] .lobby-screen__ticket {
   grid-template-columns: 1fr;
   grid-template-rows: var(--lobby-ticket-fit-stub-height, var(--lobby-ticket-top-stub-height)) minmax(0, 1fr);
-  width: max(0px, calc(clamp(360px, 40vw, 404px) - 36px));
+  width: min(380px, calc(100% - 12px));
 }
 
 body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__title {

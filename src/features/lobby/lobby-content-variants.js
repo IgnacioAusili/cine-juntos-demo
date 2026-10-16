@@ -115,6 +115,13 @@ export function syncSingleColumnContentCenter(screen, grid, hero, ticket, footer
   if (!screen || !grid || !hero || !ticket || !footer) return;
 
   const appInvite = screen.querySelector('.lobby-screen__app-invite');
+  const ticketWidth = ticket.getBoundingClientRect().width;
+  if (appInvite && ticketWidth > 0) {
+    const inviteWidth = `${ticketWidth.toFixed(2)}px`;
+    if (appInvite.style.getPropertyValue("--lobby-app-invite-ticket-width") !== inviteWidth) {
+      appInvite.style.setProperty("--lobby-app-invite-ticket-width", inviteWidth);
+    }
+  }
   appInvite?.style.removeProperty("--lobby-app-invite-center-shift");
   appInvite?.removeAttribute("data-density");
   grid.style.setProperty("--lobby-content-center-shift", "0px");
@@ -140,7 +147,9 @@ export function syncSingleColumnContentCenter(screen, grid, hero, ticket, footer
   const heroRect = hero.getBoundingClientRect();
   const ticketRect = ticket.getBoundingClientRect();
   const heroTicketGap = Math.max(0, ticketRect.top - heroRect.bottom);
-  const minimumTop = availableTop + heroRect.height + heroTicketGap;
+  const declaredGridGap = Number.parseFloat(getComputedStyle(grid).rowGap) || heroTicketGap;
+  const minimumHeroTicketGap = Math.min(heroTicketGap, Math.max(8, declaredGridGap - 4));
+  const minimumTop = heroRect.bottom + minimumHeroTicketGap;
 
   // El boleto conserva su centro vertical. El panel se acomoda después dentro
   // del espacio restante entre el boleto y el pie legal.
@@ -148,26 +157,53 @@ export function syncSingleColumnContentCenter(screen, grid, hero, ticket, footer
   const maximumTop = contentBottom - ticketRect.height;
   let targetTop = Math.min(maximumTop, Math.max(minimumTop, centeredTop));
   let inviteRect = null;
+  let inviteRequiredHeight = 0;
+
+  // El panel se centra con translate en el hueco restante; su margen superior
+  // no consume ese espacio. Sí reservamos el margen inferior para separarlo
+  // del texto legal.
+  const measureInviteRequiredHeight = () => {
+    inviteRect = appInvite.getBoundingClientRect();
+    const inviteStyle = getComputedStyle(appInvite);
+    const bottomMargin = Math.max(0, Number.parseFloat(inviteStyle.marginBottom) || 0);
+    inviteRequiredHeight = inviteRect.height + bottomMargin;
+  };
 
   if (appInvite?.getClientRects().length) {
-    const ticketBottom = ticketRect.bottom + targetTop - ticketRect.top;
-    const availableInviteHeight = Math.max(0, contentBottom - ticketBottom);
-    inviteRect = appInvite.getBoundingClientRect();
+    measureInviteRequiredHeight();
+    let ticketBottom = ticketRect.bottom + targetTop - ticketRect.top;
+    let availableInviteHeight = Math.max(0, contentBottom - ticketBottom);
 
-    if (inviteRect.height > availableInviteHeight) {
+    // Si al panel normal le faltan unos píxeles, subir el boleto dentro del
+    // espacio sobrante entre el encabezado y el boleto antes de compactarlo.
+    const normalDensityLift = Math.min(
+      Math.max(0, inviteRequiredHeight - availableInviteHeight),
+      Math.max(0, targetTop - minimumTop),
+    );
+    if (normalDensityLift > 0) {
+      targetTop -= normalDensityLift;
+      availableInviteHeight += normalDensityLift;
+      ticketBottom -= normalDensityLift;
+    }
+
+    if (inviteRequiredHeight > availableInviteHeight) {
       appInvite.dataset.density = "compact";
-      inviteRect = appInvite.getBoundingClientRect();
+      measureInviteRequiredHeight();
 
-      if (inviteRect.height > availableInviteHeight) {
+      // El espacio de separación sirve para salir del diseño grande; para
+      // bajar otra vez, primero debe no caber la tarjeta compacta en sí.
+      if (inviteRequiredHeight > availableInviteHeight) {
         appInvite.dataset.density = "minimal";
-        inviteRect = appInvite.getBoundingClientRect();
+        measureInviteRequiredHeight();
       }
     }
 
-    if (inviteRect.height > availableInviteHeight) {
-      const ticketTopWithInvite = contentBottom - ticketRect.height - inviteRect.height;
+    if (inviteRequiredHeight > availableInviteHeight) {
+      const ticketTopWithInvite = contentBottom - ticketRect.height - inviteRequiredHeight;
       if (ticketTopWithInvite >= minimumTop && ticketTopWithInvite < targetTop) {
         targetTop = ticketTopWithInvite;
+        ticketBottom = ticketRect.bottom + targetTop - ticketRect.top;
+        availableInviteHeight = Math.max(0, contentBottom - ticketBottom);
       }
     }
   }
