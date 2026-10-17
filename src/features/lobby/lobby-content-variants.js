@@ -1,45 +1,14 @@
-export function syncSingleColumnDescriptionPlacement(hero, ticket) {
+export function syncSingleColumnDescriptionWidth(hero, ticket) {
   if (!hero || !ticket) return;
 
-  // Medimos desde cero para no acumular el desplazamiento al redimensionar.
-  hero.style.setProperty("--lobby-description-separator-shift", "0px");
-  hero.style.removeProperty("--lobby-description-separator-top");
-
-  const title = hero.querySelector('.lobby-screen__title');
   const description = hero.querySelector('.lobby-screen__description');
-  if (!title || !description) return;
+  if (!description) return;
 
   const descriptionWidth = Math.max(hero.clientWidth, ticket.clientWidth);
   if (descriptionWidth > 0) {
     description.style.setProperty("--lobby-description-fit-width", `${descriptionWidth.toFixed(2)}px`);
-  }
-
-  if (window.matchMedia("(max-width: 680px)").matches) {
-    const heroRect = hero.getBoundingClientRect();
-    const descriptionRect = description.getBoundingClientRect();
-    const separatorTop = descriptionRect.bottom - heroRect.top + 6;
-    if (Number.isFinite(separatorTop)) {
-      hero.style.setProperty("--lobby-description-separator-top", `${separatorTop.toFixed(2)}px`);
-    }
-    return;
-  }
-
-  const separatorStyle = getComputedStyle(hero, "::before");
-  const separatorTop = Number.parseFloat(separatorStyle.top);
-  const separatorHeight = Number.parseFloat(separatorStyle.height);
-  if (!Number.isFinite(separatorTop) || !Number.isFinite(separatorHeight) || separatorHeight <= 0) return;
-
-  const heroRect = hero.getBoundingClientRect();
-  const titleRect = title.getBoundingClientRect();
-  const descriptionRect = description.getBoundingClientRect();
-  const ticketRect = ticket.getBoundingClientRect();
-  const separatorBottom = heroRect.top + separatorTop + separatorHeight;
-  const topGap = descriptionRect.top - titleRect.bottom;
-  const bottomGap = ticketRect.top - separatorBottom;
-  const shift = (bottomGap - topGap) / 2;
-
-  if (Number.isFinite(shift)) {
-    hero.style.setProperty("--lobby-description-separator-shift", `${shift.toFixed(2)}px`);
+  } else {
+    description.style.removeProperty("--lobby-description-fit-width");
   }
 }
 
@@ -135,7 +104,11 @@ export function syncSingleColumnContentCenter(screen, grid, hero, ticket, footer
   const footerRect = footer.getBoundingClientRect();
   const visualViewport = window.visualViewport;
   const viewportTop = visualViewport?.offsetTop ?? 0;
-  const viewportBottom = viewportTop + (visualViewport?.height ?? window.innerHeight);
+  const restingViewportHeight = document.body.dataset.lobbyBrowserKeyboardInitializing === "true"
+    ? Number.parseFloat(document.body.style.getPropertyValue("--lobby-resting-viewport-height"))
+    : 0;
+  const viewportHeight = restingViewportHeight || visualViewport?.height || window.innerHeight;
+  const viewportBottom = viewportTop + viewportHeight;
   const availableTop = Math.max(screenRect.top, viewportTop);
   const availableBottom = Math.min(screenRect.bottom, viewportBottom);
   const availableCenter = (availableTop + availableBottom) / 2;
@@ -183,7 +156,6 @@ export function syncSingleColumnContentCenter(screen, grid, hero, ticket, footer
     if (normalDensityLift > 0) {
       targetTop -= normalDensityLift;
       availableInviteHeight += normalDensityLift;
-      ticketBottom -= normalDensityLift;
     }
 
     if (inviteRequiredHeight > availableInviteHeight) {
@@ -202,8 +174,6 @@ export function syncSingleColumnContentCenter(screen, grid, hero, ticket, footer
       const ticketTopWithInvite = contentBottom - ticketRect.height - inviteRequiredHeight;
       if (ticketTopWithInvite >= minimumTop && ticketTopWithInvite < targetTop) {
         targetTop = ticketTopWithInvite;
-        ticketBottom = ticketRect.bottom + targetTop - ticketRect.top;
-        availableInviteHeight = Math.max(0, contentBottom - ticketBottom);
       }
     }
   }
@@ -252,6 +222,7 @@ export function syncSingleColumnTicketPlacement(hero, ticket, footer) {
   if (
     document.body.dataset.lobbyInputFocused === "true"
     || document.body.dataset.lobbyKeyboardOpen === "true"
+    || document.body.dataset.lobbyBrowserKeyboardOpen === "true"
   ) return;
 
   const body = ticket.querySelector('.lobby-screen__ticket-body');

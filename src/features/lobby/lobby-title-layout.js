@@ -223,9 +223,7 @@ export function resetSingleColumnTitleGroup(hero) {
   hero?.style.removeProperty("--lobby-title-group-shift");
 }
 
-export function resetSingleColumnDescriptionPlacement(hero) {
-  hero?.style.removeProperty("--lobby-description-separator-shift");
-  hero?.style.removeProperty("--lobby-description-separator-top");
+export function resetSingleColumnDescriptionWidth(hero) {
   hero?.querySelector('.lobby-screen__description')?.style.removeProperty("--lobby-description-fit-width");
 }
 

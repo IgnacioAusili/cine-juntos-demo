@@ -280,10 +280,3 @@ body.page-context--lobby[data-lobby-flow="single-column"]
   .lobby-screen__hero[data-title-placement="centered"] .lobby-screen__description {
   transform: translateY(-6px);
 }
-
-body.page-context--lobby[data-lobby-flow="single-column"]
-  .lobby-screen__hero[data-title-placement="centered"]::before,
-body.page-context--lobby[data-lobby-flow="single-column"]
-  .lobby-screen__hero[data-title-placement="centered"]::after {
-  display: none;
-}

@@ -3,6 +3,7 @@ import { scheduleLobbyContentCenter } from "./lobby-content-layout.js";
 const LOBBY_INPUT_SELECTOR = "#lobbyNameInput, #roomInput";
 const KEYBOARD_DELTA_PX = 80;
 const KEYBOARD_GAP_PX = 8;
+const RESTING_VIEWPORT_STORAGE_KEY = "cine-juntos:lobby-resting-viewport";
 
 let restoreScrollTop = 0;
 let baselineViewportHeight = 0;
@@ -10,6 +11,9 @@ let activeLobbyInput = null;
 let keyboardOpen = false;
 let restoreTimer = 0;
 let alignFrame = 0;
+let restingBrowserViewportHeight = 0;
+let restingBrowserViewportWidth = 0;
+let previousBrowserKeyboardHeroRowGap = null;
 
 function isLobbyInput(target) {
   return target instanceof HTMLInputElement
@@ -19,6 +23,137 @@ function isLobbyInput(target) {
 
 function getViewportHeight() {
   return window.visualViewport?.height || window.innerHeight || 0;
+}
+
+function getViewportWidth() {
+  return document.documentElement.clientWidth || window.innerWidth || 0;
+}
+
+function getLayoutViewportHeight() {
+  return Number.parseFloat(
+    getComputedStyle(document.documentElement).getPropertyValue("--app-viewport-height"),
+  ) || getViewportHeight();
+}
+
+function readRestingViewport() {
+  try {
+    const saved = JSON.parse(sessionStorage.getItem(RESTING_VIEWPORT_STORAGE_KEY) || "null");
+    if (
+      Number.isFinite(saved?.height)
+      && Number.isFinite(saved?.width)
+      && Number.isFinite(saved?.layoutHeight)
+    ) return saved;
+  } catch {
+    // La referencia de este ciclo sigue funcionando aunque el storage no esté disponible.
+  }
+  return null;
+}
+
+function saveRestingViewport() {
+  if (!restingBrowserViewportHeight || !restingBrowserViewportWidth) return;
+  try {
+    sessionStorage.setItem(RESTING_VIEWPORT_STORAGE_KEY, JSON.stringify({
+      height: restingBrowserViewportHeight,
+      width: restingBrowserViewportWidth,
+      layoutHeight: getLayoutViewportHeight(),
+    }));
+  } catch {
+    // El ajuste del viewport no depende de que el navegador permita storage.
+  }
+}
+
+function clearBrowserKeyboardLayout() {
+  delete document.body.dataset.lobbyBrowserKeyboardOpen;
+  document.body.style.removeProperty("--lobby-resting-viewport-height");
+  document.body.style.removeProperty("--lobby-resting-grid-gap");
+  document.body.style.removeProperty("--lobby-resting-grid-margin-top");
+  const hero = document.querySelector(".lobby-screen__hero");
+  if (hero && previousBrowserKeyboardHeroRowGap !== null) {
+    if (previousBrowserKeyboardHeroRowGap) {
+      hero.style.setProperty("row-gap", previousBrowserKeyboardHeroRowGap);
+    } else {
+      hero.style.removeProperty("row-gap");
+    }
+  }
+  previousBrowserKeyboardHeroRowGap = null;
+}
+
+function setBrowserKeyboardLayout(height, layoutHeight = getLayoutViewportHeight()) {
+  const body = document.body;
+  const rootHeight = layoutHeight || height;
+  body.dataset.lobbyBrowserKeyboardOpen = "true";
+  body.style.setProperty("--lobby-resting-viewport-height", `${height}px`);
+  body.style.setProperty("--lobby-resting-grid-gap", `${Math.max(12, Math.min(18, rootHeight * 0.018))}px`);
+  body.style.setProperty("--lobby-resting-grid-margin-top", `${Math.max(16, Math.min(24, rootHeight * 0.02))}px`);
+  const hero = document.querySelector(".lobby-screen__hero");
+  if (hero) {
+    previousBrowserKeyboardHeroRowGap = hero.style.getPropertyValue("row-gap");
+    hero.style.setProperty("row-gap", `${Math.max(2, Math.min(4, rootHeight * 0.004))}px`);
+  }
+}
+
+function syncBrowserKeyboardLayout() {
+  const body = document.body;
+  if (!body.classList.contains("page-context--lobby")) {
+    clearBrowserKeyboardLayout();
+    restingBrowserViewportHeight = 0;
+    restingBrowserViewportWidth = 0;
+    return;
+  }
+
+  const viewportHeight = getViewportHeight();
+  const viewportWidth = getViewportWidth();
+  if (!viewportHeight || !viewportWidth) return;
+
+  if (!restingBrowserViewportHeight) {
+    restingBrowserViewportHeight = viewportHeight;
+    restingBrowserViewportWidth = viewportWidth;
+    return;
+  }
+
+  // Un cambio de ancho indica una rotación o un redimensionamiento real. En
+  // ese caso el lobby debe volver a medir su composición con el viewport nuevo.
+  if (Math.abs(viewportWidth - restingBrowserViewportWidth) > 1) {
+    clearBrowserKeyboardLayout();
+    restingBrowserViewportHeight = viewportHeight;
+    restingBrowserViewportWidth = viewportWidth;
+    saveRestingViewport();
+    scheduleLobbyContentCenter();
+    return;
+  }
+
+  if (
+    activeLobbyInput
+    || body.dataset.lobbyInputFocused === "true"
+    || body.dataset.lobbyKeyboardOpen === "true"
+  ) {
+    clearBrowserKeyboardLayout();
+    return;
+  }
+
+  const browserKeyboardOpen = body.dataset.lobbyBrowserKeyboardOpen === "true";
+  if (!browserKeyboardOpen && viewportHeight > restingBrowserViewportHeight) {
+    // Chrome también puede conservar el teclado durante una recarga iniciada
+    // desde la barra. Al volver al alto normal, actualizar la referencia para
+    // que el siguiente cambio de viewport se detecte desde el tamaño correcto.
+    restingBrowserViewportHeight = viewportHeight;
+    saveRestingViewport();
+    return;
+  }
+
+  if (restingBrowserViewportHeight - viewportHeight > KEYBOARD_DELTA_PX) {
+    if (!browserKeyboardOpen) {
+      setBrowserKeyboardLayout(restingBrowserViewportHeight);
+    }
+    return;
+  }
+
+  if (browserKeyboardOpen && viewportHeight >= restingBrowserViewportHeight - KEYBOARD_DELTA_PX) {
+    clearBrowserKeyboardLayout();
+    restingBrowserViewportHeight = viewportHeight;
+    saveRestingViewport();
+    scheduleLobbyContentCenter();
+  }
 }
 
 function setKeyboardLayoutActive(active) {
@@ -93,6 +228,8 @@ function scheduleInputAlignment() {
 }
 
 function syncKeyboardViewport() {
+  syncBrowserKeyboardLayout();
+
   if (!document.body.classList.contains("page-context--lobby")) {
     if (keyboardOpen) {
       keyboardOpen = false;
@@ -125,6 +262,34 @@ function syncKeyboardViewport() {
 }
 
 export function wireLobbyKeyboardRestore() {
+  const viewportHeight = getViewportHeight();
+  const viewportWidth = getViewportWidth();
+  const savedRestingViewport = readRestingViewport();
+  if (
+    document.body.classList.contains("page-context--lobby")
+    && savedRestingViewport
+    && savedRestingViewport.width === viewportWidth
+    && savedRestingViewport.height - viewportHeight > KEYBOARD_DELTA_PX
+  ) {
+    restingBrowserViewportHeight = savedRestingViewport.height;
+    restingBrowserViewportWidth = savedRestingViewport.width;
+    if (!document.body.dataset.lobbyFlow) {
+      document.body.dataset.lobbyFlow = viewportWidth <= 680 ? "single-column" : "columns";
+    }
+    setBrowserKeyboardLayout(savedRestingViewport.height, savedRestingViewport.layoutHeight);
+    document.body.dataset.lobbyBrowserKeyboardInitializing = "true";
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        delete document.body.dataset.lobbyBrowserKeyboardInitializing;
+        scheduleLobbyContentCenter();
+      });
+    });
+  } else {
+    restingBrowserViewportHeight = viewportHeight;
+    restingBrowserViewportWidth = viewportWidth;
+    saveRestingViewport();
+  }
+
   document.addEventListener("focusin", (event) => {
     if (!isLobbyInput(event.target)) return;
 
@@ -132,6 +297,7 @@ export function wireLobbyKeyboardRestore() {
     if (!activeLobbyInput) restoreScrollTop = window.scrollY || 0;
     activeLobbyInput = event.target;
     document.body.dataset.lobbyInputFocused = "true";
+    clearBrowserKeyboardLayout();
     if (!keyboardOpen) baselineViewportHeight = getViewportHeight();
     scheduleLobbyContentCenter();
     scheduleInputAlignment();

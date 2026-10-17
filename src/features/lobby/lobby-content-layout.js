@@ -1,12 +1,18 @@
 let lobbyCenterFrame = 0;
 
-import { resetTitleFit, syncLobbyTitleFit, syncSingleColumnTitleGroup, resetSingleColumnTitleLift, resetSingleColumnTitleGroup, resetSingleColumnDescriptionPlacement, syncLobbyTextDensity, syncLobbyTicketInlinePadding } from "./lobby-title-layout.js";
-import { syncSingleColumnDescriptionPlacement, resetLobbyAboutButtonContact, syncLobbyAboutButtonContact, syncSingleColumnContentCenter, syncSingleColumnContentGap, syncSingleColumnTicketPlacement } from "./lobby-content-variants.js";
+import { resetTitleFit, syncLobbyTitleFit, syncSingleColumnTitleGroup, resetSingleColumnTitleLift, resetSingleColumnTitleGroup, resetSingleColumnDescriptionWidth, syncLobbyTextDensity, syncLobbyTicketInlinePadding } from "./lobby-title-layout.js";
+import { syncSingleColumnDescriptionWidth, resetLobbyAboutButtonContact, syncLobbyAboutButtonContact, syncSingleColumnContentCenter, syncSingleColumnContentGap, syncSingleColumnTicketPlacement } from "./lobby-content-variants.js";
 import { resetLobbyTicketPlacement, syncLobbyTicketPlacement, syncLobbyTitlePlacement, syncSingleColumnTicketStub } from "./lobby-ticket-placement.js";
 
 export function syncLobbyContentCenter() {
   lobbyCenterFrame = 0;
   if (!document.body.classList.contains('page-context--lobby')) return;
+  // El teclado de la barra de direcciones cambia el viewport del navegador,
+  // pero no debe disparar la compresión dinámica del boleto ni del lobby.
+  if (
+    document.body.dataset.lobbyBrowserKeyboardOpen === "true"
+    && document.body.dataset.lobbyBrowserKeyboardInitializing !== "true"
+  ) return;
 
   const isColumns = document.body.dataset.lobbyLayout === "columns";
   const screen = document.querySelector("#lobbyScreen");
@@ -50,7 +56,7 @@ export function syncLobbyContentCenter() {
     resetLobbyTicketPlacement(screen, ticket);
     resetSingleColumnTitleLift(hero);
     resetSingleColumnTitleGroup(hero);
-    resetSingleColumnDescriptionPlacement(hero);
+    resetSingleColumnDescriptionWidth(hero);
     syncLobbyTextDensity(hero, footer);
     syncLobbyTicketInlinePadding(ticket);
     grid?.style.setProperty("--lobby-content-center-shift", "0px");
@@ -73,7 +79,7 @@ export function syncLobbyContentCenter() {
     }
     syncLobbyTitlePlacement(screen, true);
     syncSingleColumnTitleGroup(hero);
-    syncSingleColumnDescriptionPlacement(hero, ticket);
+    syncSingleColumnDescriptionWidth(hero, ticket);
     syncLobbyTextDensity(hero, footer);
     syncLobbyTicketInlinePadding(ticket);
     syncSingleColumnContentGap(grid, ticket, footer);
@@ -83,7 +89,7 @@ export function syncLobbyContentCenter() {
     return;
   }
 
-  resetSingleColumnDescriptionPlacement(hero);
+  resetSingleColumnDescriptionWidth(hero);
   resetSingleColumnTitleLift(hero);
   resetSingleColumnTitleGroup(hero);
   hero?.style.removeProperty("translate");

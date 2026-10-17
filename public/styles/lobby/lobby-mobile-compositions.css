@@ -632,11 +632,6 @@ body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__app-inv
     transform: none;
   }
 
-  body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__hero::before,
-  body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__hero::after {
-    top: var(--lobby-description-separator-top, calc(100% + 10px + var(--lobby-description-separator-shift, 0px)));
-  }
-
   body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__title {
     width: max-content;
     max-width: 100%;
