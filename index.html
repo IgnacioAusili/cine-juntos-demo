@@ -333,7 +333,7 @@
             <h2 id="lobbyAppInviteTitle">Probala como app</h2>
             <p class="lobby-screen__app-invite-description">
               <span class="lobby-screen__app-invite-copy-full">Podés instalarla desde el menú del navegador para una experiencia más cómoda</span>
-              <span class="lobby-screen__app-invite-copy-compact">Disfrutá de una experiencia más cómoda usando la aplicación directamente desde tu dispositivo</span>
+              <span class="lobby-screen__app-invite-copy-compact">Accedé más rápido y disfrutá de una mejor experiencia</span>
               <span class="lobby-screen__app-invite-copy-minimal">Más comodidad desde tu dispositivo</span>
             </p>
             <button
@@ -355,7 +355,7 @@
             <div class="lobby-app-install-dialog__heading">
               <h2 id="lobbyAppInstallTitleDialog">Más espacio para el video</h2>
               <p id="lobbyAppInstallDescription">
-                En modo app desaparece la barra del navegador y la página se disfruta con más comodidad y fluidez.
+                En modo app, entre otras cosas, desaparece la barra del navegador y disfrutás de la página con más comodidad y fluidez.
               </p>
             </div>
             <button class="lobby-app-install-dialog__close" type="button" aria-label="Cerrar guía" data-lobby-install-close>×</button>
@@ -366,10 +366,12 @@
               <span class="lobby-app-install-dialog__number" aria-hidden="true">1</span>
               <div class="lobby-app-install-dialog__step-content">
                 <h3>Buscá esta opción</h3>
-                <p>Abrí el menú ⋮ o Compartir del navegador.</p>
+                <p class="lobby-app-install-dialog__menu-instruction">
+                  <span>Abrí el menú del navegador apretando en</span>
+                  <span class="lobby-app-install-dialog__menu-hint" aria-hidden="true"><svg viewBox="0 0 20 20" focusable="false"><circle cx="10" cy="5" r="1.7" /><circle cx="10" cy="10" r="1.7" /><circle cx="10" cy="15" r="1.7" /></svg></span>
+                </p>
                 <div class="lobby-app-install-dialog__browser-shot lobby-app-install-dialog__browser-shot--menu" aria-hidden="true">
-                  <div class="lobby-app-install-dialog__address"><span>cinejuntos.com</span><span>↻</span></div>
-                  <div class="lobby-app-install-dialog__toolbar"><span class="lobby-app-install-dialog__menu-mark">⋮</span><span>Menú / Compartir</span></div>
+                  <img class="lobby-app-install-dialog__illustration" src="./assets/lobby/install-menu.svg" alt="" width="360" height="120" />
                 </div>
               </div>
             </li>
@@ -377,10 +379,9 @@
               <span class="lobby-app-install-dialog__number" aria-hidden="true">2</span>
               <div class="lobby-app-install-dialog__step-content">
                 <h3>Agregala al inicio</h3>
-                <p>Elegí “Instalar app” o “Agregar a pantalla de inicio”.</p>
+                <p>En el menú, buscá una opción como “Instalar app” o “Agregar a pantalla de inicio”.</p>
                 <div class="lobby-app-install-dialog__browser-shot lobby-app-install-dialog__browser-shot--options" aria-hidden="true">
-                  <span><b>↗</b> Instalar app <i>›</i></span>
-                  <span><b>＋</b> Agregar a pantalla de inicio <i>›</i></span>
+                  <img class="lobby-app-install-dialog__illustration" src="./assets/lobby/install-options.svg" alt="" width="360" height="120" />
                 </div>
               </div>
             </li>
