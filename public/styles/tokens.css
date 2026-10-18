@@ -20,6 +20,9 @@
   --chat-handle-gap: 22px;
   --chat-handle-gap-collapsed: 4px;
   --chat-panel-width: 320px;
+  --right-chat-min-width: var(--chat-panel-width);
+  --right-chat-min-player-width: var(--chat-panel-width);
+  --right-chat-overlay-max-width: 680px;
   --bg-deep: #07090b;
   --bg-soft: #11151a;
   --amber: #f5a05a;

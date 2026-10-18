@@ -19,9 +19,7 @@
      esa superficie deja que el workspace ocupe lo que queda tras el header y
      la barra de sala, sin sumar otro viewport debajo de ellos. */
 
-  /* Cuando el chat está contraído, no reservar su segunda fila. En móvil el
-     dock lateral también se apila debajo del video, por lo que ambos docks
-     deben recuperar todo el alto disponible de la pantalla. */
+  /* Al contraer un layout apilado no reservar su fila del chat. */
 
   /* En una ventana angosta el reproductor y el dock lateral comparten el
      alto del viewport realmente visible, no solo el espacio restante bajo
@@ -209,14 +207,13 @@
   /* Cuando el chat está contraído, no reservar su segunda fila. En móvil el
      dock lateral también se apila debajo del video, por lo que ambos docks
      deben recuperar todo el alto disponible de la pantalla. */
-  body:not(.page-context--lobby) .session-view.session-view--chat-collapsed[data-chat-dock] .o-workspace {
+  body:not(.page-context--lobby) .session-view.session-view--chat-collapsed[data-chat-dock="bottom"] .o-workspace,
+  body:not(.page-context--lobby) .session-view--chat-collapsed.session-view--chat-stacked[data-chat-dock="right"] .o-workspace {
     grid-template-rows: minmax(0, 1fr) 0;
   }
 
-  /* En una ventana angosta el reproductor y el dock lateral comparten el
-     alto del viewport realmente visible, no solo el espacio restante bajo
-     el header. El chat se monta sobre esa misma superficie. */
-  body:not(.page-context--lobby) .session-view[data-chat-dock="right"] .o-workspace {
+  /* El estado overlay comparte el alto visible del viewport entre video y chat. */
+  body:not(.page-context--lobby) .session-view--chat-overlay[data-chat-dock="right"] .o-workspace {
     position: relative;
     display: block;
     height: var(--right-chat-visible-height, var(--app-viewport-height));
@@ -228,7 +225,7 @@
     overflow: visible;
   }
 
-  body:not(.page-context--lobby) .session-view[data-chat-dock="right"] .o-video-area {
+  body:not(.page-context--lobby) .session-view--chat-overlay[data-chat-dock="right"] .o-video-area {
     position: relative;
     width: 100%;
     height: 100%;

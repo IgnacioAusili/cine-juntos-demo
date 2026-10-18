@@ -62,8 +62,8 @@
   body:not(.page-context--lobby) .session-view[data-chat-dock] .player-frame .message-form.message-form--overlay .message-form__input-wrapper textarea {
     min-height: 30px;
     max-height: 66px;
-    padding-top: 5px;
-    padding-bottom: 5px;
+    padding-top: 4px;
+    padding-bottom: 6px;
     padding-right: 6px;
   }
 

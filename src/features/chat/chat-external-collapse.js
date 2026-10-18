@@ -73,7 +73,9 @@ export function setExternalChatCollapsed(collapsed, options = {}) {
     && dom.sessionView?.dataset.chatDock === "bottom"
     && dom.videoArea
   ) {
-    const targetTop = getBottomDockVideoScrollTop();
+    const targetTop = Number.isFinite(options.targetScrollTop)
+      ? options.targetScrollTop
+      : getBottomDockVideoScrollTop();
     if (!wasCollapsed) {
       lockChatScrollSnapDuringProgrammaticScroll();
       if (isDesktopBottomDock()) {

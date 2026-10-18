@@ -1,111 +1,140 @@
 import { dom } from "../../../core/dom.js";
+import { resolveRightChatComposition } from "./right-chat-composition.js";
+
+const CHAT_COMPOSITIONS = new Set(["parallel", "stacked", "overlay"]);
 
 let responsiveSessionLayoutObserver = null;
 let responsiveSessionLayoutFrame = 0;
-let layoutFitCheckReleaseFrame = 0;
 let syncCollapseHandleOffset = () => {};
-
-function releaseLayoutFitCheckAfterRestore(sessionView) {
-  // Mantener las transiciones apagadas hasta que el ancho real contraído se
-  // aplique; quitarlas de inmediato anima el ancho temporal de la medición.
-  if (layoutFitCheckReleaseFrame) {
-    window.cancelAnimationFrame(layoutFitCheckReleaseFrame);
-  }
-  layoutFitCheckReleaseFrame = window.requestAnimationFrame(() => {
-    layoutFitCheckReleaseFrame = 0;
-    sessionView?.classList.remove('session-view--layout-fit-check');
-  });
-}
 
 export function getVideoAreaRect() {
   if (!dom.videoArea) return null;
   const rect = dom.videoArea.getBoundingClientRect();
   return rect.width > 0 && rect.height > 0 ? rect : null;
 }
-export function isStackedSessionLayout() {
-  if (!dom.sessionView) return false;
+
+export function getChatComposition() {
+  if (!dom.sessionView) return "parallel";
+
+  if (dom.sessionView.dataset.chatDock === "right") {
+    const composition = dom.sessionView.dataset.chatComposition;
+    if (CHAT_COMPOSITIONS.has(composition)) return composition;
+    return dom.sessionView.classList.contains("session-view--layout-stacked")
+      ? "stacked"
+      : "parallel";
+  }
+
   return getComputedStyle(dom.sessionView)
     .getPropertyValue("--session-layout-mode")
-    .trim() === "stacked";
+    .trim() === "stacked"
+    ? "stacked"
+    : "parallel";
 }
 
-function setResponsiveSessionLayout(stacked) {
+export function isStackedSessionLayout() {
+  const composition = getChatComposition();
+  return composition === "stacked"
+    || (composition === "overlay" && isCoarsePointer());
+}
+
+function isCoarsePointer() {
+  return window.matchMedia("(hover: none) and (pointer: coarse)").matches;
+}
+
+function setBottomDockResponsiveLayout(stacked) {
   if (!dom.sessionView) return;
-  dom.sessionView.classList.toggle('session-view--layout-stacked', stacked);
+  dom.sessionView.classList.toggle("session-view--layout-stacked", stacked);
   dom.sessionView.style.setProperty(
     "--session-layout-mode",
     stacked ? "stacked" : "side-by-side",
   );
 }
 
-function measureResponsiveSessionLayout() {
+function setRightDockComposition(composition) {
+  if (!dom.sessionView) return;
+  dom.sessionView.dataset.chatComposition = composition;
+  CHAT_COMPOSITIONS.forEach((state) => {
+    dom.sessionView.classList.toggle(`session-view--chat-${state}`, state === composition);
+  });
+  dom.sessionView.classList.toggle(
+    "session-view--layout-stacked",
+    composition === "stacked" || (composition === "overlay" && isCoarsePointer()),
+  );
+  dom.sessionView.style.setProperty("--session-layout-mode", composition);
+}
+
+export function clearRightDockComposition() {
+  if (!dom.sessionView) return;
+  dom.sessionView.removeAttribute("data-chat-composition");
+  CHAT_COMPOSITIONS.forEach((state) => {
+    dom.sessionView.classList.remove(`session-view--chat-${state}`);
+  });
+  setBottomDockResponsiveLayout(isCoarsePointer());
+}
+
+function readCssPixels(element, property) {
+  if (!element) return 0;
+  const value = Number.parseFloat(
+    getComputedStyle(element).getPropertyValue(property),
+  );
+  return Number.isFinite(value) ? value : 0;
+}
+
+export function syncResponsiveSessionLayout({ allowTransition = false } = {}) {
   if (!dom.sessionView || !dom.workspace || !dom.chatArea) return;
 
-  const isCoarsePointer = window.matchMedia(
-    "(hover: none) and (pointer: coarse)",
-  ).matches;
-  if (dom.sessionView.dataset.chatDock !== "right" || isCoarsePointer) {
-    setResponsiveSessionLayout(isCoarsePointer);
+  const coarsePointer = isCoarsePointer();
+  if (dom.sessionView.dataset.chatDock !== "right") {
+    setBottomDockResponsiveLayout(coarsePointer);
     syncCollapseHandleOffset();
     return;
   }
 
-  const isCollapsed = dom.sessionView.classList.contains('session-view--chat-collapsed');
   if (
-    dom.sessionView.classList.contains('session-view--chat-layout-transitioning')
-    || dom.sessionView.classList.contains('session-view--chat-dock-switching')
+    document.body.classList.contains("page-context--fullscreen")
+    || document.fullscreenElement
+    || (
+      !allowTransition
+      && (
+        dom.sessionView.classList.contains("session-view--chat-layout-transitioning")
+        || dom.sessionView.classList.contains("session-view--chat-dock-switching")
+      )
+    )
   ) return;
 
-  const wasStacked = dom.sessionView.classList.contains('session-view--layout-stacked');
-  const previousChatAreaStyle = isCollapsed ? dom.chatArea.getAttribute("style") : null;
-  dom.sessionView.classList.add('session-view--layout-fit-check');
-  dom.sessionView.classList.remove('session-view--layout-stacked');
+  const workspaceWidth = dom.workspace.getBoundingClientRect().width;
 
-  let stacked = false;
-  try {
-    if (isCollapsed) {
-      // Un panel colapsado mide cero y no permite saber si cabe en la nueva
-      // ventana. Recuperar su geometría solo durante esta lectura mantiene
-      // estable el estado del chat y evita dejar obsoleto el modo responsive.
-      dom.chatArea.style.setProperty("flex-basis", "var(--chat-panel-width)");
-      dom.chatArea.style.setProperty("width", "var(--chat-panel-width)");
-      dom.chatArea.style.setProperty("min-width", "0");
-      dom.chatArea.style.setProperty("opacity", "1");
-      dom.chatArea.style.setProperty("pointer-events", "auto");
-    }
+  const workspaceStyles = getComputedStyle(dom.workspace);
+  const minChatWidth = readCssPixels(
+    dom.sessionView,
+    "--right-chat-min-width",
+  ) || readCssPixels(dom.sessionView, "--chat-panel-width");
+  const minPlayerWidth = readCssPixels(
+    dom.sessionView,
+    "--right-chat-min-player-width",
+  ) || minChatWidth;
+  const overlayMaxWidth = readCssPixels(
+    dom.sessionView,
+    "--right-chat-overlay-max-width",
+  );
+  const composition = resolveRightChatComposition({
+    availableWidth: workspaceWidth,
+    viewportWidth: window.innerWidth,
+    minChatWidth,
+    minPlayerWidth,
+    columnGap: Number.parseFloat(workspaceStyles.columnGap) || 0,
+    overlayMaxWidth,
+  });
 
-    const videoRect = dom.videoArea?.getBoundingClientRect();
-    const chatRect = dom.chatArea.getBoundingClientRect();
-    stacked = Boolean(
-      videoRect
-        && chatRect.width > 0
-        && chatRect.top > videoRect.top + 1,
-    );
-  } finally {
-    if (isCollapsed) {
-      if (previousChatAreaStyle === null) {
-        dom.chatArea.removeAttribute("style");
-      } else {
-        dom.chatArea.setAttribute("style", previousChatAreaStyle);
-      }
-    }
-    if (isCollapsed) {
-      releaseLayoutFitCheckAfterRestore(dom.sessionView);
-    } else {
-      dom.sessionView.classList.remove('session-view--layout-fit-check');
-    }
-    if (wasStacked) dom.sessionView.classList.add('session-view--layout-stacked');
-  }
-
-  setResponsiveSessionLayout(stacked);
+  setRightDockComposition(composition);
   syncCollapseHandleOffset();
 }
 
-function scheduleResponsiveSessionLayoutMeasure() {
+export function scheduleResponsiveSessionLayoutMeasure() {
   if (responsiveSessionLayoutFrame) return;
   responsiveSessionLayoutFrame = window.requestAnimationFrame(() => {
     responsiveSessionLayoutFrame = 0;
-    measureResponsiveSessionLayout();
+    syncResponsiveSessionLayout();
   });
 }
 

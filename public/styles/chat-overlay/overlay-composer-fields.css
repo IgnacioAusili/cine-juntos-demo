@@ -80,12 +80,12 @@
 .player-frame[data-chat-style="float"] .message-form.message-form--overlay .message-form__input-wrapper {
   background: linear-gradient(
     90deg,
-    rgba(12, 15, 17, 0.39) 0%,
-    rgba(12, 15, 17, 0.29) 56%,
-    rgba(12, 15, 17, 0.2) 82%,
-    rgba(12, 15, 17, 0.2) 100%
+    rgba(12, 15, 17, 0.43) 0%,
+    rgba(12, 15, 17, 0.33) 56%,
+    rgba(12, 15, 17, 0.24) 82%,
+    rgba(12, 15, 17, 0.24) 100%
   );
-  border-color: rgba(255, 255, 255, 0.045);
+  border-color: rgba(255, 255, 255, 0.065);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   background-clip: padding-box;
@@ -110,7 +110,7 @@
   padding-inline: 6px;
   padding-right: 68px;
   font-size: 0.78rem;
-  line-height: 1.28;
+  line-height: 20px;
   outline: none;
   resize: none;
   color: var(--text);
@@ -223,5 +223,11 @@
 }
 
 .player-frame[data-chat-style="panel"] .message-form.message-form--overlay .message-form__input-wrapper:focus-within {
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.09) inset;
+  border-color: var(--accent-2);
+  box-shadow: 0 0 0 1px rgba(47, 184, 164, 0.22) inset;
+}
+
+.player-frame[data-chat-style="float"] .message-form.message-form--overlay .message-form__input-wrapper:focus-within {
+  border-color: var(--accent-2);
+  box-shadow: 0 0 0 1px rgba(47, 184, 164, 0.22) inset;
 }

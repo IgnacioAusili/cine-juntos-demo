@@ -4,13 +4,16 @@ import { cancelIdentityEditing, syncNameInputWidth } from "../../presence/index.
 import { focusFullscreenWorkspace } from "../../session/session-ui.js";
 import { syncUnreadBadgesWithVisibility } from "../messages/unread-counters.js";
 import { hydrateIcons } from "../../icons-tooltips.js";
-import { isFullscreenPageActive, getPageScrollMax, getElementPageTop, scrollPageTo } from "./chat-page-scroll.js";
-import { isMobilePortraitChatViewport } from "./chat-layout-breakpoints.js";
-import { isStackedSessionLayout } from "./chat-responsive-layout.js";
+import { isFullscreenPageActive, getElementPageTop } from "./chat-page-scroll.js";
+import {
+  clearRightDockComposition,
+  isStackedSessionLayout,
+  syncResponsiveSessionLayout,
+} from "./chat-responsive-layout.js";
 import { chatDockTransitionState } from "./chat-layout-transition-state.js";
 import { updateCollapseButton } from "./chat-collapse-handles.js";
 import { CHAT_DOCK_TRANSITIONS, resolveChatDockTransition } from "./dock-transition-router.js";
-import { getBottomToRightScrollTop, animateFullscreenBottomToRightWithNativeCollapse, animateRightToBottomWithNativeCollapse, animateRightToBottomSwitch, animateFullscreenDockSwitch, scheduleBottomToRightSwitch } from "./chat-dock-transitions.js";
+import { getBottomToRightScrollTop, animateDockSwitchWithCollapse, animateFullscreenBottomToRightWithNativeCollapse, animateRightToBottomWithNativeCollapse, animateFullscreenDockSwitch, scheduleBottomToRightSwitch } from "./chat-dock-transitions.js";
 
 const controllerOperations = {};
 export function configureChatDockController(operations) { Object.assign(controllerOperations, operations || {}); }
@@ -28,11 +31,12 @@ function dispatchChatDockTransition(currentDock, nextDock, options, videoScrollT
     isCollapsed: dom.sessionView?.classList.contains('session-view--chat-collapsed') || false,
     isFullscreen: isFullscreenPageActive(),
     isStacked: isStackedSessionLayout(),
-    isCoarsePointer: window.matchMedia("(hover: none) and (pointer: coarse)").matches,
-    isMobilePortrait: isMobilePortraitChatViewport(),
   });
 
   switch (transition) {
+    case CHAT_DOCK_TRANSITIONS.COLLAPSE_SWITCH_EXPAND:
+      animateDockSwitchWithCollapse(currentDock, nextDock, videoScrollTop);
+      return true;
     case CHAT_DOCK_TRANSITIONS.FULLSCREEN_BOTTOM_TO_RIGHT:
       animateFullscreenBottomToRightWithNativeCollapse();
       return true;
@@ -41,15 +45,6 @@ function dispatchChatDockTransition(currentDock, nextDock, options, videoScrollT
       return true;
     case CHAT_DOCK_TRANSITIONS.RIGHT_TO_BOTTOM_NATIVE:
       animateRightToBottomWithNativeCollapse();
-      return true;
-    case CHAT_DOCK_TRANSITIONS.RIGHT_TO_BOTTOM_MOBILE:
-      animateRightToBottomSwitch(nextDock);
-      return true;
-    case CHAT_DOCK_TRANSITIONS.RIGHT_TO_BOTTOM_STACKED:
-      // En esta composición los paneles ya se apilan. Cambiar directamente
-      // evita el amague lateral; setChatDock lleva el viewport a la unión
-      // entre video y chat para que el panel nuevo quede a la vista.
-      setChatDock(nextDock, { skipTransition: true });
       return true;
     case CHAT_DOCK_TRANSITIONS.FULLSCREEN:
       animateFullscreenDockSwitch(nextDock);
@@ -79,6 +74,13 @@ export function setChatDock(dock, options = {}) {
 
   cancelIdentityEditing();
   dom.sessionView.dataset.chatDock = nextDock;
+  if (nextDock === "right") {
+    syncResponsiveSessionLayout({
+      allowTransition: dom.sessionView.classList.contains("session-view--chat-dock-switching"),
+    });
+  } else {
+    clearRightDockComposition();
+  }
   dom.sessionView.classList.remove('session-view--chat-header-collapsed');
   if (nextDock === "bottom") {
     // setCollapseHandleTransitioning fija temporalmente el ancho lateral del

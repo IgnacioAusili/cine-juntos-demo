@@ -2,7 +2,7 @@
 
 @media (max-width: 680px) {
 
-  body:not(.page-context--lobby) .session-view[data-chat-dock="right"] .chat-area {
+  body:not(.page-context--lobby) .session-view--chat-overlay[data-chat-dock="right"] .chat-area {
     position: absolute;
     z-index: 10;
     top: 0;
@@ -25,7 +25,7 @@
 
   /* Mantener el panel y el input con tamaño de viewport; la cortina recorta
      lo que se ve sin reacomodar el contenido durante el cierre. */
-  body:not(.page-context--lobby) .session-view.session-view--chat-collapsed[data-chat-dock="right"] .chat-area {
+  body:not(.page-context--lobby) .session-view--chat-collapsed.session-view--chat-overlay[data-chat-dock="right"] .chat-area {
     width: 100%;
     flex-basis: 100%;
     clip-path: inset(0 0 0 100%);

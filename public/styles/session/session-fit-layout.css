@@ -73,25 +73,15 @@ body:not(.page-context--lobby)
     );
 }
 
-/* El ancho intrínseco del video depende de su resolución de origen y puede
-   empujar el chat debajo al llegar loadedmetadata. Usamos una base flexible
-   y mantenemos dos columnas mientras cada una pueda ocupar el ancho del chat. */
+/* JavaScript elige la composición lateral según el ancho útil y los mínimos;
+   estos estilos solo representan el estado elegido. */
 .session-view[data-chat-dock="right"] .o-workspace {
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .session-view[data-chat-dock="right"] .o-video-area {
   flex: 1 1 0px;
-  min-width: min(100%, var(--chat-panel-width));
-}
-
-.session-view.session-view--layout-fit-check[data-chat-dock="right"] .o-workspace,
-.session-view.session-view--layout-fit-check[data-chat-dock="right"] .chat-area {
-  transition: none !important;
-}
-
-.session-view.session-view--layout-fit-check.session-view--chat-collapsed[data-chat-dock="right"] .chat-area {
-  visibility: hidden !important;
+  min-width: min(100%, var(--right-chat-min-player-width));
 }
 
 .session-view.session-view--chat-collapse-in-header:not(.session-view--chat-collapsed)[data-chat-dock="right"] .chat-tools {
@@ -99,7 +89,7 @@ body:not(.page-context--lobby)
   padding-left: 38px;
 }
 
-.session-view.session-view--layout-stacked[data-chat-dock] .o-workspace {
+.session-view.session-view--layout-stacked[data-chat-dock="bottom"] .o-workspace {
   display: grid;
   min-height: 0;
   grid-template-columns: 1fr;
@@ -109,7 +99,17 @@ body:not(.page-context--lobby)
     "chat";
 }
 
-.session-view.session-view--layout-stacked[data-chat-dock="right"] .chat-area {
+.session-view--chat-stacked[data-chat-dock="right"] .o-workspace {
+  display: grid;
+  min-height: 0;
+  grid-template-columns: 1fr;
+  grid-template-rows: minmax(0, 58fr) minmax(0, 42fr);
+  grid-template-areas:
+    "video"
+    "chat";
+}
+
+.session-view--chat-stacked[data-chat-dock="right"] .chat-area {
   flex: none;
   width: auto;
 }
@@ -126,7 +126,15 @@ body:not(.page-context--lobby)
     minmax(0, calc(var(--app-viewport-height) - var(--app-shell-gutter)));
 }
 
-.session-view.session-view--layout-stacked.session-view--chat-collapsed[data-chat-dock] .o-workspace {
+.session-view.session-view--layout-stacked.session-view--chat-collapsed[data-chat-dock="bottom"] .o-workspace {
+  row-gap: 0;
+  grid-template-rows: minmax(0, 1fr) 0px;
+  grid-template-areas:
+    "video"
+    "chat";
+}
+
+.session-view--chat-stacked.session-view--chat-collapsed[data-chat-dock="right"] .o-workspace {
   row-gap: 0;
   grid-template-rows: minmax(0, 1fr) 0px;
   grid-template-areas:
