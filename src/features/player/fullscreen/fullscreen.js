@@ -34,6 +34,7 @@ const PLAYER_OVERLAY_IDLE_MS = 3000;
 const PLAYER_OVERLAY_LEAVE_HIDE_DELAY_MS = 800;
 const MOBILE_OVERLAY_TOGGLE_LOCK_MS = 320;
 const MOBILE_PLAYER_MEDIA_QUERY = "(max-width: 980px) and (hover: none) and (pointer: coarse)";
+const PAGE_SCROLL_SNAP_THRESHOLD_RATIO = 0.2;
 let fallbackFullscreenActive = false;
 
 const USE_NATIVE_FULLSCREEN = true;
@@ -204,7 +205,13 @@ export function snapFullscreenScroll() {
     }
   });
 
-  if (closestPoint == null || closestDistance < 2 || closestDistance > FULLSCREEN_SNAP_THRESHOLD) {
+  const snapThreshold = isPageFullscreenActive()
+    ? FULLSCREEN_SNAP_THRESHOLD
+    : Math.max(
+      FULLSCREEN_SNAP_THRESHOLD,
+      Math.round(getFullscreenViewportHeight() * PAGE_SCROLL_SNAP_THRESHOLD_RATIO),
+    );
+  if (closestPoint == null || closestDistance < 2 || closestDistance > snapThreshold) {
     return;
   }
 

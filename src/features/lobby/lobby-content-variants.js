@@ -12,41 +12,6 @@ export function syncSingleColumnDescriptionWidth(hero, ticket) {
   }
 }
 
-export function resetLobbyAboutButtonContact() {
-  delete document.body.dataset.lobbyAboutContact;
-}
-
-export function syncLobbyAboutButtonContact(ticket, footer) {
-  const button = footer?.querySelector('.lobby-screen__about-button');
-  if (!ticket || !button || button.getClientRects().length === 0) {
-    resetLobbyAboutButtonContact();
-    return;
-  }
-
-  const renderedScale = Number.parseFloat(getComputedStyle(button).scale);
-  const scale = Number.isFinite(renderedScale) && renderedScale > 0 ? renderedScale : 1;
-  const buttonRect = button.getBoundingClientRect();
-  const centerX = (buttonRect.left + buttonRect.right) / 2;
-  const centerY = (buttonRect.top + buttonRect.bottom) / 2;
-  const unscaledWidth = buttonRect.width / scale;
-  const unscaledHeight = buttonRect.height / scale;
-  const baseButtonRect = {
-    left: centerX - unscaledWidth / 2,
-    right: centerX + unscaledWidth / 2,
-    top: centerY - unscaledHeight / 2,
-    bottom: centerY + unscaledHeight / 2,
-  };
-  const ticketRect = ticket.getBoundingClientRect();
-  const contactTolerance = 1;
-  const touchesButton = ticketRect.left <= baseButtonRect.right + contactTolerance
-    && ticketRect.right >= baseButtonRect.left - contactTolerance
-    && ticketRect.top <= baseButtonRect.bottom + contactTolerance
-    && ticketRect.bottom >= baseButtonRect.top - contactTolerance;
-
-  if (touchesButton) document.body.dataset.lobbyAboutContact = "true";
-  else resetLobbyAboutButtonContact();
-}
-
 export function syncSingleColumnContentGap(grid, ticket, footer) {
   if (!grid || !ticket || !footer) return;
 

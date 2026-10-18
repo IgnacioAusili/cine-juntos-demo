@@ -139,9 +139,9 @@ body:not(.page-context--lobby)
   body:not(.page-context--lobby)
     .session-view.session-view--bottom-dock-panels-fit-viewport:not(.session-view--chat-collapsed)[data-chat-dock="bottom"]
   .player-frame:not(.mini-player-surface)[data-control-style="line"] .player-progress-group {
-    right: 16px;
+    right: 8px;
     bottom: -9px;
-    left: 16px;
+    left: 8px;
     z-index: 42;
   }
 }

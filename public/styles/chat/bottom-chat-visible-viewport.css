@@ -1,15 +1,12 @@
-/* El viewport estructural puede incluir espacio de las barras del navegador.
-   Al contraer el dock inferior, usar el alto realmente visible para el video. */
+/* Al contraer el dock inferior, conservar el alto estructural completo para
+   el video aunque las barras del navegador reduzcan el viewport visible. */
 .session-view.session-view--chat-collapsed:not(.session-view--layout-component-stack)[data-chat-dock="bottom"] .o-workspace {
-  height: var(
-    --chat-bottom-viewport-height,
-    calc(var(--app-viewport-height) - var(--app-shell-gutter))
-  );
+  height: var(--app-viewport-height);
 }
 
 .session-view.session-view--layout-component-stack.session-view--chat-collapsed[data-chat-dock="bottom"] .o-workspace {
   grid-template-rows:
-    minmax(0, var(--chat-bottom-viewport-height, var(--app-viewport-height)))
+    minmax(0, var(--app-viewport-height))
     0px;
 }
 

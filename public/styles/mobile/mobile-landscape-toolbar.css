@@ -54,7 +54,8 @@
     scroll-margin-top: 0;
   }
 
-  body:not(.page-context--lobby):not(.page-context--fullscreen) .app-shell {
+  html.page-context--viewport-landscape
+    body:not(.page-context--lobby):not(.page-context--fullscreen) .app-shell {
     width: 100vw;
     max-width: none;
     box-sizing: border-box;
@@ -64,32 +65,40 @@
     gap: var(--session-header-gap);
   }
 
-  body:not(.page-context--lobby):not(.page-context--fullscreen) .site-header {
+  html.page-context--viewport-landscape
+    body:not(.page-context--lobby):not(.page-context--fullscreen) .site-header {
     margin-inline: var(--app-shell-gutter);
   }
 
   /* El tag de sala tiene un ajuste vertical propio para escritorio. En
      landscape móvil sus dos márgenes internos deben ser idénticos para que
      el espacio visual no pese más hacia la sesión. */
-  body:not(.page-context--lobby):not(.page-context--fullscreen) .site-header #roomChip {
+  html.page-context--viewport-landscape
+    body:not(.page-context--lobby):not(.page-context--fullscreen) .site-header #roomChip {
     padding-block: 5px;
   }
 
-  body:not(.page-context--lobby) .session-view {
+  html.page-context--viewport-landscape
+    body:not(.page-context--lobby) .session-view {
     width: 100%;
     max-width: none;
     margin-inline: 0;
   }
 
-  body:not(.page-context--lobby) .session-view[data-chat-dock] .player-frame:not(.mini-player-surface),
-  body:not(.page-context--lobby) .session-view[data-chat-dock] .chat-area,
-  body:not(.page-context--lobby) .session-view[data-chat-dock] .chat-area::before {
+  html.page-context--viewport-landscape
+    body:not(.page-context--lobby) .session-view[data-chat-dock] .player-frame:not(.mini-player-surface),
+  html.page-context--viewport-landscape
+    body:not(.page-context--lobby) .session-view[data-chat-dock] .chat-area,
+  html.page-context--viewport-landscape
+    body:not(.page-context--lobby) .session-view[data-chat-dock] .chat-area::before {
     border: 0 !important;
     border-radius: 0 !important;
   }
 
-  body:not(.page-context--lobby) .session-view[data-chat-dock] .player-frame:not(.mini-player-surface),
-  body:not(.page-context--lobby) .session-view[data-chat-dock] .chat-area {
+  html.page-context--viewport-landscape
+    body:not(.page-context--lobby) .session-view[data-chat-dock] .player-frame:not(.mini-player-surface),
+  html.page-context--viewport-landscape
+    body:not(.page-context--lobby) .session-view[data-chat-dock] .chat-area {
     box-shadow: none !important;
   }
 }

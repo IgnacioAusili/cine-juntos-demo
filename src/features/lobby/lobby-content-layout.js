@@ -1,7 +1,7 @@
 let lobbyCenterFrame = 0;
 
 import { resetTitleFit, syncLobbyTitleFit, syncSingleColumnTitleGroup, resetSingleColumnTitleLift, resetSingleColumnTitleGroup, resetSingleColumnDescriptionWidth, syncLobbyTextDensity, syncLobbyTicketInlinePadding } from "./lobby-title-layout.js";
-import { syncSingleColumnDescriptionWidth, resetLobbyAboutButtonContact, syncLobbyAboutButtonContact, syncSingleColumnContentCenter, syncSingleColumnContentGap, syncSingleColumnTicketPlacement } from "./lobby-content-variants.js";
+import { syncSingleColumnDescriptionWidth, syncSingleColumnContentCenter, syncSingleColumnContentGap, syncSingleColumnTicketPlacement } from "./lobby-content-variants.js";
 import { resetLobbyTicketPlacement, syncLobbyTicketPlacement, syncLobbyTitlePlacement, syncSingleColumnTicketStub } from "./lobby-ticket-placement.js";
 
 export function syncLobbyContentCenter() {
@@ -25,33 +25,43 @@ export function syncLobbyContentCenter() {
   const hero = screen?.querySelector('.lobby-screen__hero');
   const ticket = screen?.querySelector('.lobby-screen__ticket');
 
-  // En el modo columns primero se prueba la composición real. Si un título
-  // de prestaciones queda recortado en su tarjeta, el ancho restante ya no
-  // alcanza para mostrar ambas columnas con claridad y el grid pasa a una.
+  // Mide siempre la geometría candidata de columnas. La transición depende
+  // del espacio mínimo de ambas áreas, no del recorte de un texto concreto.
   if (isColumns && grid) document.body.dataset.lobbyFlow = "columns";
-  const gridColumns = grid ? getComputedStyle(grid).gridTemplateColumns.trim().split(/\s+/) : [];
-  const featureHeadings = hero ? [...hero.querySelectorAll('.lobby-screen__feature-text strong')] : [];
-  const hasClippedFeatureHeading = featureHeadings.some((heading) => {
-    if (heading.getClientRects().length === 0 || heading.clientWidth === 0) return false;
-
-    const compactTitle = heading.querySelector('.lobby-screen__feature-title--short');
-    const compactTitleIsVisible = compactTitle?.getClientRects().length > 0;
-    const isClipped = heading.scrollWidth > heading.clientWidth + 1;
-
-    // El título largo ya se recorta de forma intencional y tiene una versión
-    // corta para este espacio. Pasa a vertical cuando también se desborda la
-    // versión corta que realmente ve el usuario.
-    return isClipped && (!compactTitle || compactTitleIsVisible);
-  });
+  const gridStyle = grid ? getComputedStyle(grid) : null;
+  const gridColumns = gridStyle?.gridTemplateColumns.trim().split(/\s+/) ?? [];
+  const cssPixels = (value) => Number.parseFloat(value);
+  const minHeroWidth = cssPixels(
+    gridStyle?.getPropertyValue("--lobby-columns-min-hero-inline-size"),
+  );
+  const minTicketWidth = cssPixels(
+    gridStyle?.getPropertyValue("--lobby-columns-min-ticket-inline-size"),
+  );
+  const columnGap = cssPixels(gridStyle?.columnGap);
+  const paddingInline = gridStyle
+    ? cssPixels(gridStyle.paddingLeft) + cssPixels(gridStyle.paddingRight)
+    : Number.NaN;
+  const borderInline = gridStyle
+    ? cssPixels(gridStyle.borderLeftWidth) + cssPixels(gridStyle.borderRightWidth)
+    : Number.NaN;
+  const availableInlineSize = grid
+    ? grid.getBoundingClientRect().width - paddingInline - borderInline
+    : Number.NaN;
+  const canMeasureColumns = [
+    minHeroWidth,
+    minTicketWidth,
+    columnGap,
+    availableInlineSize,
+  ].every(Number.isFinite);
+  const columnsHaveRoom = canMeasureColumns
+    && availableInlineSize + 0.5 >= minHeroWidth + minTicketWidth + columnGap;
   const isSingleColumn = Boolean(grid) && (
-    gridColumns.length < 2 || (isColumns && hasClippedFeatureHeading)
+    gridColumns.length < 2 || (isColumns && canMeasureColumns && !columnsHaveRoom)
   );
   document.body.dataset.lobbyFlow = isSingleColumn ? "single-column" : "columns";
-  if (!isSingleColumn) resetLobbyAboutButtonContact();
   syncLobbyTitlePlacement(screen, isSingleColumn);
 
   if (!grid || content.length !== 2) {
-    resetLobbyAboutButtonContact();
     resetTitleFit(screen?.querySelector('.lobby-screen__title'));
     resetLobbyTicketPlacement(screen, ticket);
     resetSingleColumnTitleLift(hero);
@@ -85,7 +95,6 @@ export function syncLobbyContentCenter() {
     syncSingleColumnContentGap(grid, ticket, footer);
     syncSingleColumnTicketPlacement(hero, ticket, footer);
     syncSingleColumnContentCenter(screen, grid, hero, ticket, footer);
-    syncLobbyAboutButtonContact(ticket, footer);
     return;
   }
 
