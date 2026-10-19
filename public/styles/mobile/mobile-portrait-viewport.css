@@ -50,8 +50,8 @@
 
   body:not(.page-context--lobby) .session-view[data-chat-dock="bottom"] .o-workspace {
     grid-template-rows:
-      minmax(220px, 40%)
-      minmax(0, 1fr);
+      minmax(var(--bottom-dock-video-min-block-size, 0px), 40fr)
+      minmax(var(--bottom-dock-chat-min-block-size, 0px), 60fr);
   }
 
   body:not(.page-context--lobby) .session-view:not(.session-view--chat-collapsed)[data-chat-dock="bottom"] .chat-area__collapse-hover-zone {

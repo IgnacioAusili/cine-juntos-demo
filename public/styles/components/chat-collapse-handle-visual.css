@@ -19,6 +19,13 @@
   stroke-width: 2.2px;
 }
 
+/* La flecha de expandir aparece sobre el video y necesita menos intensidad
+   para igualar el contraste de la flecha de contraer sobre la cabecera. */
+:where(.session-view[data-chat-dock="bottom"] .chat-area__collapse-hover-zone--expand)
+  .chat-area__collapse-handle {
+  color: color-mix(in srgb, var(--text) 72%, transparent);
+}
+
 .session-view[data-chat-dock] .chat-area__collapse-handle [data-lucide]:empty::before {
   min-width: 20px;
   font-size: 20px;

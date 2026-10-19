@@ -1,15 +1,15 @@
 import { dom } from "../../../core/dom.js";
-import { isStackedSessionLayout } from "./chat-responsive-layout.js";
-import { getElementPageTop, getPageScrollContainer, getPageScrollMax, getPageScrollTop, isFullscreenPageActive, scrollPageTo } from "./chat-page-scroll.js";
+import { getPageScrollContainer, getPageScrollTop, isFullscreenPageActive, scrollPageTo } from "./chat-page-scroll.js";
 import { syncComponentAspectLayoutNow } from "./component-aspect-layout.js";
 import { chatDockTransitionState, getChatDockOperations } from "./chat-layout-transition-state.js";
-import { easeBottomChatCurtainProgress, easeBottomChatRevealProgress, getWorkspaceRowHeights, getWorkspaceContentHeight, getCollapsedWorkspaceContentHeight, isDesktopBottomDock } from "./chat-dock-transition-measurements.js";
+import { easeBottomChatCurtainProgress, easeBottomChatRevealProgress, getWorkspaceRowHeights, getWorkspaceContentHeight, getCollapsedWorkspaceContentHeight } from "./chat-dock-transition-measurements.js";
 import { BOTTOM_CHAT_CURTAIN_MS, BOTTOM_CHAT_SCROLL_TIMEOUT_MS } from "./chat-layout-timing.js";
 
 function shouldAnimateBottomChatRows() {
   const isEdgeToEdgeBottomDock = dom.sessionView?.classList.contains('session-view--layout-edge-to-edge')
     && !dom.sessionView.classList.contains('session-view--layout-component-stack');
   return dom.sessionView?.classList.contains('session-view--bottom-dock-panels-fit-viewport')
+    || dom.sessionView?.classList.contains('session-view--layout-component-stack')
     || isEdgeToEdgeBottomDock;
 }
 

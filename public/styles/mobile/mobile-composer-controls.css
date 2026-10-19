@@ -161,7 +161,7 @@
     .session-view[data-chat-dock="bottom"]
     .chat-area__collapse-hover-zone[data-chat-control="collapse"] {
     top: 0 !important;
-    transform: translate(-50%, -50%) !important;
+    transform: none !important;
   }
 
   body:not(.page-context--lobby) #playerChatToggleButton {

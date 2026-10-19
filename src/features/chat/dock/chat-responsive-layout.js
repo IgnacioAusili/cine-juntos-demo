@@ -69,7 +69,7 @@ export function clearRightDockComposition() {
   CHAT_COMPOSITIONS.forEach((state) => {
     dom.sessionView.classList.remove(`session-view--chat-${state}`);
   });
-  setBottomDockResponsiveLayout(isCoarsePointer());
+  setBottomDockResponsiveLayout(false);
 }
 
 function readCssPixels(element, property) {
@@ -83,9 +83,9 @@ function readCssPixels(element, property) {
 export function syncResponsiveSessionLayout({ allowTransition = false } = {}) {
   if (!dom.sessionView || !dom.workspace || !dom.chatArea) return;
 
-  const coarsePointer = isCoarsePointer();
   if (dom.sessionView.dataset.chatDock !== "right") {
-    setBottomDockResponsiveLayout(coarsePointer);
+    // D3 owns the bottom-dock composition. Input type only adapts controls;
+    // the component layout resolver decides whether both panels fit together.
     syncCollapseHandleOffset();
     return;
   }

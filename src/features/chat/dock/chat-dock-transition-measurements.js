@@ -44,7 +44,32 @@ export function getWorkspaceContentHeight() {
   return Math.max(0, dom.workspace.clientHeight - paddingTop - paddingBottom);
 }
 
+function getComponentStackCollapsedVideoHeight() {
+  if (!dom.workspace) return 0;
+
+  const probe = document.createElement("div");
+  probe.setAttribute("aria-hidden", "true");
+  Object.assign(probe.style, {
+    position: "absolute",
+    top: "0",
+    left: "0",
+    width: "0",
+    height: "var(--component-stack-collapsed-video-block-size)",
+    visibility: "hidden",
+    pointerEvents: "none",
+  });
+  dom.workspace.append(probe);
+  const height = probe.getBoundingClientRect().height;
+  probe.remove();
+
+  return Math.max(0, height);
+}
+
 export function getCollapsedWorkspaceContentHeight() {
+  if (dom.sessionView?.classList.contains("session-view--layout-component-stack")) {
+    return getComponentStackCollapsedVideoHeight();
+  }
+
   const workspaceHeight = getWorkspaceContentHeight();
   const isEdgeToEdgeBottomDock = dom.sessionView?.dataset.chatDock === "bottom"
     && dom.sessionView.classList.contains("session-view--layout-edge-to-edge")

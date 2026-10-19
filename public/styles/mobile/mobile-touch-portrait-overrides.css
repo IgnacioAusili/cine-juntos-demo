@@ -126,6 +126,13 @@
       inset 0 8px 18px rgba(0, 0, 0, 0.08);
   }
 
+  /* En la variante que cabe en el viewport, alinear los extremos de los
+     controles con el inset de la pista y conservar un margen fluido. */
+  body:not(.page-context--lobby) .session-view.session-view--bottom-dock-panels-fit-viewport:not(.session-view--layout-component-stack):not(.session-view--chat-collapsed)[data-chat-dock="bottom"]
+    .player-frame:not(.mini-player-surface)[data-control-style="line"] .player-frame__bottom-actions {
+    padding-inline: clamp(8px, 2vw, 14px);
+  }
+
   /* La pista debe poder quedar sobre el borde del chat, mientras la flecha
      sigue siendo el elemento superior. Estas propiedades evitan que el blur,
      el containment y el will-change del panel lo encierren en otra capa. */

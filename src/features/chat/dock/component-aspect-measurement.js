@@ -1,43 +1,60 @@
-const FULL_PANEL_LAYOUT_CLASS = 'session-view--layout-component-stack';
-const DEFAULT_VIDEO_ASPECT_RATIO = 16 / 9;
-const MIN_VIDEO_ASPECT_SHORTFALL_PX = 24;
-const VIDEO_ASPECT_SHORTFALL_TOLERANCE = 0.08;
+const VIDEO_ASPECT_RATIO_FALLBACK = 16 / 9;
 
-let measuringExpandedTarget = false;
-
-function capturePageScrollPosition(appShell) {
-  const isFullscreen = Boolean(document.fullscreenElement)
-    || document.body.classList.contains('page-context--fullscreen');
-  const container = isFullscreen ? appShell : null;
-  return {
-    container,
-    top: container ? container.scrollTop : window.scrollY,
-  };
+function readCssPixels(style, property) {
+  const value = Number.parseFloat(style.getPropertyValue(property));
+  return Number.isFinite(value) ? value : 0;
 }
 
-function restorePageScrollPosition(position) {
-  if (!position) return;
-
-  const currentTop = position.container ? position.container.scrollTop : window.scrollY;
-  if (Math.abs(currentTop - position.top) < 1) return;
-
-  if (position.container) {
-    position.container.scrollTop = position.top;
-  } else {
-    window.scrollTo({ top: position.top, behavior: "instant" });
-  }
+function readAspectRatio(value) {
+  const [width, height] = value.split("/").map(Number);
+  return width > 0 && height > 0 ? width / height : 0;
 }
 
-function getVideoAspectRatio(videoPlayer) {
+function getVideoAspectRatio(videoPlayer, playerFrame) {
   if (videoPlayer?.videoWidth > 0 && videoPlayer.videoHeight > 0) {
     return videoPlayer.videoWidth / videoPlayer.videoHeight;
   }
 
-  const cssAspectRatio = getComputedStyle(videoPlayer).aspectRatio;
-  const [width, height] = cssAspectRatio.split("/").map(Number);
-  return width > 0 && height > 0
-    ? width / height
-    : DEFAULT_VIDEO_ASPECT_RATIO;
+  const videoRatio = readAspectRatio(getComputedStyle(videoPlayer).aspectRatio);
+  if (videoRatio) return videoRatio;
+
+  const frameStyle = getComputedStyle(playerFrame);
+  return readAspectRatio(
+    frameStyle.getPropertyValue("--bottom-dock-video-default-aspect-ratio"),
+  ) || VIDEO_ASPECT_RATIO_FALLBACK;
+}
+
+function getVideoMinimumBlockSize(playerFrame, videoPlayer) {
+  const frameRect = playerFrame.getBoundingClientRect();
+  const frameStyle = getComputedStyle(playerFrame);
+  const contentWidth = Math.max(
+    0,
+    frameRect.width
+      - readCssPixels(frameStyle, "border-left-width")
+      - readCssPixels(frameStyle, "border-right-width"),
+  );
+  const borderBlockSize = readCssPixels(frameStyle, "border-top-width")
+    + readCssPixels(frameStyle, "border-bottom-width");
+
+  return contentWidth / getVideoAspectRatio(videoPlayer, playerFrame) + borderBlockSize;
+}
+
+function getChatMinimumBlockSize(chatArea, chatTools, messageListShell) {
+  const toolsStyle = getComputedStyle(chatTools);
+  const toolsHeight = Math.max(
+    chatTools.getBoundingClientRect().height,
+    readCssPixels(toolsStyle, "min-height"),
+  );
+  const messageListStyle = getComputedStyle(messageListShell);
+  const messageListHeight = readCssPixels(messageListStyle, "min-height");
+  const chatStyle = getComputedStyle(chatArea);
+  const chatInsets = readCssPixels(chatStyle, "border-top-width")
+    + readCssPixels(chatStyle, "border-bottom-width")
+    + readCssPixels(chatStyle, "padding-top")
+    + readCssPixels(chatStyle, "padding-bottom");
+  const chatRowGap = readCssPixels(chatStyle, "row-gap");
+
+  return toolsHeight + messageListHeight + chatInsets + chatRowGap;
 }
 
 export function hasLoadedVideo(videoPlayer) {
@@ -47,92 +64,75 @@ export function hasLoadedVideo(videoPlayer) {
   );
 }
 
-export function isMeasuringExpandedTarget() {
-  return measuringExpandedTarget;
-}
-
-export function measurePanelLayoutTarget({
+export function resolveBottomDockLayout({
   sessionView,
-  appShell,
   workspace,
-  videoArea,
   playerFrame,
-  chatArea,
   videoPlayer,
+  chatArea,
+  chatTools,
+  messageListShell,
 }) {
+  const unavailable = {
+    requiresSequentialLayout: false,
+    combinedPanelHeight: 0,
+    availableBlockSize: 0,
+    videoMinimumBlockSize: 0,
+    chatMinimumBlockSize: 0,
+    hasMeasuredPanels: false,
+  };
+
   if (
     !sessionView
     || !workspace
-    || !videoArea
     || !playerFrame
+    || !videoPlayer
     || !chatArea
+    || !chatTools
+    || !messageListShell
     || sessionView.dataset.chatDock !== "bottom"
   ) {
-    return {
-      shouldStack: false,
-      combinedPanelHeight: 0,
-      hasMeasuredPanels: false,
-    };
+    return unavailable;
   }
 
-  const wasCollapsed = sessionView.classList.contains('session-view--chat-collapsed');
-  const wasExpanded = sessionView.classList.contains(FULL_PANEL_LAYOUT_CLASS);
-  const preservedScrollPosition = wasCollapsed || wasExpanded
-    ? capturePageScrollPosition(appShell)
-    : null;
-  const shouldSuppressTransitions = wasCollapsed || wasExpanded;
-  if (shouldSuppressTransitions) {
-    sessionView.classList.add('session-view--layout-measuring');
-    // Aplicar el estado temporal antes de medir evita que se anime.
-    void getComputedStyle(sessionView).transitionProperty;
-  }
-  if (wasCollapsed) measuringExpandedTarget = true;
-  if (wasExpanded) sessionView.classList.remove(FULL_PANEL_LAYOUT_CLASS);
-  if (wasCollapsed) sessionView.classList.remove('session-view--chat-collapsed');
-
-  // Medir la geometría que tendrá el dock al expandirse.
-  const videoRect = playerFrame.getBoundingClientRect();
-  const videoAreaRect = videoArea.getBoundingClientRect();
-  const chatRect = chatArea.getBoundingClientRect();
-  const rowGap = Number.parseFloat(getComputedStyle(workspace).rowGap) || 0;
+  const workspaceStyle = getComputedStyle(workspace);
+  const workspaceRect = workspace.getBoundingClientRect();
+  const appViewportBlockSize = readCssPixels(
+    getComputedStyle(document.documentElement),
+    "--app-viewport-height",
+  );
+  const sharedBlockSizeInset = readCssPixels(
+    workspaceStyle,
+    "--bottom-dock-shared-block-size-inset-start",
+  ) + readCssPixels(
+    workspaceStyle,
+    "--bottom-dock-shared-block-size-inset-end",
+  );
+  const availableBlockSize = Math.max(0, appViewportBlockSize - sharedBlockSizeInset);
+  const videoMinimumBlockSize = getVideoMinimumBlockSize(playerFrame, videoPlayer);
+  const chatMinimumBlockSize = getChatMinimumBlockSize(
+    chatArea,
+    chatTools,
+    messageListShell,
+  );
+  const rowGap = readCssPixels(workspaceStyle, "row-gap");
   const hasMeasuredPanels = Boolean(
-    videoRect.width > 0
-    && videoRect.height > 0
-    && videoAreaRect.height > 0
-    && chatRect.height > 0,
+    workspaceRect.width > 0
+    && availableBlockSize > 0
+    && videoMinimumBlockSize > 0
+    && chatMinimumBlockSize > 0,
   );
   const combinedPanelHeight = hasMeasuredPanels
-    ? videoAreaRect.height + chatRect.height + rowGap
+    ? videoMinimumBlockSize + chatMinimumBlockSize + rowGap
     : 0;
-  const requiredVideoHeight = videoRect.width / getVideoAspectRatio(videoPlayer);
-  const videoAspectShortfall = requiredVideoHeight - videoRect.height;
-  const toleratedVideoShortfall = Math.max(
-    MIN_VIDEO_ASPECT_SHORTFALL_PX,
-    requiredVideoHeight * VIDEO_ASPECT_SHORTFALL_TOLERANCE,
-  );
-  const shouldStack = Boolean(
-    videoRect.width > 0
-    && videoRect.height > 0
-    && chatRect.width > 0
-    && chatRect.height > 0
-    && videoAspectShortfall > toleratedVideoShortfall,
-  );
 
-  if (wasCollapsed) {
-    sessionView.classList.add('session-view--chat-collapsed');
-    // Dejar que la mutación temporal llegue a los observers antes de aceptar acciones.
-    queueMicrotask(() => {
-      measuringExpandedTarget = false;
-    });
-  }
-  if (wasExpanded) sessionView.classList.add(FULL_PANEL_LAYOUT_CLASS);
-  restorePageScrollPosition(preservedScrollPosition);
-  if (shouldSuppressTransitions) {
-    sessionView.classList.remove('session-view--layout-measuring');
-  }
   return {
-    shouldStack,
+    requiresSequentialLayout: hasMeasuredPanels
+      && combinedPanelHeight > availableBlockSize,
     combinedPanelHeight,
+    availableBlockSize,
+    videoMinimumBlockSize,
+    chatMinimumBlockSize,
     hasMeasuredPanels,
   };
 }

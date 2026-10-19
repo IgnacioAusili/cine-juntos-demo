@@ -3,8 +3,7 @@ import { syncComponentStackShellInsets } from "./component-stack-insets.js";
 import { wireComponentAspectObservers } from "./component-aspect-observers.js";
 import {
   hasLoadedVideo,
-  isMeasuringExpandedTarget,
-  measurePanelLayoutTarget,
+  resolveBottomDockLayout,
 } from "./component-aspect-measurement.js";
 import { getElementPageTop, getPageScrollMax, scrollPageTo } from "./chat-page-scroll.js";
 
@@ -15,6 +14,9 @@ const videoArea = sessionView?.querySelector('.o-video-area');
 const videoPlayer = sessionView?.querySelector("#videoPlayer");
 const playerFrame = sessionView?.querySelector(".player-frame");
 const chatArea = sessionView?.querySelector(".chat-area");
+const chatTools = chatArea?.querySelector(".chat-tools");
+const messageListShell = chatArea?.querySelector(".chat-message-list-shell");
+const messageForm = chatArea?.querySelector(":scope > .message-form");
 const FULL_PANEL_LAYOUT_CLASS = 'session-view--layout-component-stack';
 const EDGE_TO_EDGE_LAYOUT_CLASS = 'session-view--layout-edge-to-edge';
 const BOTTOM_DOCK_FIT_VIEWPORT_CLASS = 'session-view--bottom-dock-panels-fit-viewport';
@@ -23,41 +25,49 @@ let pendingFrame = 0;
 let pendingScrollTarget = "";
 let initialSessionScrollPending = true;
 
-function getStructuralViewportHeight() {
-  const configuredHeight = Number.parseFloat(
-    getComputedStyle(document.documentElement)
-      .getPropertyValue("--app-viewport-height"),
-  );
-  return configuredHeight > 0
-    ? configuredHeight
-    : document.documentElement.clientHeight || window.innerHeight;
-}
-
 function applyComponentLayoutState({
-  shouldStack,
-  combinedPanelHeight,
+  requiresSequentialLayout,
+  videoMinimumBlockSize,
+  chatMinimumBlockSize,
   hasMeasuredPanels,
 }) {
   const isDesktop = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
   const isExpandedBottomDock = sessionView?.dataset.chatDock === "bottom"
     && !sessionView.classList.contains('session-view--chat-collapsed');
-  const viewportHeight = getStructuralViewportHeight();
   const panelsFitViewport = Boolean(
     isExpandedBottomDock
     && hasMeasuredPanels
-    && !shouldStack
-    && combinedPanelHeight <= viewportHeight + 1
+    && !requiresSequentialLayout
   );
   const needsScrollSnap = Boolean(
     isDesktop
     && isExpandedBottomDock
     && hasMeasuredPanels
-    && (shouldStack || combinedPanelHeight > viewportHeight + 1),
+    && requiresSequentialLayout,
   );
 
-  // Los tres estados se aplican desde la misma medición antes del siguiente
-  // repintado: ni el scroll ni una segunda medición de visibilidad los separa.
-  sessionView?.classList.toggle(FULL_PANEL_LAYOUT_CLASS, shouldStack);
+  // CSS define los mínimos de cada panel y la capacidad del estado compartido.
+  // El resolver mide esos límites sin alterar clases ni estilos visibles.
+  if (hasMeasuredPanels) {
+    sessionView.style.setProperty(
+      "--bottom-dock-video-min-block-size",
+      `${videoMinimumBlockSize}px`,
+    );
+    sessionView.style.setProperty(
+      "--bottom-dock-chat-min-block-size",
+      `${chatMinimumBlockSize}px`,
+    );
+    sessionView.classList.toggle(FULL_PANEL_LAYOUT_CLASS, requiresSequentialLayout);
+    sessionView.classList.toggle("session-view--layout-stacked", !requiresSequentialLayout);
+    sessionView.style.setProperty(
+      "--session-layout-mode",
+      requiresSequentialLayout ? "side-by-side" : "stacked",
+    );
+  } else if (sessionView?.dataset.chatDock !== "bottom") {
+    sessionView?.classList.remove(FULL_PANEL_LAYOUT_CLASS);
+  }
+
+  // Los tres estados se aplican juntos, antes del siguiente repintado.
   sessionView?.classList.toggle(BOTTOM_DOCK_FIT_VIEWPORT_CLASS, panelsFitViewport);
   sessionView?.classList.toggle('session-view--chat-bottom-snap-enabled', needsScrollSnap);
   syncComponentStackChatHandle(sessionView, chatArea);
@@ -80,42 +90,37 @@ function measureComponentLayout({ allowDuringChatTransition = false } = {}) {
   pendingFrame = 0;
   syncComponentStackShellInsets(appShell, sessionView, workspace);
   syncEdgeToEdgeLayout();
-  const wasStacked = sessionView?.classList.contains(FULL_PANEL_LAYOUT_CLASS);
+  const wasSequential = sessionView?.classList.contains(FULL_PANEL_LAYOUT_CLASS);
   if (
     sessionView?.classList.contains('session-view--chat-layout-transitioning')
     && !allowDuringChatTransition
   ) return;
 
-  const targetLayout = measurePanelLayoutTarget({
+  const isFullscreen = Boolean(document.fullscreenElement)
+    || document.body.classList.contains('page-context--fullscreen');
+  if (isFullscreen && sessionView?.dataset.chatDock === "bottom") return;
+
+  const targetLayout = resolveBottomDockLayout({
     sessionView,
-    appShell,
     workspace,
-    videoArea,
     playerFrame,
-    chatArea,
     videoPlayer,
+    chatArea,
+    chatTools,
+    messageListShell,
   });
-  const isExpandedBottomDock = sessionView?.dataset.chatDock === "bottom"
-    && !sessionView.classList.contains('session-view--chat-collapsed');
-  const panelsFitViewport = Boolean(
-    isExpandedBottomDock
-    && targetLayout.hasMeasuredPanels
-    && !targetLayout.shouldStack
-    && targetLayout.combinedPanelHeight <= getStructuralViewportHeight() + 1
-  );
-  // Compartir el viewport solo es válido si el video conserva su proporción.
-  // Las diferencias pequeñas por redondeo ya se absorben en la medición.
-  const shouldStack = Boolean(targetLayout.shouldStack && !panelsFitViewport);
+  if (!targetLayout.hasMeasuredPanels && sessionView?.dataset.chatDock === "bottom") return;
+
   if (
-    shouldStack
-    && !wasStacked
+    targetLayout.requiresSequentialLayout
+    && !wasSequential
     && !sessionView.classList.contains('session-view--chat-collapsed')
     && !pendingScrollTarget
   ) {
     pendingScrollTarget = "center-video";
   }
 
-  applyComponentLayoutState({ ...targetLayout, shouldStack });
+  applyComponentLayoutState(targetLayout);
 
   const scrollTarget = pendingScrollTarget;
   pendingScrollTarget = "";
@@ -127,7 +132,7 @@ function measureComponentLayout({ allowDuringChatTransition = false } = {}) {
     if (sessionView.hidden) return;
 
     const isCollapsed = sessionView.classList.contains('session-view--chat-collapsed');
-    const isStacked = sessionView.classList.contains(FULL_PANEL_LAYOUT_CLASS);
+    const isSequential = sessionView.classList.contains(FULL_PANEL_LAYOUT_CLASS);
     if (initialSessionScrollPending) {
       initialSessionScrollPending = false;
       if (!hasLoadedVideo()) {
@@ -146,7 +151,7 @@ function measureComponentLayout({ allowDuringChatTransition = false } = {}) {
         }
       } else if (
         sessionView.dataset.chatDock === "bottom"
-        && (isStacked || isCollapsed)
+        && (isSequential || isCollapsed)
       ) {
         videoArea.scrollIntoView({ block: "center", inline: "nearest", behavior: "auto" });
       }
@@ -154,14 +159,14 @@ function measureComponentLayout({ allowDuringChatTransition = false } = {}) {
     }
 
     if (sessionView.dataset.chatDock !== "bottom") return;
-    if (scrollTarget === "reveal-chat" && isStacked && !isCollapsed) {
+    if (scrollTarget === "reveal-chat" && isSequential && !isCollapsed) {
       const chatTop = chatArea.getBoundingClientRect().top;
       if (Math.abs(chatTop) > 1) {
         chatArea.scrollIntoView({ block: "start", inline: "nearest", behavior: "auto" });
       }
     } else if (
       scrollTarget === "center-video"
-      && (isStacked || isCollapsed)
+      && (isSequential || isCollapsed)
       && hasLoadedVideo()
     ) {
       videoArea.scrollIntoView({ block: "center", inline: "nearest", behavior: "auto" });
@@ -194,8 +199,10 @@ wireComponentAspectObservers({
   videoPlayer,
   playerFrame,
   chatArea,
+  chatTools,
+  messageListShell,
+  messageForm,
   scheduleComponentLayoutMeasure,
-  isMeasuringExpandedTarget,
 });
 
 window.addEventListener("load", scheduleComponentLayoutMeasure, { once: true });

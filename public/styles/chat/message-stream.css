@@ -17,7 +17,7 @@
   background:
     linear-gradient(180deg, rgba(8, 11, 13, 0.2), rgba(8, 11, 13, 0.08)),
     rgba(10, 13, 15, 0.34);
-  padding: 8px 8px var(--chat-message-bottom-reserve, 132px);
+  padding: var(--chat-message-padding-block-start, 8px) 8px var(--chat-message-bottom-reserve, 132px);
 }
 
 .message {

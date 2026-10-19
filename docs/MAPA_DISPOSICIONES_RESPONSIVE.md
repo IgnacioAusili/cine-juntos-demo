@@ -13,7 +13,7 @@ Hoy, CSS y JavaScript deciden la composición desde criterios repartidos entre d
 |---|---|---|
 | Lobby | JavaScript compara el espacio útil del grid con mínimos del hero y boleto; apila si no alcanzan. También ajusta el boleto. | Mantener columnas si ambas áreas caben; apilar si no, conservando la apariencia de cada disposición. |
 | Chat lateral | Mide si video y chat caben en fila; el puntero táctil fuerza apilado y hasta 680 px el chat puede cubrir el reproductor. | Mantener el dock lateral elegido y decidir entre paralelo, apilado o superpuesto según el espacio. El puntero ajusta controles, no determina por sí solo la composición. |
-| Chat inferior | Conserva el orden video/chat; JavaScript considera proporción del video, altura de paneles y scroll. | Compartir el espacio solo si video y chat siguen siendo utilizables; si no, usar paneles secuenciales con scroll o chat superpuesto. |
+| Chat inferior | Un resolver compara las dimensiones mínimas del video y chat con el espacio compartido; CSS aplica el reparto o la secuencia con scroll. | Decidir con las restricciones útiles de cada componente y el espacio del contenedor. Si no caben juntos, mantener video seguido de chat con scroll; no superponerlo sobre la línea de tiempo. |
 | Móvil | Reglas de CSS y JavaScript varían por orientación, teclado y barras del navegador. | Tratar esos cambios como variaciones del espacio visible y mantener una composición que no comprima video ni chat. |
 
 ## Seguimiento
@@ -29,5 +29,14 @@ Hoy, CSS y JavaScript deciden la composición desde criterios repartidos entre d
   - [x] Unificar el cambio de dock abierto: contraer el actual, cambiar el dock en estado contraído y expandir el destino con su mecanismo normal.
   - [x] Conservar scroll, foco y controles al cambiar la composición o el dock.
 
-- [ ] **D3 — Chat inferior:** revisar la distribución de video y chat.
+- [x] **D3 — Chat inferior:**
+  - [x] Resolver con la proporción del video y los mínimos de controles, historial y compositor del chat.
+  - [x] Comparar con el espacio útil definido por el layout; el puntero no elige la composición.
+  - [x] Usar un resolver y dejar a CSS repartir tamaños mínimos o presentar los paneles en secuencia con scroll.
+  - [x] Calcular sin modificar temporalmente el layout visible; agrupar recálculos ante cambios relevantes.
+  - [x] Conservar el orden video/chat y la apariencia actual.
+  - [x] Mantener el cálculo independiente de que el chat esté expandido o contraído.
+  - [x] Revisar ambos modos en más tamaños.
+  - [x] Extender 1 px el alto máximo de la fila para alinear el header al final del scroll.
+  - [x] Coordinar la animación de las filas con la contracción y expansión del chat.
 - [ ] **D4 — Móvil:** revisar orientación, barras y teclado.

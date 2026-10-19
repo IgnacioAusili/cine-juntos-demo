@@ -2,6 +2,11 @@
 
 @media (max-width: 680px) {
 
+  .session-view[data-chat-dock="bottom"] {
+    --bottom-dock-shared-block-size-inset-start: 0px;
+    --bottom-dock-shared-block-size-inset-end: 0px;
+  }
+
   .lobby-screen__fields input[type="text"] {
     --lobby-input-offset: 3px;
   }
@@ -193,15 +198,14 @@
   body:not(.page-context--lobby) .session-view[data-chat-dock="bottom"] .o-workspace {
     margin-top: var(--session-toolbar-height);
     scroll-margin-top: var(--session-toolbar-height);
-    /* En móvil el video y el chat forman una única pantalla desplazable.
-       Las reglas generales del dock inferior les asignan un viewport entero
-       a cada fila, dejando solo el chat visible al llegar al final. */
+    /* La decisión de composición se calcula fuera de CSS; estas fracciones
+       solo distribuyen el espacio cuando los mínimos permiten compartirlo. */
     height: var(--app-viewport-height);
     min-height: 0;
     padding-top: 0;
     grid-template-rows:
-      minmax(220px, 42%)
-      minmax(0, 1fr);
+      minmax(var(--bottom-dock-video-min-block-size, 0px), 42fr)
+      minmax(var(--bottom-dock-chat-min-block-size, 0px), 58fr);
   }
 
   /* Cuando el chat está contraído, no reservar su segunda fila. En móvil el
