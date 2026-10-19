@@ -135,8 +135,11 @@ export function getBottomDockVideoScrollTop() {
   // En móvil la sesión ocupa todo el ancho y el video debe comenzar en el
   // borde superior del viewport. El gutter ya no forma parte del espacio
   // visible, por lo que restarlo deja el reproductor desplazado al contraer.
+  const viewportLandscape = isFullscreenPageActive()
+    ? window.matchMedia("(orientation: landscape)").matches
+    : document.documentElement.classList.contains("page-context--viewport-landscape");
   const mobileViewport = window.matchMedia("(max-width: 680px)").matches
-    || (isStackedSessionLayout() && window.matchMedia("(orientation: landscape)").matches);
+    || (isStackedSessionLayout() && viewportLandscape);
   const topOffset = isFullscreenPageActive() || mobileViewport ? 0 : gutter;
   return Math.max(0, Math.round(getElementPageTop(dom.videoArea) - topOffset));
 }

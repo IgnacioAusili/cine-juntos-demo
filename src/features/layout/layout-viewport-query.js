@@ -2,6 +2,16 @@ import { dom } from "../../core/dom.js";
 
 const MOBILE_LAYOUT_QUERY = "(max-width: 980px)";
 
+// Margen para separar cambios menores del viewport (incluidas las barras del
+// navegador) de una reducción que pueda corresponder al teclado virtual.
+export const CHAT_KEYBOARD_VIEWPORT_TOLERANCE_PX = 80;
+
+export function isViewportReducedForKeyboard(referenceHeight, visibleHeight) {
+  return referenceHeight > 0
+    && visibleHeight > 0
+    && referenceHeight - visibleHeight > CHAT_KEYBOARD_VIEWPORT_TOLERANCE_PX;
+}
+
 export function isMobileLayout() {
   return window.matchMedia?.(MOBILE_LAYOUT_QUERY).matches === true;
 }

@@ -1,15 +1,24 @@
 import { dom } from "../../core/dom.js";
 import { layoutMetricsState } from "./layout-metrics-state.js";
-import { isMobileLayout, isFullscreenActive, isOverlayChatInputFocused, isBottomChatKeyboardTarget, isBottomChatNameEditorFocused, isBottomChatInputFocused, isBottomChatKeyboardOpen, isRightChatInputFocused } from "./layout-viewport-query.js";
+import { isMobileLayout, isBottomChatInputFocused, isBottomChatKeyboardOpen, isRightChatInputFocused, isViewportReducedForKeyboard } from "./layout-viewport-query.js";
 import { getLargeViewportHeight, getCurrentViewportHeight } from "./layout-viewport-page-scroll.js";
 export { isMobileLayout, isFullscreenActive, isOverlayChatInputFocused, isBottomChatKeyboardTarget, isBottomChatNameEditorFocused, isBottomChatInputFocused, isBottomChatKeyboardOpen, isRightChatInputFocused } from "./layout-viewport-query.js";
 export { getLargeViewportHeight, getCurrentViewportHeight, getNativePageScrollMax, captureOrientationScrollPosition, restoreOrientationScrollPosition, scheduleOrientationScrollRestore, rememberNativePageScrollPosition, preservePageBottomAfterViewportChange } from "./layout-viewport-page-scroll.js";
 
+export function isChatKeyboardViewportOpen(viewportHeight = getCurrentViewportHeight()) {
+  const chatInputFocused = isBottomChatInputFocused() || isRightChatInputFocused();
+  const referenceHeight = layoutMetricsState.lockedMobileViewportMetrics?.height
+    || layoutMetricsState.lastViewportMetrics?.height
+    || getLargeViewportHeight();
+  return chatInputFocused && isViewportReducedForKeyboard(referenceHeight, viewportHeight);
+}
+
 export function isRightChatKeyboardOpen(viewportHeight = getCurrentViewportHeight()) {
-  const referenceHeight = layoutMetricsState.lastViewportMetrics?.height || getLargeViewportHeight();
-  return isRightChatInputFocused()
-    && viewportHeight > 0
-    && referenceHeight - viewportHeight > 80;
+  return isRightChatInputFocused() && isChatKeyboardViewportOpen(viewportHeight);
+}
+
+export function isBottomChatKeyboardViewportOpen(viewportHeight = getCurrentViewportHeight()) {
+  return isBottomChatInputFocused() && isChatKeyboardViewportOpen(viewportHeight);
 }
 export function captureRightChatKeyboardScroll(allowUnfocused = false) {
   if (

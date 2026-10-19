@@ -2,7 +2,7 @@
 
 /* Esta anulación queda al final de la hoja para ganar también sobre el borde
    estructural del frame definido en la variante de viewport móvil compacto. */
-@media (hover: none) and (pointer: coarse) and (orientation: portrait) {
+@media (hover: none) and (pointer: coarse) and (max-width: 680px) {
   body:not(.page-context--lobby) .session-view .player-frame:not(.mini-player-surface) {
     border-top: 0 !important;
   }
@@ -36,7 +36,7 @@
 /* Cuando el dock inferior está expandido, la pista se ancla a la unión entre
    video y chat aunque el conjunto necesite scroll; la fila de controles queda
    por encima de la línea. */
-@media (max-width: 680px) and (orientation: portrait) {
+@media (max-width: 680px) {
   /* Mantener la pista anclada al mismo contenedor en ambas disposiciones. Si
      la barra pasa de relative a static al expandir el chat, cambia su bloque
      de referencia y la línea salta antes de que termine la cortina. */

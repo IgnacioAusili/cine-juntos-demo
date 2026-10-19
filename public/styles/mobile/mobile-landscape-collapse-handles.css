@@ -65,6 +65,11 @@
     padding: 0;
   }
 
+  html.page-context--viewport-landscape body:not(.page-context--lobby) .session-view[data-chat-dock="bottom"] .chat-area > .message-form .message-form__input-wrapper:not([data-expanded="true"]) .icon-button--emoji-trigger,
+  html.page-context--viewport-landscape body:not(.page-context--lobby) .session-view[data-chat-dock="bottom"] .chat-area > .message-form .message-form__input-wrapper:not([data-expanded="true"]) .icon-button--send {
+    align-self: center;
+  }
+
   html.page-context--viewport-landscape body:not(.page-context--lobby) .session-view[data-chat-dock="bottom"] .message-form .message-form__input-wrapper .icon-button--emoji-trigger,
   html.page-context--viewport-landscape body:not(.page-context--lobby) .session-view[data-chat-dock="bottom"] .message-form .message-form__input-wrapper .icon-button--send {
     margin-top: 0;

@@ -207,7 +207,9 @@
 
 @media (max-width: 680px) {
   .message-form .message-form__input-wrapper:not([data-expanded="true"]) #messageInput {
-    padding-block: 3px 7px;
+    /* La caja móvil mide al menos 36px: 20px de línea más 8px por lado la
+       centra de forma consistente en los motores móviles y de escritorio. */
+    padding-block: 8px;
   }
 }
 

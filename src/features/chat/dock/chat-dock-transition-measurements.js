@@ -1,9 +1,12 @@
 import { dom } from "../../../core/dom.js";
 import { isStackedSessionLayout } from "./chat-responsive-layout.js";
+import { isFullscreenPageActive } from "./chat-page-scroll.js";
 
 export function isDesktopBottomDock() {
-  const isLandscapeMobile = isStackedSessionLayout()
-    && window.matchMedia("(orientation: landscape)").matches;
+  const isLandscape = isFullscreenPageActive()
+    ? window.matchMedia("(orientation: landscape)").matches
+    : document.documentElement.classList.contains("page-context--viewport-landscape");
+  const isLandscapeMobile = isStackedSessionLayout() && isLandscape;
   return dom.sessionView?.dataset.chatDock === "bottom"
     && (!isStackedSessionLayout() || isLandscapeMobile);
 }

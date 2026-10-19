@@ -26,8 +26,8 @@
      por los eventos del reproductor. */
 
   /* iOS Safari amplía la página al enfocar controles de texto menores a
-     16px. La línea explícita también centra el placeholder dentro de la
-     altura compacta del composer sin alterar el layout de escritorio. */
+     16px. La línea explícita conserva la misma métrica en motores móviles;
+     el padding vertical del campo centra el texto. */
 
   /* Todos los compositores externos usan la misma caja que el dock inferior:
      el shell ocupa la altura disponible y el textarea conserva su línea y
@@ -147,8 +147,8 @@
     width: auto !important;
   }
 
-  /* Los botones conservan el alto de una línea aun cuando el textarea crece.
-     El ancho extra queda dentro del botón, por lo que también es táctil. */
+  /* Al crecer el campo, los botones permanecen alineados con su borde
+     inferior; el estado de una sola línea los centra más abajo. */
   body:not(.page-context--lobby) .chat-area > .message-form .message-form__input-wrapper .icon-button--emoji-trigger {
     align-self: flex-end;
     flex: 0 0 24px;
@@ -167,6 +167,11 @@
     height: 30px;
     margin: 0;
     padding: 0;
+  }
+
+  body:not(.page-context--lobby) .chat-area > .message-form .message-form__input-wrapper:not([data-expanded="true"]) .icon-button--emoji-trigger,
+  body:not(.page-context--lobby) .chat-area > .message-form .message-form__input-wrapper:not([data-expanded="true"]) .icon-button--send {
+    align-self: center;
   }
 
   body:not(.page-context--lobby) .chat-area > .message-form .message-form__input-wrapper .icon-button--send > * {

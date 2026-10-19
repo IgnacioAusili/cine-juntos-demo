@@ -1,6 +1,6 @@
 
 
-@media (max-width: 680px) and (orientation: portrait) {
+@media (max-width: 680px) {
   body:not(.page-context--lobby) .session-view {
     width: var(--app-viewport-width, 100vw);
     max-width: var(--app-viewport-width, 100vw);

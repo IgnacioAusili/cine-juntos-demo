@@ -1,6 +1,7 @@
 import { dom } from "../../core/dom.js";
 
-const MOBILE_PORTRAIT_QUERY = "(max-width: 680px) and (orientation: portrait)";
+const MOBILE_NARROW_VIEWPORT_QUERY = "(max-width: 680px)";
+const MOBILE_FULLSCREEN_PORTRAIT_QUERY = "(max-width: 680px) and (orientation: portrait)";
 const PLACEMENT_ATTRIBUTE = "data-inside-chat-placement";
 const PLACEMENT_VALUE = "side";
 const EDGE_GAP_PX = 8;
@@ -15,7 +16,13 @@ let placementCleanupTimer = 0;
 let preservePlacementWhileClosing = false;
 
 function isEligibleViewport() {
-  return window.matchMedia?.(MOBILE_PORTRAIT_QUERY).matches === true
+  const isFullscreen = document.body.classList.contains("page-context--fullscreen")
+    || Boolean(document.fullscreenElement);
+  const isNarrowRoomViewport = isFullscreen
+    ? window.matchMedia?.(MOBILE_FULLSCREEN_PORTRAIT_QUERY).matches === true
+    : window.matchMedia?.(MOBILE_NARROW_VIEWPORT_QUERY).matches === true
+      && !document.documentElement.classList.contains("page-context--viewport-landscape");
+  return isNarrowRoomViewport
     && dom.sessionView?.dataset.chatDock === "bottom"
     && !dom.playerFrame?.classList.contains("mini-player-surface");
 }

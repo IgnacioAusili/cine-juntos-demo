@@ -39,4 +39,12 @@ Hoy, CSS y JavaScript deciden la composición desde criterios repartidos entre d
   - [x] Revisar ambos modos en más tamaños.
   - [x] Extender 1 px el alto máximo de la fila para alinear el header al final del scroll.
   - [x] Coordinar la animación de las filas con la contracción y expansión del chat.
-- [ ] **D4 — Móvil:** revisar orientación, barras y teclado.
+- [x] **D4 — Móvil (sala):**
+  - [x] Separar viewport estructural estable (`100lvh`/métrica bloqueada) del área visible que puede reducir el teclado; cambios de barras no deben alterar la sala.
+  - [x] Quitar orientación ancho/alto como selector de composición; decidir por el espacio útil del workspace y las restricciones de video/chat.
+  - [x] Auditar clases y media queries de orientación para que una deformación de panel o viewport no active una composición apaisada.
+  - [x] Centralizar la detección del teclado: foco en el campo y reducción dinámica desde la referencia estable, excluyendo las barras del navegador.
+  - [x] Mantener los ajustes geométricos propios de cada dock como consumidores del estado común, sin duplicar la detección.
+  - [x] Concentrar 80 px como tolerancia provisional de fallback, no como tamaño del teclado; ajustar mediante pruebas.
+  - [x] No activar `VirtualKeyboard.overlaysContent`; evaluar su geometría solo si puede conservarse el comportamiento actual.
+  - [x] Verificar barras sin teclado, apertura/cierre en ambos docks y rotación real; lobby queda fuera de D4.

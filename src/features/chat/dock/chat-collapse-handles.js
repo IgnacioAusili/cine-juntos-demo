@@ -1,9 +1,8 @@
 import { dom } from "../../../core/dom.js";
 import { hydrateIcons, hideTooltip } from "../../icons-tooltips.js";
 import { shouldAnchorChatCollapseHandleInHeader } from "./chat-collapse-header-layout.js";
-import { isFullscreenPageActive } from "./chat-page-scroll.js";
 import { isStackedSessionLayout } from "./chat-responsive-layout.js";
-import { isMobilePortraitChatViewport } from "./chat-layout-breakpoints.js";
+import { isMobilePortraitChatViewport, isMobileLandscapeRightDock, isMobileLandscapeFullscreenBottomDock } from "./chat-layout-breakpoints.js";
 
 export function syncInsideChatPanelOffset() {
   if (!dom.playerFrame) return;
@@ -95,7 +94,7 @@ export function syncExternalChatCollapseHandleOffset() {
       && isStackedSessionLayout();
     const isPortraitMobileRightDock =
       isMobileRightDock
-      && window.matchMedia("(orientation: portrait)").matches;
+      && !isMobileLandscapeRightDock();
     if (isMobileRightDock && dom.videoArea) {
       const workspaceRect = dom.workspace.getBoundingClientRect();
       const videoRect = dom.videoArea.getBoundingClientRect();
@@ -132,12 +131,8 @@ export function syncExternalChatCollapseHandleOffset() {
   const chatRect = dom.chatArea.getBoundingClientRect();
   const chatHeader = dom.chatArea.querySelector(".chat-tools");
   const chatHeaderRect = chatHeader?.getBoundingClientRect();
-  const isPortraitMobileBottomDock =
-    window.matchMedia("(max-width: 680px) and (orientation: portrait)").matches;
-  const isLandscapeMobileFullscreenBottomDock =
-    isFullscreenPageActive()
-    && isStackedSessionLayout()
-    && window.matchMedia("(orientation: landscape)").matches;
+  const isPortraitMobileBottomDock = isMobilePortraitChatViewport();
+  const isLandscapeMobileFullscreenBottomDock = isMobileLandscapeFullscreenBottomDock();
   const parsedDockGap = Number.parseFloat(
     getComputedStyle(dom.sessionView).getPropertyValue("--chat-bottom-dock-gap"),
   );
@@ -213,12 +208,9 @@ export function updateCollapseButton() {
   const isPortraitMobileRightDock =
     dock === "right"
     && isStackedSessionLayout()
-    && window.matchMedia("(orientation: portrait)").matches;
+    && !isMobileLandscapeRightDock();
   const isFullscreenLandscapeBottomDock =
-    dock === "bottom"
-    && isFullscreenPageActive()
-    && isStackedSessionLayout()
-    && window.matchMedia("(orientation: landscape)").matches;
+    dock === "bottom" && isMobileLandscapeFullscreenBottomDock();
   const isDesktopLayout = !isStackedSessionLayout();
   const iconName = isFullscreenLandscapeBottomDock
     ? collapsed

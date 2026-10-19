@@ -81,7 +81,7 @@
 
 /* En portrait, el reproductor debe pintar sobre el chat en la unión para que
    la barra de tiempo siga visible. */
-@media (max-width: 680px) and (orientation: portrait) {
+@media (max-width: 680px) {
   :root body:not(.page-context--lobby) .app-shell
     .session-view:not(.session-view--chat-collapsed)[data-chat-dock="bottom"] .chat-area {
     z-index: 40;

@@ -1,12 +1,12 @@
 import { dom } from "../../../core/dom.js";
 import { focusFullscreenWorkspace } from "../../session/session-ui.js";
-import { isStackedSessionLayout } from "./chat-responsive-layout.js";
 import { getElementPageTop, getPageScrollContainer, getPageScrollMax, getPageScrollTop, isFullscreenPageActive, scrollPageTo } from "./chat-page-scroll.js";
 import { syncComponentAspectLayoutNow } from "./component-aspect-layout.js";
 import { chatDockTransitionState, getChatDockOperations } from "./chat-layout-transition-state.js";
 import { animateDesktopBottomChatExpand } from "./chat-dock-transition-core.js";
 import { isDesktopBottomDock } from "./chat-dock-transition-measurements.js";
-import { BOTTOM_CHAT_CURTAIN_MS, BOTTOM_CHAT_SCROLL_TIMEOUT_MS, RIGHT_CHAT_LAYOUT_TRANSITION_MS, BOTTOM_TO_RIGHT_SCROLL_TIMEOUT_MS, BOTTOM_TO_RIGHT_LAYOUT_MS, FULLSCREEN_DOCK_OUT_MS, FULLSCREEN_DOCK_IN_MS } from "./chat-layout-timing.js";
+import { isMobilePortraitChatViewport } from "./chat-layout-breakpoints.js";
+import { BOTTOM_CHAT_CURTAIN_MS, RIGHT_CHAT_LAYOUT_TRANSITION_MS, BOTTOM_TO_RIGHT_SCROLL_TIMEOUT_MS, BOTTOM_TO_RIGHT_LAYOUT_MS, FULLSCREEN_DOCK_OUT_MS, FULLSCREEN_DOCK_IN_MS } from "./chat-layout-timing.js";
 
 const DOCK_SWITCH_MOTION_TIMEOUT_MS = Math.max(
   BOTTOM_CHAT_CURTAIN_MS,
@@ -256,7 +256,7 @@ export function getBottomToRightScrollTop() {
 
   if (
     dom.workspace
-    && window.matchMedia("(max-width: 680px) and (orientation: portrait)").matches
+    && isMobilePortraitChatViewport()
   ) {
     return Math.min(
       getPageScrollMax(),
@@ -345,7 +345,7 @@ export function scheduleBottomToRightSwitch(nextDock, targetScrollTop) {
       window.requestAnimationFrame(() => {
         if (
           nextDock === "right"
-          && window.matchMedia("(max-width: 680px) and (orientation: portrait)").matches
+          && isMobilePortraitChatViewport()
         ) {
           const workspaceTop = Math.min(
             getPageScrollMax(),

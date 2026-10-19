@@ -81,7 +81,7 @@
   html.page-context--viewport-landscape body:not(.page-context--lobby) .session-view[data-chat-dock="right"] .chat-area > .message-form .message-form__input-wrapper textarea {
     min-height: 30px;
     max-height: 66px;
-    padding-block: 4px 6px;
+    padding-block: 5px;
     padding-inline: 8px;
   }
 
@@ -105,6 +105,11 @@
     padding: 0;
   }
 
+  html.page-context--viewport-landscape body:not(.page-context--lobby) .session-view[data-chat-dock="right"] .chat-area > .message-form .message-form__input-wrapper:not([data-expanded="true"]) .icon-button--emoji-trigger,
+  html.page-context--viewport-landscape body:not(.page-context--lobby) .session-view[data-chat-dock="right"] .chat-area > .message-form .message-form__input-wrapper:not([data-expanded="true"]) .icon-button--send {
+    align-self: center;
+  }
+
   /* El chat interno conserva en landscape el mismo composer compacto que
      usa el reproductor en portrait, en lugar de heredar el tamaño del chat
      externo lateral. */
@@ -122,10 +127,11 @@
   html.page-context--viewport-landscape body:not(.page-context--lobby) .session-view[data-chat-dock] .player-frame .message-form.message-form--overlay .message-form__input-wrapper textarea {
     min-height: 30px;
     max-height: 66px;
-    padding: 4px 6px 6px;
+    padding: 5px 6px;
   }
 
   html.page-context--viewport-landscape body:not(.page-context--lobby) .player-frame .message-form.message-form--overlay .message-form__input-wrapper .icon-button--emoji-trigger {
+    align-self: flex-end;
     width: 24px;
     min-height: 30px;
     height: 30px;
@@ -134,11 +140,17 @@
   }
 
   html.page-context--viewport-landscape body:not(.page-context--lobby) .player-frame .message-form.message-form--overlay .message-form__input-wrapper .icon-button--send {
+    align-self: flex-end;
     width: 34px;
     min-height: 30px;
     height: 30px;
     flex-basis: 34px;
     margin: 0;
+  }
+
+  html.page-context--viewport-landscape body:not(.page-context--lobby) .player-frame .message-form.message-form--overlay .message-form__input-wrapper:not([data-expanded="true"]) .icon-button--emoji-trigger,
+  html.page-context--viewport-landscape body:not(.page-context--lobby) .player-frame .message-form.message-form--overlay .message-form__input-wrapper:not([data-expanded="true"]) .icon-button--send {
+    align-self: center;
   }
 
   html.page-context--viewport-landscape body:not(.page-context--lobby) .session-view[data-chat-dock="right"] .message-form .message-form__input-wrapper .icon-button--emoji-trigger,
