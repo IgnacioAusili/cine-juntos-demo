@@ -2,6 +2,8 @@
 
 .lobby-screen__grid {
   --lobby-grid-column-gap: 10px;
+  --lobby-columns-min-hero-inline-size: 384px;
+  --lobby-columns-min-ticket-inline-size: var(--lobby-ticket-track-size, 404px);
 }
 
 /* ============================================================

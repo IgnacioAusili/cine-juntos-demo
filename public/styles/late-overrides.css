@@ -135,13 +135,13 @@ body:not(.page-context--lobby)
 
 /* En vertical móvil con ambos paneles visibles, alinear la pista con el borde
    inferior del reproductor. */
-@media (max-width: 680px) and (orientation: portrait) {
+@media (max-width: 680px) {
   body:not(.page-context--lobby)
     .session-view.session-view--bottom-dock-panels-fit-viewport:not(.session-view--chat-collapsed)[data-chat-dock="bottom"]
   .player-frame:not(.mini-player-surface)[data-control-style="line"] .player-progress-group {
-    right: 16px;
+    right: 8px;
     bottom: -9px;
-    left: 16px;
+    left: 8px;
     z-index: 42;
   }
 }

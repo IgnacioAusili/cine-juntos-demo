@@ -2,8 +2,8 @@
 
 @media (max-width: 680px) {
 
-  /* Los botones conservan la altura de una sola línea aunque el textarea se
-     expanda. El envío también toma el espacio libre hasta el borde derecho. */
+  /* Conservan el área táctil de una línea: centrados con texto corto y al
+     borde inferior cuando el campo se expande. */
 
   body:not(.page-context--lobby) .session-view[data-chat-dock="bottom"] .chat-tools {
     --chat-tools-inline-gutter: 4px;
@@ -44,6 +44,11 @@
     padding: 0;
   }
 
+  body:not(.page-context--lobby) .session-view[data-chat-dock="bottom"] .chat-area .message-form__input-wrapper:not([data-expanded="true"]) .icon-button--emoji-trigger,
+  body:not(.page-context--lobby) .session-view[data-chat-dock="bottom"] .chat-area .message-form__input-wrapper:not([data-expanded="true"]) .icon-button--send {
+    align-self: center;
+  }
+
   body:not(.page-context--lobby) .session-view[data-chat-dock="bottom"] .chat-area .message-form__input-wrapper .icon-button--send > * {
     left: calc(50% - 3px);
   }
@@ -62,14 +67,14 @@
   body:not(.page-context--lobby) .session-view[data-chat-dock] .player-frame .message-form.message-form--overlay .message-form__input-wrapper textarea {
     min-height: 30px;
     max-height: 66px;
-    padding-top: 5px;
-    padding-bottom: 5px;
+    padding-block: 5px;
     padding-right: 6px;
   }
 
   /* Los botones conservan la altura de una sola línea aunque el textarea se
      expanda. El envío también toma el espacio libre hasta el borde derecho. */
   body:not(.page-context--lobby) .player-frame .message-form.message-form--overlay .message-form__input-wrapper .icon-button--emoji-trigger {
+    align-self: flex-end;
     width: 24px;
     min-height: 30px;
     height: 30px;
@@ -78,11 +83,17 @@
   }
 
   body:not(.page-context--lobby) .player-frame .message-form.message-form--overlay .message-form__input-wrapper .icon-button--send {
+    align-self: flex-end;
     width: 34px;
     min-height: 30px;
     height: 30px;
     flex-basis: 34px;
     margin: 0;
+  }
+
+  body:not(.page-context--lobby) .player-frame .message-form.message-form--overlay .message-form__input-wrapper:not([data-expanded="true"]) .icon-button--emoji-trigger,
+  body:not(.page-context--lobby) .player-frame .message-form.message-form--overlay .message-form__input-wrapper:not([data-expanded="true"]) .icon-button--send {
+    align-self: center;
   }
 
   body:not(.page-context--lobby) .player-frame .message-form.message-form--overlay .message-form__input-wrapper .icon-button--send > * {
@@ -161,7 +172,7 @@
     .session-view[data-chat-dock="bottom"]
     .chat-area__collapse-hover-zone[data-chat-control="collapse"] {
     top: 0 !important;
-    transform: translate(-50%, -50%) !important;
+    transform: none !important;
   }
 
   body:not(.page-context--lobby) #playerChatToggleButton {

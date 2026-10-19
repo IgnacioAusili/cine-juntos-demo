@@ -15,8 +15,8 @@ export function syncComponentStackChatHandle(sessionView, chatArea) {
   const chatAreaStyle = getComputedStyle(chatArea);
   const chatRowGap = Number.parseFloat(chatAreaStyle.rowGap) || 0;
   const isCompactDesktopLandscape = window.matchMedia(
-    "(max-width: 680px) and (orientation: landscape) and (hover: hover) and (pointer: fine)",
-  ).matches;
+    "(max-width: 680px) and (hover: hover) and (pointer: fine)",
+  ).matches && document.documentElement.classList.contains("page-context--viewport-landscape");
   const visualCenterOffset = isCompactDesktopLandscape ? chatRowGap / 2 : 0;
 
   sessionView.style.setProperty(

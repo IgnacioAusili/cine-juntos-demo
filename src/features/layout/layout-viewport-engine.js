@@ -1,7 +1,7 @@
 import { dom } from "../../core/dom.js";
 import { layoutMetricsState } from "./layout-metrics-state.js";
-import { isOverlayChatInputFocused, isBottomChatKeyboardTarget, isBottomChatNameEditorFocused, isBottomChatInputFocused, isBottomChatKeyboardOpen, isRightChatInputFocused, isRightChatKeyboardOpen, captureRightChatKeyboardScroll, alignRightChatKeyboardViewport, restoreRightChatKeyboardScroll, preventRightChatPageScroll, captureBottomChatKeyboardHandlePosition, restoreBottomChatKeyboardHandlePosition, preventBottomChatPageScroll, restoreBottomChatPageScrollPosition, getLargeViewportHeight, getCurrentViewportHeight, getNativePageScrollMax, captureOrientationScrollPosition, restoreOrientationScrollPosition, scheduleOrientationScrollRestore, rememberNativePageScrollPosition, preservePageBottomAfterViewportChange } from "./layout-viewport-interactions.js";
-import { isMobileLayout, isFullscreenActive } from "./layout-viewport-query.js";
+import { isOverlayChatInputFocused, isBottomChatNameEditorFocused, isBottomChatInputFocused, isBottomChatKeyboardOpen, isRightChatInputFocused, isChatKeyboardViewportOpen, isBottomChatKeyboardViewportOpen, captureRightChatKeyboardScroll, alignRightChatKeyboardViewport, restoreRightChatKeyboardScroll, captureBottomChatKeyboardHandlePosition, restoreBottomChatKeyboardHandlePosition, getLargeViewportHeight, getCurrentViewportHeight, scheduleOrientationScrollRestore, rememberNativePageScrollPosition } from "./layout-viewport-interactions.js";
+import { isViewportReducedForKeyboard, isMobileLayout, isFullscreenActive } from "./layout-viewport-query.js";
 
 export { isMobileLayout, isFullscreenActive } from "./layout-viewport-query.js";
 
@@ -9,11 +9,12 @@ export function getViewportMetrics(force = false) {
   const viewport = window.visualViewport;
   const documentElement = document.documentElement;
   const currentViewportHeight = getCurrentViewportHeight();
-  const rightChatKeyboardOpen = isRightChatKeyboardOpen(currentViewportHeight);
   const hasReducedViewport = !force && Boolean(
     layoutMetricsState.lastViewportMetrics?.height
-      && currentViewportHeight > 0
-      && currentViewportHeight < layoutMetricsState.lastViewportMetrics.height - 80,
+      && isViewportReducedForKeyboard(
+        layoutMetricsState.lastViewportMetrics.height,
+        currentViewportHeight,
+      ),
   );
   const fullscreenActive = isFullscreenActive();
   // Una sincronización forzada también debe poder descartar una altura vieja
@@ -30,7 +31,7 @@ export function getViewportMetrics(force = false) {
     || window.innerWidth
     || viewport?.width
     || 0;
-  const layoutHeight = rightChatKeyboardOpen || fullscreenActive
+  const layoutHeight = fullscreenActive
     ? currentViewportHeight
     : (hasReducedViewport && layoutMetricsState.lastViewportMetrics?.height)
       || getLargeViewportHeight()
@@ -51,8 +52,8 @@ export function getViewportMetrics(force = false) {
   // El teclado del overlay se superpone al reproductor. Mantener las últimas
   // métricas completas evita que el visualViewport reducido refluya toda la
   // sesión o que una pantalla vertical sea interpretada como apaisada. El
-  // chat inferior es la excepción: con interactive-widget=resizes-content
-  // necesita aceptar el alto reducido para que el composer siga al teclado.
+  // alto visible reducido se publica por separado para que el composer pueda
+  // seguir al teclado sin cambiar el tamaño estructural de la sesión.
   if (isOverlayChatInputFocused() && layoutMetricsState.lastViewportMetrics) {
     return layoutMetricsState.lastViewportMetrics;
   }
@@ -65,14 +66,11 @@ function isViewportLandscape(metrics, rightChatKeyboardOpen) {
     return metrics.width > metrics.height;
   }
 
-  // El teclado reduce el viewport visible, pero no cambia la orientación del
-  // dispositivo. Mientras el ancho siga siendo el mismo, conservar la última
-  // métrica completa evita que una pantalla vertical active las reglas de
-  // landscape y vuelva a poner video y chat en columnas. Si el ancho cambió,
-  // sí hay una rotación real y las métricas actuales vuelven a ser la fuente.
+  // La rama fullscreen mantiene su decisión anterior, donde el viewport
+  // reducido del teclado se gestiona como un estado propio.
   const widthChanged = Math.abs(metrics.width - layoutMetricsState.lastViewportMetrics.width) > 1;
-  return (widthChanged ? metrics : layoutMetricsState.lastViewportMetrics).width
-    > (widthChanged ? metrics : layoutMetricsState.lastViewportMetrics).height;
+  const orientationMetrics = widthChanged ? metrics : layoutMetricsState.lastViewportMetrics;
+  return orientationMetrics.width > orientationMetrics.height;
 }
 
 export function scheduleFullscreenMetricResync() {
@@ -96,10 +94,7 @@ export function scheduleFullscreenMetricResync() {
 
 function getStableViewportMetrics(force = false) {
   const liveMetrics = getViewportMetrics(force);
-  const shouldLock = isMobileLayout()
-    && !isFullscreenActive()
-    && !isBottomChatInputFocused()
-    && !isRightChatKeyboardOpen();
+  const shouldLock = isMobileLayout() && !isFullscreenActive();
 
   if (!shouldLock) {
     layoutMetricsState.lockedMobileViewportMetrics = null;
@@ -111,7 +106,8 @@ function getStableViewportMetrics(force = false) {
   if (
     force
     || !layoutMetricsState.lockedMobileViewportMetrics
-    || liveMetrics.width !== layoutMetricsState.lockedMobileViewportMetrics.width
+    || Math.abs(liveMetrics.width - layoutMetricsState.lockedMobileViewportMetrics.width) > 1
+    || Math.abs(liveMetrics.height - layoutMetricsState.lockedMobileViewportMetrics.height) > 1
   ) {
     layoutMetricsState.lockedMobileViewportMetrics = liveMetrics;
   }
@@ -132,10 +128,9 @@ export function syncViewportMetrics(force = false) {
     && window.scrollY >= previousMaxScroll - 4;
   const metrics = getStableViewportMetrics(force);
   const currentViewportHeight = getCurrentViewportHeight();
-  const bottomChatKeyboardOpen = isBottomChatInputFocused()
-    && currentViewportHeight > 0
-    && metrics.height - currentViewportHeight > 80;
-  const rightChatKeyboardOpen = isRightChatKeyboardOpen(currentViewportHeight);
+  const chatKeyboardOpen = isChatKeyboardViewportOpen(currentViewportHeight);
+  const bottomChatKeyboardOpen = isBottomChatKeyboardViewportOpen(currentViewportHeight);
+  const rightChatKeyboardOpen = isRightChatInputFocused() && chatKeyboardOpen;
   if (
     !isOverlayChatInputFocused()
     && !isBottomChatInputFocused()

@@ -79,14 +79,6 @@
 
   body.page-context--lobby .lobby-screen__description {
     width: 100%;
-    /* La animación base controla transform; translate permite sumar el
-       centrado geométrico sin que la animación lo sobrescriba. */
-    translate: 0 var(--lobby-description-separator-shift, 0px);
-  }
-
-  body.page-context--lobby .lobby-screen__hero::before,
-  body.page-context--lobby .lobby-screen__hero::after {
-    top: calc(100% - 8px + var(--lobby-description-separator-shift, 0px));
   }
 
   body.page-context--lobby .lobby-screen__ticket {

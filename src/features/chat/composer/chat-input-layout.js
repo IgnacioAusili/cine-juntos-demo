@@ -2,7 +2,6 @@ import { dom } from "../../../core/dom.js";
 import { hideEmojiPicker } from "./emoji-picker.js";
 import { isPinnedToBottom, queuePinnedChatScrollSync } from "../dock/chat-scroll-sync.js";
 import { wireChatScrollbar, syncChatScrollbar, syncComposerScrollbar } from "./chat-scrollbar.js";
-import { isMobileLayout } from "./chat-input-debug.js";
 
 const floatingComposerObservers = new WeakMap();
 
@@ -18,14 +17,21 @@ export function autoResizeMessageInput(input) {
   const wasPinnedToBottom = isPinnedToBottom(messagesContainer);
 
   const maxHeight = isOverlay ? 86 : 118;
-  const mobileMinHeight = isMobileLayout();
-  const minHeight = mobileMinHeight ? 30 : (isOverlay ? 30 : 36);
   const wrapper = input.closest('.message-form__input-wrapper');
 
+  // Medir desde el estado compacto evita que un padding de la última edición
+  // mantenga expandido un campo ya vacío. El mínimo se toma del CSS activo
+  // para respetar los distintos docks y breakpoints.
+  if (wrapper) {
+    wrapper.dataset.expanded = "false";
+  }
+  const computedMinHeight = Number.parseFloat(window.getComputedStyle(input).minHeight);
+  const minHeight = Number.isFinite(computedMinHeight)
+    ? computedMinHeight
+    : (isOverlay ? 30 : 36);
   input.style.height = `${minHeight}px`;
-  // El padding del textarea cambia cuando pasa a multilinea. Resolver el
-  // estado antes de la medición final evita calcular la altura con la métrica
-  // anterior y producir un salto en el primer Enter.
+  // El padding y el interlineado cambian al expandirse, así que esta primera
+  // medición decide el estado y la segunda obtiene la altura con sus métricas.
   const shouldExpand = input.scrollHeight > minHeight + 4;
   if (wrapper) {
     wrapper.dataset.expanded = String(shouldExpand);
@@ -33,7 +39,7 @@ export function autoResizeMessageInput(input) {
 
   const contentHeight = input.scrollHeight;
   input.style.height = `${Math.min(Math.max(contentHeight, minHeight), maxHeight)}px`;
-  input.scrollTop = input.scrollHeight;
+  input.scrollTop = shouldExpand ? input.scrollHeight : 0;
   syncComposerScrollbar(input);
   queuePinnedChatScrollSync(messagesContainer, isOverlay, wasPinnedToBottom);
 }

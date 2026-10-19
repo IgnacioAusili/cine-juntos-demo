@@ -1,10 +1,9 @@
 export const CHAT_DOCK_TRANSITIONS = Object.freeze({
+  COLLAPSE_SWITCH_EXPAND: "collapse-switch-expand",
   BOTTOM_TO_RIGHT: "bottom-to-right",
   FULLSCREEN_BOTTOM_TO_RIGHT: "fullscreen-bottom-to-right",
   FULLSCREEN: "fullscreen",
   RIGHT_TO_BOTTOM_NATIVE: "right-to-bottom-native",
-  RIGHT_TO_BOTTOM_MOBILE: "right-to-bottom-mobile",
-  RIGHT_TO_BOTTOM_STACKED: "right-to-bottom-stacked",
 });
 
 export function resolveChatDockTransition({
@@ -14,31 +13,29 @@ export function resolveChatDockTransition({
   isCollapsed,
   isFullscreen,
   isStacked,
-  isCoarsePointer,
-  isMobilePortrait,
 }) {
   if (skipTransition || currentDock === nextDock) return null;
 
+  // Fuera de fullscreen, todos los cambios de dock siguen el mismo ciclo:
+  // contraer el panel actual, cambiar la disposición y expandirlo en destino.
+  // El dock actual sigue determinando la animación visual de cada fase.
+  if (!isFullscreen) {
+    return isCollapsed
+      ? null
+      : CHAT_DOCK_TRANSITIONS.COLLAPSE_SWITCH_EXPAND;
+  }
+
   if (currentDock === "bottom" && nextDock === "right") {
-    return isFullscreen && !isStacked
+    return !isStacked
       ? CHAT_DOCK_TRANSITIONS.FULLSCREEN_BOTTOM_TO_RIGHT
       : CHAT_DOCK_TRANSITIONS.BOTTOM_TO_RIGHT;
   }
 
-  if (isFullscreen && !isCollapsed) {
+  if (!isCollapsed) {
     if (currentDock === "right" && nextDock === "bottom" && !isStacked) {
       return CHAT_DOCK_TRANSITIONS.RIGHT_TO_BOTTOM_NATIVE;
     }
     return CHAT_DOCK_TRANSITIONS.FULLSCREEN;
-  }
-
-  if (currentDock === "right" && nextDock === "bottom" && !isCollapsed) {
-    if (isStacked && !isCoarsePointer) {
-      return CHAT_DOCK_TRANSITIONS.RIGHT_TO_BOTTOM_STACKED;
-    }
-    return isMobilePortrait || isStacked
-      ? CHAT_DOCK_TRANSITIONS.RIGHT_TO_BOTTOM_MOBILE
-      : CHAT_DOCK_TRANSITIONS.RIGHT_TO_BOTTOM_NATIVE;
   }
 
   return null;

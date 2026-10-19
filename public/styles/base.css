@@ -8,7 +8,13 @@
     linear-gradient(90deg, rgba(255, 255, 255, 0.022) 1px, transparent 1px),
     linear-gradient(180deg, rgba(255, 255, 255, 0.022) 1px, transparent 1px),
     var(--bg);
-  --session-page-background-size: auto, auto, auto, 56px 56px, 56px 56px, auto;
+  --session-page-background-size:
+    var(--app-viewport-width, 100lvw) var(--app-viewport-height, 100lvh),
+    var(--app-viewport-width, 100lvw) var(--app-viewport-height, 100lvh),
+    var(--app-viewport-width, 100lvw) var(--app-viewport-height, 100lvh),
+    56px 56px,
+    56px 56px,
+    auto;
 }
 
 * {
@@ -40,7 +46,17 @@ html:has(body.page-context--lobby) {
     linear-gradient(180deg, rgba(255, 255, 255, 0.022) 1px, transparent 1px),
     linear-gradient(135deg, transparent 0 45%, rgba(255, 255, 255, 0.025) 45% 46%, transparent 46%),
     var(--bg);
-  background-size: auto, auto, auto, 56px 56px, 56px 56px, 100lvw 100lvh, auto;
+  /* El navegador Android reduce el viewport visual cuando abre el teclado.
+     Si los degradados quedan en auto, cambian su tamaño y el color del fondo.
+     Las capas decorativas usan las métricas estructurales estables. */
+  background-size:
+    var(--app-viewport-width, 100lvw) var(--app-viewport-height, 100lvh),
+    var(--app-viewport-width, 100lvw) var(--app-viewport-height, 100lvh),
+    var(--app-viewport-width, 100lvw) var(--app-viewport-height, 100lvh),
+    56px 56px,
+    56px 56px,
+    var(--app-viewport-width, 100lvw) var(--app-viewport-height, 100lvh),
+    auto;
   background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0;
   background-repeat: no-repeat, no-repeat, no-repeat, repeat, repeat, no-repeat, no-repeat;
   background-attachment: fixed, fixed, fixed, fixed, fixed, fixed, fixed;

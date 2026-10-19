@@ -1,7 +1,7 @@
 const TITLE_ICON_SCALE = 1.085;
 const TITLE_ICON_MIN_SIZE_PX = 56;
 const TITLE_ICON_MAX_SIZE_PX = 160;
-const LOBBY_TICKET_TOP_STUB_MAX_SIDE_WIDTH_PX = 360;
+const LOBBY_TICKET_TOP_STUB_MAX_SIDE_WIDTH_PX = 260;
 
 function syncLobbyTitleIconSize(title, icon) {
   const fontSize = Number.parseFloat(getComputedStyle(title).fontSize);

@@ -22,18 +22,17 @@ body.page-context--lobby .lobby-screen {
   padding: 0;
 }
 
-/* El boleto mantiene su geometría cuando el grid pasa de dos columnas a una.
-   El ancho solo se limita si el viewport es físicamente más angosto que el
-   boleto; la separación interior y los controles no dependen del layout. */
+/* En una columna, el boleto y la invitación conservan un ancho alineado y
+   dejan un margen fluido respecto del ancho real del grid. */
 body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__ticket {
-  width: min(404px, 100%);
+  width: min(380px, calc(100% - 12px));
   height: var(--lobby-ticket-fit-height, auto);
   min-height: 0;
   grid-template-rows: minmax(0, 1fr);
 }
 
 body.page-context--lobby[data-lobby-flow="single-column"][data-lobby-ticket-stub="top"] .lobby-screen__ticket {
-  width: min(404px, 100%);
+  width: min(380px, calc(100% - 12px));
   justify-self: center;
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: var(--lobby-ticket-fit-stub-height, var(--lobby-ticket-top-stub-height)) minmax(0, 1fr);
@@ -145,7 +144,7 @@ body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__actions
     line-height: 1.25;
   }
 
-  body.page-context--lobby[data-lobby-layout="columns"] .lobby-screen__ticket {
+  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__ticket {
     width: min(404px, 100%);
     justify-self: center;
     align-self: center;

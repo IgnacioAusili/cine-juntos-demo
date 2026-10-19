@@ -13,39 +13,6 @@ body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__descrip
   transform: translateY(-2px);
 }
 
-body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__hero::before,
-body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__hero::after {
-  position: absolute;
-  top: calc(100% - 8px);
-  left: 50%;
-  content: "";
-  pointer-events: none;
-  z-index: 0;
-}
-
-body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__hero::before {
-  width: clamp(190px, 58cqw, 242px);
-  height: 16px;
-  transform: translateX(-50%);
-  background:
-    linear-gradient(90deg, transparent, rgba(240, 140, 58, 0.54) 19%, rgba(240, 140, 58, 0.54) 43%, transparent 49%) center / 100% 1px no-repeat,
-    linear-gradient(90deg, transparent 51%, rgba(47, 184, 164, 0.58) 57%, rgba(47, 184, 164, 0.58) 81%, transparent) center / 100% 1px no-repeat;
-}
-
-body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__hero::after {
-  width: 9px;
-  height: 9px;
-  border: 1px solid rgba(240, 140, 58, 0.78);
-  background: rgba(17, 22, 25, 0.94);
-  box-shadow: 0 0 0 3px rgba(17, 22, 25, 0.88), 0 0 12px rgba(240, 140, 58, 0.2);
-  transform: translate(-50%, 3px) rotate(45deg);
-}
-
-body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__hero > * {
-  position: relative;
-  z-index: 1;
-}
-
 @media (min-width: 681px) and (max-width: 980px) {
   body.page-context--lobby[data-lobby-layout="columns"] .lobby-screen__ticket-body {
     gap: 12px;

@@ -7,9 +7,5 @@
 }
 
 body.page-context--lobby .lobby-screen__about-button {
-  transition: scale 160ms ease, transform 160ms ease, background 160ms ease, border-color 160ms ease;
-}
-
-body.page-context--lobby[data-lobby-about-contact="true"] .lobby-screen__about-button {
-  scale: 0.9;
+  transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
 }

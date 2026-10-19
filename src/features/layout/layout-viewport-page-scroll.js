@@ -1,6 +1,6 @@
 import { dom } from "../../core/dom.js";
 import { layoutMetricsState } from "./layout-metrics-state.js";
-import { isMobileLayout, isFullscreenActive, isBottomChatInputFocused, isRightChatInputFocused } from "./layout-viewport-query.js";
+import { CHAT_KEYBOARD_VIEWPORT_TOLERANCE_PX, isViewportReducedForKeyboard, isMobileLayout, isFullscreenActive, isBottomChatInputFocused, isRightChatInputFocused } from "./layout-viewport-query.js";
 import { isRightChatKeyboardOpen } from "./layout-viewport-interactions.js";
 
 function measureViewportUnit(unit) {
@@ -31,7 +31,7 @@ export function getLargeViewportHeight() {
 
 function getMinimumUsableRightChatViewportHeight() {
   const inputHeight = Math.round(dom.messageInput?.getBoundingClientRect().height || 0);
-  return Math.max(80, inputHeight * 2);
+  return Math.max(CHAT_KEYBOARD_VIEWPORT_TOLERANCE_PX, inputHeight * 2);
 }
 
 export function getCurrentViewportHeight() {
@@ -50,8 +50,7 @@ export function getCurrentViewportHeight() {
   // lateral enfocado, esa diferencia es precisamente el espacio ocupado por
   // el teclado; usar clientHeight deja el composer debajo del IME.
   const rightChatKeyboardLikelyOpen = isRightChatInputFocused()
-    && visualViewportHeight > 0
-    && layoutViewportHeight - visualViewportHeight > 80;
+    && isViewportReducedForKeyboard(layoutViewportHeight, visualViewportHeight);
   if (rightChatKeyboardLikelyOpen && visualViewportHeight >= minimumUsableHeight) {
     layoutMetricsState.lastRightChatKeyboardViewportHeight = visualViewportHeight;
     layoutMetricsState.lastRightChatKeyboardViewportWidth = visualViewportWidth;

@@ -2,6 +2,11 @@
 
 @media (max-width: 680px) {
 
+  .session-view[data-chat-dock="bottom"] {
+    --bottom-dock-shared-block-size-inset-start: 0px;
+    --bottom-dock-shared-block-size-inset-end: 0px;
+  }
+
   .lobby-screen__fields input[type="text"] {
     --lobby-input-offset: 3px;
   }
@@ -19,9 +24,7 @@
      esa superficie deja que el workspace ocupe lo que queda tras el header y
      la barra de sala, sin sumar otro viewport debajo de ellos. */
 
-  /* Cuando el chat está contraído, no reservar su segunda fila. En móvil el
-     dock lateral también se apila debajo del video, por lo que ambos docks
-     deben recuperar todo el alto disponible de la pantalla. */
+  /* Al contraer un layout apilado no reservar su fila del chat. */
 
   /* En una ventana angosta el reproductor y el dock lateral comparten el
      alto del viewport realmente visible, no solo el espacio restante bajo
@@ -195,28 +198,26 @@
   body:not(.page-context--lobby) .session-view[data-chat-dock="bottom"] .o-workspace {
     margin-top: var(--session-toolbar-height);
     scroll-margin-top: var(--session-toolbar-height);
-    /* En móvil el video y el chat forman una única pantalla desplazable.
-       Las reglas generales del dock inferior les asignan un viewport entero
-       a cada fila, dejando solo el chat visible al llegar al final. */
+    /* La decisión de composición se calcula fuera de CSS; estas fracciones
+       solo distribuyen el espacio cuando los mínimos permiten compartirlo. */
     height: var(--app-viewport-height);
     min-height: 0;
     padding-top: 0;
     grid-template-rows:
-      minmax(220px, 42%)
-      minmax(0, 1fr);
+      minmax(var(--bottom-dock-video-min-block-size, 0px), 42fr)
+      minmax(var(--bottom-dock-chat-min-block-size, 0px), 58fr);
   }
 
   /* Cuando el chat está contraído, no reservar su segunda fila. En móvil el
      dock lateral también se apila debajo del video, por lo que ambos docks
      deben recuperar todo el alto disponible de la pantalla. */
-  body:not(.page-context--lobby) .session-view.session-view--chat-collapsed[data-chat-dock] .o-workspace {
+  body:not(.page-context--lobby) .session-view.session-view--chat-collapsed[data-chat-dock="bottom"] .o-workspace,
+  body:not(.page-context--lobby) .session-view--chat-collapsed.session-view--chat-stacked[data-chat-dock="right"] .o-workspace {
     grid-template-rows: minmax(0, 1fr) 0;
   }
 
-  /* En una ventana angosta el reproductor y el dock lateral comparten el
-     alto del viewport realmente visible, no solo el espacio restante bajo
-     el header. El chat se monta sobre esa misma superficie. */
-  body:not(.page-context--lobby) .session-view[data-chat-dock="right"] .o-workspace {
+  /* El estado overlay comparte el alto visible del viewport entre video y chat. */
+  body:not(.page-context--lobby) .session-view--chat-overlay[data-chat-dock="right"] .o-workspace {
     position: relative;
     display: block;
     height: var(--right-chat-visible-height, var(--app-viewport-height));
@@ -228,7 +229,7 @@
     overflow: visible;
   }
 
-  body:not(.page-context--lobby) .session-view[data-chat-dock="right"] .o-video-area {
+  body:not(.page-context--lobby) .session-view--chat-overlay[data-chat-dock="right"] .o-video-area {
     position: relative;
     width: 100%;
     height: 100%;

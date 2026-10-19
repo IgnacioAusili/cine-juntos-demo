@@ -134,7 +134,7 @@
   border: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
-  padding-block: 8px;
+  padding-block: 7px 9px;
   padding-inline: 8px;
   outline: none;
   resize: none;
@@ -174,8 +174,8 @@
   /* La métrica de la fuente deja unos píxeles de aire visual en el último
      renglón. Este reparto compacto compensa esa métrica sin recortar texto. */
   .message-form .message-form__input-wrapper[data-expanded="true"] textarea {
-    padding-top: 2px;
-    padding-bottom: 4px;
+    padding-top: 1px;
+    padding-bottom: 5px;
   }
 
   /* Ambos docks usan la misma altura de una línea; el autoajuste multilinea
@@ -184,7 +184,7 @@
     .message-form__input-wrapper:not([data-expanded="true"]) #messageInput {
     height: 32px !important;
     min-height: 32px;
-    padding-block: 6px;
+    padding-block: 4px 8px;
   }
 
   .session-view[data-chat-dock] .chat-area > .message-form
@@ -202,6 +202,14 @@
   .session-view[data-chat-dock] .chat-area > .message-form
     .message-form__input-wrapper:not([data-expanded="true"]) .icon-button--send {
     margin-bottom: 0;
+  }
+}
+
+@media (max-width: 680px) {
+  .message-form .message-form__input-wrapper:not([data-expanded="true"]) #messageInput {
+    /* La caja móvil mide al menos 36px: 20px de línea más 8px por lado la
+       centra de forma consistente en los motores móviles y de escritorio. */
+    padding-block: 8px;
   }
 }
 

@@ -1,5 +1,5 @@
 /* En la vista normal, la pista sigue alineada con la fila de controles. */
-@media (max-width: 680px) and (orientation: portrait) {
+@media (max-width: 680px) {
   body:not(.page-context--lobby) .session-view:not(.session-view--chat-collapsed)[data-chat-dock="bottom"]
     .player-frame:not(.mini-player-surface)[data-control-style="line"] .player-controls-bar {
     position: relative;

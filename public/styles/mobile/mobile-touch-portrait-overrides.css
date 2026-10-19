@@ -2,16 +2,41 @@
 
 /* Esta anulación queda al final de la hoja para ganar también sobre el borde
    estructural del frame definido en la variante de viewport móvil compacto. */
-@media (hover: none) and (pointer: coarse) and (orientation: portrait) {
+@media (hover: none) and (pointer: coarse) and (max-width: 680px) {
   body:not(.page-context--lobby) .session-view .player-frame:not(.mini-player-surface) {
     border-top: 0 !important;
+  }
+}
+
+/* Android can report landscape when the keyboard reduces the CSS viewport,
+   even though the phone stays in portrait. Keep the player row stable while
+   its URL field is focused, without overriding the chat's keyboard layout. */
+@media (hover: none) and (pointer: coarse) and (max-width: 680px) {
+  html:not(.page-context--viewport-landscape)
+    body:not(.page-context--lobby)
+    .session-view[data-chat-dock=bottom]:has(#videoUrlInput:focus) .o-workspace {
+    grid-template-rows: minmax(220px, 40%) minmax(0, 1fr) !important;
+  }
+
+  html:not(.page-context--viewport-landscape)
+    body:not(.page-context--lobby) .session-view .player-frame:not(.mini-player-surface) {
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  html:not(.page-context--viewport-landscape)
+    body:not(.page-context--lobby) .session-view .player-frame:not(.mini-player-surface) video {
+    border: 0 !important;
+    border-radius: 0 !important;
+    height: calc(100% + 1px) !important;
   }
 }
 
 /* Cuando el dock inferior está expandido, la pista se ancla a la unión entre
    video y chat aunque el conjunto necesite scroll; la fila de controles queda
    por encima de la línea. */
-@media (max-width: 680px) and (orientation: portrait) {
+@media (max-width: 680px) {
   /* Mantener la pista anclada al mismo contenedor en ambas disposiciones. Si
      la barra pasa de relative a static al expandir el chat, cambia su bloque
      de referencia y la línea salta antes de que termine la cortina. */
@@ -23,9 +48,9 @@
 
   body:not(.page-context--lobby) .session-view:not(.session-view--layout-component-stack).session-view--chat-collapsed[data-chat-dock="bottom"]
     .player-frame:not(.mini-player-surface)[data-control-style="line"] .player-progress-group {
-    right: 18px;
+    right: 8px;
     bottom: 52px;
-    left: 18px;
+    left: 8px;
   }
 
   body:not(.page-context--lobby) .session-view:is(
@@ -101,6 +126,13 @@
       inset 0 8px 18px rgba(0, 0, 0, 0.08);
   }
 
+  /* En la variante que cabe en el viewport, alinear los extremos de los
+     controles con el inset de la pista y conservar un margen fluido. */
+  body:not(.page-context--lobby) .session-view.session-view--bottom-dock-panels-fit-viewport:not(.session-view--layout-component-stack):not(.session-view--chat-collapsed)[data-chat-dock="bottom"]
+    .player-frame:not(.mini-player-surface)[data-control-style="line"] .player-frame__bottom-actions {
+    padding-inline: clamp(8px, 2vw, 14px);
+  }
+
   /* La pista debe poder quedar sobre el borde del chat, mientras la flecha
      sigue siendo el elemento superior. Estas propiedades evitan que el blur,
      el containment y el will-change del panel lo encierren en otra capa. */
@@ -148,9 +180,9 @@
 
   body:not(.page-context--lobby) .session-view:not(.session-view--layout-component-stack):not(.session-view--chat-collapsed)[data-chat-dock="bottom"]
     .player-frame:not(.mini-player-surface)[data-control-style="line"] .player-progress-group {
-    right: 16px;
+    right: 8px;
     bottom: -9px;
-    left: 16px;
+    left: 8px;
     z-index: 39;
   }
 
@@ -165,9 +197,9 @@
 
   body:not(.page-context--lobby) .session-view.session-view--bottom-dock-panels-fit-viewport.session-view--chat-bottom-pc-collapse-controls-transition:not(.session-view--chat-collapsed)[data-chat-dock="bottom"]
     .player-frame:not(.mini-player-surface)[data-control-style="line"] .player-progress-group {
-    right: 18px;
+    right: 8px;
     bottom: 52px;
-    left: 18px;
+    left: 8px;
     z-index: auto;
   }
 

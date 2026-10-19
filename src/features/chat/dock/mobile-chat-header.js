@@ -190,7 +190,7 @@ function isMobileLandscapeRightDock() {
     dom.sessionView
       && dom.sessionView.dataset.chatDock === "right"
       && document.documentElement.classList.contains('page-context--viewport-landscape')
-      && window.matchMedia("(max-width: 980px) and (orientation: landscape)").matches,
+      && window.matchMedia("(max-width: 980px)").matches,
   );
 }
 

@@ -1,12 +1,127 @@
 import { dom } from "../../../core/dom.js";
 import { focusFullscreenWorkspace } from "../../session/session-ui.js";
-import { isStackedSessionLayout } from "./chat-responsive-layout.js";
 import { getElementPageTop, getPageScrollContainer, getPageScrollMax, getPageScrollTop, isFullscreenPageActive, scrollPageTo } from "./chat-page-scroll.js";
 import { syncComponentAspectLayoutNow } from "./component-aspect-layout.js";
 import { chatDockTransitionState, getChatDockOperations } from "./chat-layout-transition-state.js";
-import { clearBottomChatTransitionVisuals, lockBottomChatScrollAnchoring, restoreBottomChatScrollAnchoring, cancelBottomChatTransition, completeDesktopBottomChatTransition, setDesktopBottomChatCurtainProgress, setMobileBottomTransitionProgress, setDesktopBottomTransitionRowsProgress, completeMobileBottomChatTransition, stepMobileBottomChatTransition, stepDesktopBottomChatTransition, animateDesktopBottomChatCollapse, animateDesktopBottomChatExpand, animateBottomChatCollapse, animateBottomChatExpand } from "./chat-dock-transition-core.js";
-import { isDesktopBottomDock, easeBottomChatCurtainProgress, getWorkspaceRowHeights, getWorkspaceContentHeight } from "./chat-dock-transition-measurements.js";
-import { BOTTOM_CHAT_CURTAIN_MS, BOTTOM_CHAT_SCROLL_TIMEOUT_MS, RIGHT_CHAT_LAYOUT_TRANSITION_MS, BOTTOM_TO_RIGHT_SCROLL_TIMEOUT_MS, BOTTOM_TO_RIGHT_LAYOUT_MS, FULLSCREEN_DOCK_OUT_MS, FULLSCREEN_DOCK_IN_MS } from "./chat-layout-timing.js";
+import { animateDesktopBottomChatExpand } from "./chat-dock-transition-core.js";
+import { isDesktopBottomDock } from "./chat-dock-transition-measurements.js";
+import { isMobilePortraitChatViewport } from "./chat-layout-breakpoints.js";
+import { BOTTOM_CHAT_CURTAIN_MS, RIGHT_CHAT_LAYOUT_TRANSITION_MS, BOTTOM_TO_RIGHT_SCROLL_TIMEOUT_MS, BOTTOM_TO_RIGHT_LAYOUT_MS, FULLSCREEN_DOCK_OUT_MS, FULLSCREEN_DOCK_IN_MS } from "./chat-layout-timing.js";
+
+const DOCK_SWITCH_MOTION_TIMEOUT_MS = Math.max(
+  BOTTOM_CHAT_CURTAIN_MS,
+  RIGHT_CHAT_LAYOUT_TRANSITION_MS,
+) + 160;
+
+function waitForElementAnimations(elements) {
+  return new Promise((resolve) => {
+    let settled = false;
+    const timeoutId = window.setTimeout(resolveOnce, DOCK_SWITCH_MOTION_TIMEOUT_MS);
+
+    function resolveOnce() {
+      if (settled) return;
+      settled = true;
+      window.clearTimeout(timeoutId);
+      resolve();
+    }
+
+    window.requestAnimationFrame(() => {
+      const animations = new Set(
+        elements
+          .filter((element) => typeof element?.getAnimations === "function")
+          .flatMap((element) => element.getAnimations({ subtree: true }))
+          .filter((animation) => animation.playState !== "finished"),
+      );
+      if (!animations.size) {
+        resolveOnce();
+        return;
+      }
+      Promise.allSettled([...animations].map((animation) => animation.finished))
+        .then(resolveOnce);
+    });
+  });
+}
+
+function waitForBottomChatTransition() {
+  return new Promise((resolve) => {
+    const startedAt = performance.now();
+    const check = () => {
+      if (
+        !chatDockTransitionState.bottomChatTransition
+        || performance.now() - startedAt >= DOCK_SWITCH_MOTION_TIMEOUT_MS
+      ) {
+        resolve();
+        return;
+      }
+      window.requestAnimationFrame(check);
+    };
+    check();
+  });
+}
+
+function waitForDockMotion(dock) {
+  const elements = [dom.chatArea, dom.workspace, dom.videoArea];
+  return Promise.all([
+    waitForElementAnimations(elements),
+    dock === "bottom" ? waitForBottomChatTransition() : Promise.resolve(),
+  ]);
+}
+
+function commitCollapsedDockLayout() {
+  // Resolver el estilo contraído del dock de destino antes de expandirlo.
+  // Esto separa los valores iniciales y finales de la transición sin esperar
+  // cuadros de render que pueden retrasarse cuando la pestaña está ocupada.
+  void dom.sessionView?.offsetWidth;
+  void dom.workspace?.offsetWidth;
+  void dom.chatArea?.getBoundingClientRect();
+}
+
+export function animateDockSwitchWithCollapse(currentDock, nextDock, targetScrollTop) {
+  if (!dom.sessionView || !dom.chatArea) {
+    getChatDockOperations().setChatDock(nextDock, {
+      skipTransition: true,
+      preserveScroll: true,
+    });
+    return;
+  }
+
+  const transition = { currentDock, nextDock };
+  chatDockTransitionState.pendingChatDockSwitch = transition;
+  getChatDockOperations().keepChatDockHandlesHidden();
+  getChatDockOperations().setExternalChatCollapsed(true, {
+    source: "dock-switch",
+    ...(currentDock === "bottom" && Number.isFinite(targetScrollTop)
+      ? { targetScrollTop }
+      : {}),
+  });
+
+  const finishSwitch = async () => {
+    try {
+      await waitForDockMotion(currentDock);
+      if (chatDockTransitionState.pendingChatDockSwitch !== transition) return;
+
+      getChatDockOperations().setChatDock(nextDock, {
+        skipTransition: true,
+        preserveScroll: true,
+        skipFullscreenFocus: true,
+      });
+      commitCollapsedDockLayout();
+      getChatDockOperations().setExternalChatCollapsed(false, {
+        source: "dock-switch",
+      });
+      await waitForDockMotion(nextDock);
+    } finally {
+      if (chatDockTransitionState.pendingChatDockSwitch === transition) {
+        chatDockTransitionState.pendingChatDockSwitch = null;
+        getChatDockOperations().setCollapseHandleTransitioning(false);
+        getChatDockOperations().scheduleChatDockHandlesReveal(80);
+        getChatDockOperations().scheduleExternalChatCollapseHandleOffset();
+      }
+    }
+  };
+
+  void finishSwitch();
+}
 
 export function animateFullscreenDockSwitch(nextDock) {
   if (!dom.sessionView || !dom.chatArea) {
@@ -141,7 +256,7 @@ export function getBottomToRightScrollTop() {
 
   if (
     dom.workspace
-    && window.matchMedia("(max-width: 680px) and (orientation: portrait)").matches
+    && isMobilePortraitChatViewport()
   ) {
     return Math.min(
       getPageScrollMax(),
@@ -158,56 +273,6 @@ export function getBottomToRightScrollTop() {
     getElementPageTop(dom.videoArea) + videoRect.height / 2 - viewportHeight / 2;
 
   return Math.min(maxScrollTop, Math.max(0, Math.round(centeredVideoTop)));
-}
-
-export function animateRightToBottomSwitch(nextDock) {
-  if (!dom.sessionView || !dom.workspace || !dom.chatArea) {
-    getChatDockOperations().setChatDock(nextDock, { skipTransition: true, preserveScroll: true });
-    return;
-  }
-
-  const transition = {
-    collapsed: false,
-    frameId: 0,
-    timeoutId: 0,
-    startedAt: performance.now(),
-    // En el dock lateral el video ocupa todo el viewport y el chat está
-    // superpuesto. Convertimos ese estado visual en las filas iniciales de la
-    // cortina inferior antes de empezar a revelar el panel.
-    startRows: [Math.max(0, dom.workspace.clientHeight), 0],
-    targetRows: [0, 0],
-    startScrollTop: getPageScrollTop(),
-    targetScrollTop: 0,
-  };
-  chatDockTransitionState.bottomChatTransition = transition;
-  getChatDockOperations().keepChatDockHandlesHidden();
-  getChatDockOperations().setCollapseHandleTransitioning(
-    true,
-    BOTTOM_CHAT_CURTAIN_MS + BOTTOM_CHAT_SCROLL_TIMEOUT_MS + 80,
-  );
-
-  // Cambiar el dock sin revelar el chat todavía permite que el mismo motor de
-  // la cortina inferior controle las filas y el recorte, sin un frame visible
-  // en el que aparezcan ambos chats.
-  getChatDockOperations().setChatDock(nextDock, { skipTransition: true, preserveScroll: true });
-  dom.sessionView.classList.add('session-view--chat-bottom-mobile-expand-visual');
-  transition.targetRows = getWorkspaceRowHeights();
-  transition.targetScrollTop = getChatDockOperations().getBottomDockChatScrollTop();
-  dom.workspace.style.setProperty(
-    "grid-template-rows",
-    `${transition.startRows[0]}px ${transition.startRows[1]}px`,
-  );
-  setMobileBottomTransitionProgress(transition, 0);
-  void dom.chatArea.offsetWidth;
-  dom.sessionView.classList.add('session-view--chat-bottom-mobile-curtain-active');
-  transition.startedAt = performance.now();
-  transition.frameId = window.requestAnimationFrame(() => {
-    stepMobileBottomChatTransition(transition);
-  });
-  transition.timeoutId = window.setTimeout(() => {
-    stepMobileBottomChatTransition(transition, true);
-    getChatDockOperations().scheduleChatDockHandlesReveal(BOTTOM_CHAT_CURTAIN_MS + 80);
-  }, BOTTOM_CHAT_CURTAIN_MS + 80);
 }
 
 export function scheduleBottomToRightSwitch(nextDock, targetScrollTop) {
@@ -280,7 +345,7 @@ export function scheduleBottomToRightSwitch(nextDock, targetScrollTop) {
       window.requestAnimationFrame(() => {
         if (
           nextDock === "right"
-          && window.matchMedia("(max-width: 680px) and (orientation: portrait)").matches
+          && isMobilePortraitChatViewport()
         ) {
           const workspaceTop = Math.min(
             getPageScrollMax(),

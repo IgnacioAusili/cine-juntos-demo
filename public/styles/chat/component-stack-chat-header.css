@@ -79,12 +79,17 @@
   }
 }
 
-/* En portrait, mobile.css deja la superficie del panel detrás del video.
-   Elevar el panel completo cubre el solape sin tocar el header. */
-@media (max-width: 680px) and (orientation: portrait) {
+/* En portrait, el reproductor debe pintar sobre el chat en la unión para que
+   la barra de tiempo siga visible. */
+@media (max-width: 680px) {
   :root body:not(.page-context--lobby) .app-shell
     .session-view:not(.session-view--chat-collapsed)[data-chat-dock="bottom"] .chat-area {
     z-index: 40;
+  }
+
+  :root body:not(.page-context--lobby) .app-shell
+    .session-view:not(.session-view--chat-collapsed)[data-chat-dock="bottom"] .o-video-area {
+    z-index: 41;
   }
 }
 

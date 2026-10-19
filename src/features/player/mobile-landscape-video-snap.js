@@ -1,12 +1,11 @@
 const LANDSCAPE_BOTTOM_CHAT_QUERY =
-  "(max-width: 980px) and (max-height: 500px) and (orientation: landscape)";
+  "(max-width: 980px) and (max-height: 500px)";
 const SNAP_THRESHOLD_RATIO = 0.12;
 const FALLBACK_SETTLE_DELAY = 240;
 const SMOOTH_SETTLE_TIMEOUT = 600;
 
 function isEligible() {
   return window.matchMedia(LANDSCAPE_BOTTOM_CHAT_QUERY).matches
-    && !window.matchMedia("(orientation: portrait)").matches
     && document.documentElement.classList.contains('page-context--viewport-landscape')
     && !document.documentElement.classList.contains('page-context--bottom-chat-keyboard-open')
     && !document.body.classList.contains('page-context--lobby')
