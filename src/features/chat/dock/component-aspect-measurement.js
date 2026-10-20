@@ -1,4 +1,5 @@
 const VIDEO_ASPECT_RATIO_FALLBACK = 16 / 9;
+const MINIMUM_CHAT_TO_VIDEO_HEIGHT_RATIO = 1;
 
 function readCssPixels(style, property) {
   const value = Number.parseFloat(style.getPropertyValue(property));
@@ -39,7 +40,12 @@ function getVideoMinimumBlockSize(playerFrame, videoPlayer) {
   return contentWidth / getVideoAspectRatio(videoPlayer, playerFrame) + borderBlockSize;
 }
 
-function getChatMinimumBlockSize(chatArea, chatTools, messageListShell) {
+function getChatMinimumBlockSize(
+  chatArea,
+  chatTools,
+  messageListShell,
+  videoMinimumBlockSize,
+) {
   const toolsStyle = getComputedStyle(chatTools);
   const toolsHeight = Math.max(
     chatTools.getBoundingClientRect().height,
@@ -54,7 +60,10 @@ function getChatMinimumBlockSize(chatArea, chatTools, messageListShell) {
     + readCssPixels(chatStyle, "padding-bottom");
   const chatRowGap = readCssPixels(chatStyle, "row-gap");
 
-  return toolsHeight + messageListHeight + chatInsets + chatRowGap;
+  const structuralMinimum = toolsHeight + messageListHeight + chatInsets + chatRowGap;
+  const readableMinimum = videoMinimumBlockSize * MINIMUM_CHAT_TO_VIDEO_HEIGHT_RATIO;
+
+  return Math.max(structuralMinimum, readableMinimum);
 }
 
 export function hasLoadedVideo(videoPlayer) {
@@ -114,6 +123,7 @@ export function resolveBottomDockLayout({
     chatArea,
     chatTools,
     messageListShell,
+    videoMinimumBlockSize,
   );
   const rowGap = readCssPixels(workspaceStyle, "row-gap");
   const hasMeasuredPanels = Boolean(

@@ -34,7 +34,7 @@ const PLAYER_OVERLAY_IDLE_MS = 3000;
 const PLAYER_OVERLAY_LEAVE_HIDE_DELAY_MS = 800;
 const MOBILE_OVERLAY_TOGGLE_LOCK_MS = 320;
 const MOBILE_PLAYER_MEDIA_QUERY = "(max-width: 980px) and (hover: none) and (pointer: coarse)";
-const PAGE_SCROLL_SNAP_THRESHOLD_RATIO = 0.2;
+const PAGE_SCROLL_SNAP_THRESHOLD_RATIO = 0.16;
 let fallbackFullscreenActive = false;
 
 const USE_NATIVE_FULLSCREEN = true;
