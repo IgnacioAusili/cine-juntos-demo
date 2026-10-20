@@ -16,13 +16,8 @@ export function syncComponentStackShellInsets(appShell, sessionView, workspace) 
   // deja una franja vacía delante del primer panel de video.
   const measuredTopInset = Number.isFinite(topPadding) ? Math.max(0, topPadding) : 0;
   const topInset = sessionTouchesViewportEdges ? 0 : measuredTopInset;
-  const workspaceDocumentTop = Math.max(
-    0,
-    workspace.getBoundingClientRect().top + window.scrollY,
-  );
   const insetValue = `${inset}px`;
   const topInsetValue = `${topInset}px`;
-  const videoViewportInsetValue = `${Math.round(workspaceDocumentTop + inset)}px`;
 
   if (
     workspace.style.getPropertyValue("--component-stack-viewport-bottom-inset")
@@ -38,17 +33,4 @@ export function syncComponentStackShellInsets(appShell, sessionView, workspace) 
     workspace.style.setProperty("--component-stack-viewport-top-inset", topInsetValue);
   }
 
-  if (sessionView.dataset.chatDock === "bottom") {
-    if (
-      sessionView.style.getPropertyValue("--bottom-dock-video-viewport-inset")
-      !== videoViewportInsetValue
-    ) {
-      sessionView.style.setProperty(
-        "--bottom-dock-video-viewport-inset",
-        videoViewportInsetValue,
-      );
-    }
-  } else {
-    sessionView.style.removeProperty("--bottom-dock-video-viewport-inset");
-  }
 }

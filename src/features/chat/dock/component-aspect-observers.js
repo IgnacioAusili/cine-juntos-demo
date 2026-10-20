@@ -20,7 +20,6 @@ export function wireComponentAspectObservers({
   [chatTools, messageListShell, messageForm].forEach((element) => {
     if (element) workspaceObserver.observe(element);
   });
-
   let dockLayoutTransitionPending = false;
   const dockObserver = new MutationObserver(() => {
     if (sessionView.classList.contains('session-view--chat-layout-transitioning')) {

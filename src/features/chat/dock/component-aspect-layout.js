@@ -5,7 +5,6 @@ import {
   hasLoadedVideo,
   resolveBottomDockLayout,
 } from "./component-aspect-measurement.js";
-import { getElementPageTop, getPageScrollMax, scrollPageTo } from "./chat-page-scroll.js";
 
 const sessionView = document.querySelector("#sessionView");
 const appShell = document.querySelector(".app-shell");
@@ -133,19 +132,20 @@ function measureComponentLayout({ allowDuringChatTransition = false } = {}) {
 
     const isCollapsed = sessionView.classList.contains('session-view--chat-collapsed');
     const isSequential = sessionView.classList.contains(FULL_PANEL_LAYOUT_CLASS);
+    const isFullHeightCollapsedPlayer = isCollapsed
+      && sessionView.dataset.chatDock === "bottom"
+      && isSequential;
     if (initialSessionScrollPending) {
       initialSessionScrollPending = false;
-      if (!hasLoadedVideo()) {
+      if (isFullHeightCollapsedPlayer) {
+        videoArea.scrollIntoView({ block: "start", inline: "nearest", behavior: "auto" });
+      } else if (!hasLoadedVideo(videoPlayer)) {
         if (
           sessionView.dataset.chatDock === "bottom"
           && isCollapsed
           && sessionView.classList.contains(EDGE_TO_EDGE_LAYOUT_CLASS)
         ) {
-          const targetTop = Math.min(
-            getPageScrollMax(),
-            Math.max(0, Math.round(getElementPageTop(videoArea))),
-          );
-          scrollPageTo(targetTop, "auto");
+          videoArea.scrollIntoView({ block: "start", inline: "nearest", behavior: "auto" });
         } else {
           window.scrollTo({ top: 0, behavior: "auto" });
         }
@@ -167,9 +167,13 @@ function measureComponentLayout({ allowDuringChatTransition = false } = {}) {
     } else if (
       scrollTarget === "center-video"
       && (isSequential || isCollapsed)
-      && hasLoadedVideo()
+      && (hasLoadedVideo(videoPlayer) || isFullHeightCollapsedPlayer)
     ) {
-      videoArea.scrollIntoView({ block: "center", inline: "nearest", behavior: "auto" });
+      videoArea.scrollIntoView({
+        block: isFullHeightCollapsedPlayer ? "start" : "center",
+        inline: "nearest",
+        behavior: "auto",
+      });
     }
   });
 }

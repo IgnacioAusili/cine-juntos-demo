@@ -124,14 +124,11 @@ export function resolveBottomDockLayout({
     workspaceStyle,
     "--bottom-dock-shared-block-size-inset-end",
   );
-  const availableBlockSize = Math.max(0, appViewportBlockSize - sharedBlockSizeInset);
   const isDesktop = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
   const videoViewportInset = isDesktop
-    ? readCssPixels(
-      getComputedStyle(sessionView),
-      "--bottom-dock-video-viewport-inset",
-    )
+    ? readCssPixels(workspaceStyle, "--component-stack-video-viewport-inset")
     : 0;
+  const availableBlockSize = Math.max(0, appViewportBlockSize - sharedBlockSizeInset);
   const videoMaximumBlockSize = Math.min(
     availableBlockSize,
     Math.max(0, appViewportBlockSize - videoViewportInset),
