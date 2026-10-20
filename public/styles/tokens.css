@@ -56,7 +56,7 @@
 }
 
 :root {
-  color-scheme: dark;
+  color-scheme: only dark;
 
   /* ===== Base de color (sin cambios para no romper referencias) ===== */
 

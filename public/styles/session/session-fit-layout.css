@@ -37,7 +37,10 @@ body:not(.page-context--lobby)
   body:not(.page-context--lobby):not(.page-context--fullscreen)
     .session-view.session-view--layout-component-stack[data-chat-dock="bottom"] .o-workspace {
     --component-stack-video-viewport-inset:
-      calc(var(--component-stack-viewport-bottom-inset, var(--component-stack-chat-header-inset)) * 2);
+      var(
+        --bottom-dock-video-viewport-inset,
+        calc(var(--component-stack-viewport-bottom-inset, var(--component-stack-chat-header-inset)) * 2)
+      );
   }
 
   body.page-context--fullscreen

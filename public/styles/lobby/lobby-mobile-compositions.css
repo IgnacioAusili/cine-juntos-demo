@@ -225,7 +225,7 @@ body.page-context--lobby .lobby-app-install-dialog__done {
   min-height: 36px;
   padding: 7px 14px;
   border: 1px solid rgba(255, 174, 94, 0.5);
-  border-radius: 9px;
+  border-radius: 6px;
   background: linear-gradient(145deg, #ffb15f, #f58b3e);
   color: #171413;
   font: inherit;

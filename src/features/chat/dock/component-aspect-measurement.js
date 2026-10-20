@@ -25,7 +25,7 @@ function getVideoAspectRatio(videoPlayer, playerFrame) {
   ) || VIDEO_ASPECT_RATIO_FALLBACK;
 }
 
-function getVideoMinimumBlockSize(playerFrame, videoPlayer) {
+function getVideoMinimumBlockSize(playerFrame, videoPlayer, maxBlockSize) {
   const frameRect = playerFrame.getBoundingClientRect();
   const frameStyle = getComputedStyle(playerFrame);
   const contentWidth = Math.max(
@@ -37,7 +37,14 @@ function getVideoMinimumBlockSize(playerFrame, videoPlayer) {
   const borderBlockSize = readCssPixels(frameStyle, "border-top-width")
     + readCssPixels(frameStyle, "border-bottom-width");
 
-  return contentWidth / getVideoAspectRatio(videoPlayer, playerFrame) + borderBlockSize;
+  const aspectRatioBlockSize = contentWidth / getVideoAspectRatio(videoPlayer, playerFrame)
+    + borderBlockSize;
+
+  // No imponerle al reproductor una altura mayor que el viewport disponible.
+  // El video conserva su proporción dentro del frame mediante object-fit: contain.
+  return maxBlockSize > 0
+    ? Math.min(aspectRatioBlockSize, maxBlockSize)
+    : aspectRatioBlockSize;
 }
 
 function getChatMinimumBlockSize(
@@ -118,7 +125,22 @@ export function resolveBottomDockLayout({
     "--bottom-dock-shared-block-size-inset-end",
   );
   const availableBlockSize = Math.max(0, appViewportBlockSize - sharedBlockSizeInset);
-  const videoMinimumBlockSize = getVideoMinimumBlockSize(playerFrame, videoPlayer);
+  const isDesktop = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+  const videoViewportInset = isDesktop
+    ? readCssPixels(
+      getComputedStyle(sessionView),
+      "--bottom-dock-video-viewport-inset",
+    )
+    : 0;
+  const videoMaximumBlockSize = Math.min(
+    availableBlockSize,
+    Math.max(0, appViewportBlockSize - videoViewportInset),
+  );
+  const videoMinimumBlockSize = getVideoMinimumBlockSize(
+    playerFrame,
+    videoPlayer,
+    videoMaximumBlockSize,
+  );
   const chatMinimumBlockSize = getChatMinimumBlockSize(
     chatArea,
     chatTools,
