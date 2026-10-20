@@ -159,10 +159,26 @@
     max-height: none;
     padding-top: 0;
     padding-bottom: 0;
-    opacity: 0;
-    overflow: hidden;
-    pointer-events: none;
+    opacity: 1;
+    overflow: visible;
+    pointer-events: auto;
     transform: translateY(0);
+  }
+
+  html.page-context--viewport-landscape body:not(.page-context--lobby)
+    .session-view.session-view--chat-header-collapsed[data-chat-dock="right"]
+    .chat-tools > :not(.chat-area__collapse-hover-zone) {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  html.page-context--viewport-landscape body:not(.page-context--lobby)
+    .session-view.session-view--chat-header-collapsed[data-chat-dock="right"]
+    .chat-area__collapse-hover-zone[data-chat-control="collapse"] {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
   }
 
   html.page-context--viewport-landscape body:not(.page-context--lobby)

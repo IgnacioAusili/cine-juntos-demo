@@ -23,7 +23,7 @@ body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__descrip
     gap: 10px;
   }
 
-  body.page-context--lobby[data-lobby-layout="columns"] .lobby-screen__fields input[type="text"] {
+  body.page-context--lobby[data-lobby-layout="columns"] .lobby-screen__fields input:is([type="text"], [type="search"]) {
     height: 40px;
     min-height: 40px;
     line-height: 40px;
@@ -108,7 +108,7 @@ body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__descrip
     gap: clamp(7px, 1vw, 10px);
   }
 
-  body.page-context--lobby .lobby-screen__fields input[type="text"] {
+  body.page-context--lobby .lobby-screen__fields input:is([type="text"], [type="search"]) {
     height: clamp(36px, 4vw, 40px);
     min-height: clamp(36px, 4vw, 40px);
     line-height: clamp(36px, 4vw, 40px);

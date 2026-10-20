@@ -1,17 +1,16 @@
 
 
 @media (max-width: 680px) {
-
   body:not(.page-context--lobby) .session-view--chat-overlay[data-chat-dock="right"] .chat-area {
     position: absolute;
     z-index: 10;
     top: 0;
     right: 0;
-    bottom: 0;
-    left: auto;
+    bottom: auto;
+    left: 0;
     width: 100%;
     max-width: 100%;
-    height: 100%;
+    height: var(--right-chat-visible-height, var(--app-viewport-height));
     min-height: 0;
     flex: 0 0 100%;
     clip-path: inset(0);
@@ -151,6 +150,16 @@
     box-shadow:
       0 4px 14px rgba(0, 0, 0, 0.35),
       inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+
+  /* Centrar verticalmente la flecha y mantenerla junto al borde del reproductor. */
+  body:not(.page-context--lobby) .session-view.session-view--chat-collapsed[data-chat-dock="right"]
+    .chat-area__collapse-hover-zone[data-chat-control="expand"] {
+    top: var(--chat-right-mobile-collapsed-handle-top, 50%);
+    right: var(--chat-handle-gap-collapsed, 4px);
+    bottom: auto;
+    left: auto;
+    transform: translateY(-50%);
   }
 
   /* Si la flecha de expandir está oculta, su área ampliada tampoco debe

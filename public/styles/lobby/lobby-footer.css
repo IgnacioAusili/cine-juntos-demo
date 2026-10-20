@@ -210,7 +210,7 @@ body:not(.page-context--lobby) .live-badge {
 }
 
 /* Los campos sobresalen del cuerpo del boleto sin mover sus etiquetas ni los tags. */
-.lobby-screen__fields input[type="text"] {
+.lobby-screen__fields input:is([type="text"], [type="search"]) {
   width: calc(100% - var(--lobby-input-offset));
   transform: translateX(var(--lobby-input-offset));
 }

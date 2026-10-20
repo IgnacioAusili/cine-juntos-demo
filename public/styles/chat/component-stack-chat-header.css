@@ -32,7 +32,7 @@
    mediciones geométricas en JavaScript. */
 @media (max-width: 680px) {
   :root body:not(.page-context--lobby) .app-shell
-    .session-view[data-chat-dock="bottom"] .chat-area {
+    .session-view:not(.session-view--chat-header-collapsed)[data-chat-dock="bottom"] .chat-area {
     row-gap: 0;
     grid-template-rows: var(--component-stack-chat-header-height) minmax(0, 1fr);
   }
@@ -45,7 +45,7 @@
   }
 
   :root body:not(.page-context--lobby) .app-shell
-    .session-view[data-chat-dock="bottom"] .chat-tools {
+    .session-view:not(.session-view--chat-header-collapsed)[data-chat-dock="bottom"] .chat-tools {
     box-sizing: border-box;
     align-items: center;
     height: var(--component-stack-chat-header-height);
@@ -97,17 +97,17 @@
    ancho. Se usa el estado nativo/de página y no la detección geométrica. */
 @media (min-width: 681px) {
   :root body:not(.page-context--lobby) .app-shell:fullscreen
-    .session-view[data-chat-dock="bottom"] .chat-area,
+    .session-view:not(.session-view--chat-header-collapsed)[data-chat-dock="bottom"] .chat-area,
   :root body.page-context--fullscreen .app-shell
-    .session-view[data-chat-dock="bottom"] .chat-area {
+    .session-view:not(.session-view--chat-header-collapsed)[data-chat-dock="bottom"] .chat-area {
     row-gap: 0;
     grid-template-rows: var(--component-stack-chat-header-height) minmax(0, 1fr);
   }
 
   :root body:not(.page-context--lobby) .app-shell:fullscreen
-    .session-view[data-chat-dock="bottom"] .chat-tools,
+    .session-view:not(.session-view--chat-header-collapsed)[data-chat-dock="bottom"] .chat-tools,
   :root body.page-context--fullscreen .app-shell
-    .session-view[data-chat-dock="bottom"] .chat-tools {
+    .session-view:not(.session-view--chat-header-collapsed)[data-chat-dock="bottom"] .chat-tools {
     box-sizing: border-box;
     align-items: center;
     height: var(--component-stack-chat-header-height);

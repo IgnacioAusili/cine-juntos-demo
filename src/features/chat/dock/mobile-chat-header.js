@@ -34,6 +34,7 @@ let hideTimer = 0;
 let tapToggleTimer = 0;
 let headerCollapsedBeforeKeyboard = null;
 let headerKeyboardPreparing = false;
+let isHeaderGestureActive = () => false;
 let chatHasMessages = false;
 let dockHandleSwitchActive = false;
 let bottomDockHandleRevealPending = false;
@@ -209,11 +210,11 @@ function scheduleHeaderHide() {
     setHeaderCollapsed(false);
     return;
   }
-  if (activeGesture || hasPersistentActivity()) return;
+  if (isHeaderGestureActive() || hasPersistentActivity()) return;
 
   hideTimer = window.setTimeout(() => {
     hideTimer = 0;
-    if (!isActiveChatDock() || activeGesture || hasPersistentActivity()) return;
+    if (!isActiveChatDock() || isHeaderGestureActive() || hasPersistentActivity()) return;
     setHeaderCollapsed(true);
   }, HEADER_IDLE_MS);
 }
@@ -257,10 +258,8 @@ function scheduleHeaderToggle() {
     if (isChatKeyboardOpen() || !isActiveChatDock()) return;
 
     const isCollapsed = dom.sessionView.classList.contains('session-view--chat-header-collapsed');
-    // La actividad persistente impide volver a ocultar la cabecera, pero no
-    // debe impedir que un toque sobre el chat la revele si ya estaba plegada.
-    if (!isCollapsed && hasPersistentActivity()) return;
-
+    // Un toque explicito alterna la cabecera. La actividad persistente pausa
+    // el auto-ocultamiento, pero no debe bloquear una accion del usuario.
     const shouldCollapse = !isCollapsed;
     setHeaderCollapsed(shouldCollapse);
     if (!shouldCollapse) scheduleHeaderHide();
@@ -331,7 +330,7 @@ export function wireMobileBottomChatHeader() {
     attributeFilter: ["class"],
   });
 
-  wireMobileChatHeaderGestures({
+  isHeaderGestureActive = wireMobileChatHeaderGestures({
     clearHideTimer,
     isSystemMessageTarget,
     isContextualTarget,

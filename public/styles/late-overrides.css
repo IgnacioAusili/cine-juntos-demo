@@ -209,7 +209,8 @@ body:not(.page-context--lobby) .session-view:not(.session-view--chat-collapsed)[
   bottom: auto;
   left: 50%;
   grid-column: auto;
-  transform: translate(-50%, -50%);
+  /* El area táctil empieza en la union y queda completa debajo del video. */
+  transform: translateX(-50%);
 }
 
 /* En el dock lateral el anclaje medido sigue siendo relativo al panel; al
@@ -294,4 +295,19 @@ body:not(.page-context--lobby) .session-view:not(.session-view--chat-collapsed)[
 .message-form .message-form__textarea-shell,.message-form.message-form--overlay .message-form__textarea-shell {
   box-sizing: border-box;
   padding-inline-start: 3px;
+}
+
+#lobbyNameInput::-webkit-search-cancel-button,
+#roomInput::-webkit-search-cancel-button,
+#videoUrlInput::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+  display: none;
+}
+
+#lobbyNameInput,
+#roomInput,
+#videoUrlInput {
+  -webkit-appearance: none;
+  appearance: none;
 }

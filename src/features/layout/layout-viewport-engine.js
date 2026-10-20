@@ -150,7 +150,7 @@ export function syncViewportMetrics(force = false) {
   );
   rootStyle.setProperty(
     "--right-chat-visible-height",
-    `${currentViewportHeight || metrics.height}px`,
+    `${Math.round(window.visualViewport?.height || currentViewportHeight || metrics.height)}px`,
   );
   syncBottomChatVisibleHeight(currentViewportHeight);
   rootStyle.setProperty("--app-viewport-offset-left", `${metrics.offsetLeft}px`);

@@ -143,6 +143,7 @@ h1 {
 
 input[type="text"],
 input[type="url"],
+input[type="search"],
 textarea,
 select {
   width: 100%;
@@ -183,6 +184,7 @@ textarea {
 /* Focus refinado: ring teal sutil en lugar de nada */
 input[type="text"]:focus,
 input[type="url"]:focus,
+input[type="search"]:focus,
 textarea:focus,
 select:focus {
   border-color: var(--teal);

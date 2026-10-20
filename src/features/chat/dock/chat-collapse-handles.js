@@ -98,26 +98,16 @@ export function syncExternalChatCollapseHandleOffset() {
     if (isMobileRightDock && dom.videoArea) {
       const workspaceRect = dom.workspace.getBoundingClientRect();
       const videoRect = dom.videoArea.getBoundingClientRect();
-      const playerControlBarRect = dom.playerFrame
-        ?.querySelector(".player-controls-bar")
-        ?.getBoundingClientRect();
       const videoCenterTop =
         videoRect.top - workspaceRect.top + videoRect.height / 2;
       dom.sessionView.style.setProperty(
         "--chat-right-mobile-handle-top",
         `${Math.round(isPortraitMobileRightDock ? videoRect.bottom - workspaceRect.top : videoCenterTop)}px`,
       );
-      if (isPortraitMobileRightDock && playerControlBarRect?.height) {
-        dom.sessionView.style.setProperty(
-          "--chat-right-mobile-collapsed-handle-top",
-          `${Math.round(playerControlBarRect.top - workspaceRect.top)}px`,
-        );
-      } else {
-        dom.sessionView.style.setProperty(
-          "--chat-right-mobile-collapsed-handle-top",
-          `${Math.round(videoCenterTop)}px`,
-        );
-      }
+      dom.sessionView.style.setProperty(
+        "--chat-right-mobile-collapsed-handle-top",
+        `${Math.round(videoCenterTop)}px`,
+      );
     } else {
       dom.sessionView.style.removeProperty("--chat-right-mobile-handle-top");
       dom.sessionView.style.removeProperty("--chat-right-mobile-collapsed-handle-top");

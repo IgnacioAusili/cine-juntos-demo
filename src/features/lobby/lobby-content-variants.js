@@ -194,7 +194,7 @@ export function syncSingleColumnTicketPlacement(hero, ticket, footer) {
   const stub = ticket.querySelector('.lobby-screen__ticket-stub');
   const head = ticket.querySelector('.lobby-screen__ticket-head');
   const fields = ticket.querySelector('.lobby-screen__fields');
-  const controls = [...(fields?.querySelectorAll('input[type="text"]') || [])];
+  const controls = [...(fields?.querySelectorAll('input[type="text"], input[type="search"]') || [])];
   const actionButtons = [...ticket.querySelectorAll('.lobby-screen__actions > .button')];
   const stubRect = stub?.getBoundingClientRect();
   const hasTopStub = Boolean(stubRect && stubRect.width > stubRect.height);

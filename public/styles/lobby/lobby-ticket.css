@@ -1,10 +1,10 @@
 
 
-.lobby-screen__fields input[type="text"] {
+.lobby-screen__fields input:is([type="text"], [type="search"]) {
   --lobby-input-offset: 3px;
 }
 
-.lobby-screen__fields input[type="text"] {
+.lobby-screen__fields input:is([type="text"], [type="search"]) {
   appearance: none;
   display: block;
   height: 40px;
@@ -166,7 +166,7 @@
   gap: 10px;
 }
 
-.lobby-screen__fields input[type="text"]:focus {
+.lobby-screen__fields input:is([type="text"], [type="search"]):focus {
   box-shadow: none;
 }
 

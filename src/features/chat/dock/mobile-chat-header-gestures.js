@@ -91,4 +91,6 @@ function finishGesture(event) {
   document.addEventListener("pointermove", updateGesture, { capture: true, passive: true });
   document.addEventListener("pointerup", finishGesture, { capture: true, passive: true });
   document.addEventListener("pointercancel", finishGesture, { capture: true, passive: true });
+
+  return () => Boolean(activeGesture);
 }

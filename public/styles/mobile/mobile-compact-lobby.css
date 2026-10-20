@@ -86,7 +86,7 @@
     gap: 8px;
   }
 
-  .lobby-screen__fields input[type="text"] {
+  .lobby-screen__fields input:is([type="text"], [type="search"]) {
     height: 36px;
     min-height: 36px;
     line-height: 36px;

@@ -7,7 +7,7 @@
     --bottom-dock-shared-block-size-inset-end: 0px;
   }
 
-  .lobby-screen__fields input[type="text"] {
+  .lobby-screen__fields input:is([type="text"], [type="search"]) {
     --lobby-input-offset: 3px;
   }
 
@@ -70,7 +70,7 @@
     gap: 10px;
   }
 
-  .lobby-screen__fields input[type="text"] {
+  .lobby-screen__fields input:is([type="text"], [type="search"]) {
     height: 42px;
     min-height: 42px;
     line-height: 42px;
@@ -84,7 +84,7 @@
     min-height: 42px;
   }
 
-  .lobby-screen__fields input[type="text"] {
+  .lobby-screen__fields input:is([type="text"], [type="search"]) {
     width: calc(100% - var(--lobby-input-offset));
     transform: translateX(var(--lobby-input-offset));
   }
