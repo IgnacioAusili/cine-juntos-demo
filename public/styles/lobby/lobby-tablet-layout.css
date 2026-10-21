@@ -25,14 +25,14 @@ body.page-context--lobby .lobby-screen {
 /* En una columna, el boleto y la invitación conservan un ancho alineado y
    dejan un margen fluido respecto del ancho real del grid. */
 body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__ticket {
-  width: min(380px, calc(100% - 12px));
+  width: min(var(--lobby-ticket-track-size, 404px), 100%);
   height: var(--lobby-ticket-fit-height, auto);
   min-height: 0;
   grid-template-rows: minmax(0, 1fr);
 }
 
 body.page-context--lobby[data-lobby-flow="single-column"][data-lobby-ticket-stub="top"] .lobby-screen__ticket {
-  width: min(380px, calc(100% - 12px));
+  width: min(var(--lobby-ticket-track-size, 404px), 100%);
   justify-self: center;
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows: var(--lobby-ticket-fit-stub-height, var(--lobby-ticket-top-stub-height)) minmax(0, 1fr);

@@ -82,6 +82,7 @@ export function syncSingleColumnContentCenter(screen, grid, hero, ticket, footer
     availableBottom,
     footerLegal?.getBoundingClientRect().top ?? footerRect.top,
   );
+  const inviteBottom = Math.min(contentBottom, footerRect.top);
   const heroRect = hero.getBoundingClientRect();
   const ticketRect = ticket.getBoundingClientRect();
   const heroTicketGap = Math.max(0, ticketRect.top - heroRect.bottom);
@@ -96,38 +97,36 @@ export function syncSingleColumnContentCenter(screen, grid, hero, ticket, footer
   let inviteRect = null;
   let inviteRequiredHeight = 0;
 
-  // El panel se centra con translate en el hueco restante; su margen superior
-  // no consume ese espacio. Sí reservamos el margen inferior para separarlo
-  // del texto legal.
+  // La tarjeta conserva su densidad solo si mantiene espacio a ambos lados y
+  // queda separada del pie completo, incluido su botón.
   const measureInviteRequiredHeight = () => {
     inviteRect = appInvite.getBoundingClientRect();
     const inviteStyle = getComputedStyle(appInvite);
-    const bottomMargin = Math.max(0, Number.parseFloat(inviteStyle.marginBottom) || 0);
-    inviteRequiredHeight = inviteRect.height + bottomMargin;
+    const topMargin = Math.max(0, Number.parseFloat(inviteStyle.marginBlockStart) || 0);
+    const bottomMargin = Math.max(0, Number.parseFloat(inviteStyle.marginBlockEnd) || 0);
+    const compactClearance = Math.max(
+      0,
+      Number.parseFloat(inviteStyle.getPropertyValue("--lobby-app-invite-compact-clearance")) || 0,
+    );
+    const minimumClearance = appInvite.dataset.density === "compact"
+      ? compactClearance
+      : appInvite.dataset.density === "minimal"
+        ? 0
+        : Math.max(topMargin, bottomMargin);
+    inviteRequiredHeight = inviteRect.height + minimumClearance * 2;
   };
 
   if (appInvite?.getClientRects().length) {
     measureInviteRequiredHeight();
     let ticketBottom = ticketRect.bottom + targetTop - ticketRect.top;
-    let availableInviteHeight = Math.max(0, contentBottom - ticketBottom);
-
-    // Si al panel normal le faltan unos píxeles, subir el boleto dentro del
-    // espacio sobrante entre el encabezado y el boleto antes de compactarlo.
-    const normalDensityLift = Math.min(
-      Math.max(0, inviteRequiredHeight - availableInviteHeight),
-      Math.max(0, targetTop - minimumTop),
-    );
-    if (normalDensityLift > 0) {
-      targetTop -= normalDensityLift;
-      availableInviteHeight += normalDensityLift;
-    }
+    const availableInviteHeight = Math.max(0, inviteBottom - ticketBottom);
 
     if (inviteRequiredHeight > availableInviteHeight) {
       appInvite.dataset.density = "compact";
       measureInviteRequiredHeight();
 
-      // El espacio de separación sirve para salir del diseño grande; para
-      // bajar otra vez, primero debe no caber la tarjeta compacta en sí.
+      // El espacio amplio sirve para salir del diseño grande; para bajar otra
+      // vez, debe faltar incluso el margen mínimo del diseño compacto.
       if (inviteRequiredHeight > availableInviteHeight) {
         appInvite.dataset.density = "minimal";
         measureInviteRequiredHeight();
@@ -135,7 +134,7 @@ export function syncSingleColumnContentCenter(screen, grid, hero, ticket, footer
     }
 
     if (inviteRequiredHeight > availableInviteHeight) {
-      const ticketTopWithInvite = contentBottom - ticketRect.height - inviteRequiredHeight;
+      const ticketTopWithInvite = inviteBottom - ticketRect.height - inviteRequiredHeight;
       if (ticketTopWithInvite >= minimumTop && ticketTopWithInvite < targetTop) {
         targetTop = ticketTopWithInvite;
       }
@@ -149,7 +148,7 @@ export function syncSingleColumnContentCenter(screen, grid, hero, ticket, footer
 
   if (appInvite?.getClientRects().length && inviteRect) {
     const ticketBottom = ticketRect.bottom + ticketShift;
-    const availableInviteCenter = (ticketBottom + contentBottom) / 2;
+    const availableInviteCenter = (ticketBottom + inviteBottom) / 2;
     const currentInviteRect = appInvite.getBoundingClientRect();
     const currentInviteCenter = (currentInviteRect.top + currentInviteRect.bottom) / 2;
     const inviteShift = availableInviteCenter - currentInviteCenter;

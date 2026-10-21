@@ -249,6 +249,7 @@ body.page-context--lobby .lobby-app-install-dialog button:focus-visible {
 }
 
 body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__app-invite {
+  --lobby-app-invite-compact-clearance: 8px;
   display: grid;
   grid-template-columns: 62px minmax(0, 1fr);
   align-items: center;

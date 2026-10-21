@@ -60,6 +60,10 @@ function syncLobbyMarqueeFit(screen, marquee, grid, footer) {
   const gridStyle = getComputedStyle(grid);
   const items = [...grid.children].filter((item) => getComputedStyle(item).display !== "none");
   if (items.length === 0) return;
+  const invite = screen.querySelector(".lobby-screen__app-invite");
+  const visibleScreenItems = [grid, invite, footer]
+    .filter((item) => item && getComputedStyle(item).display !== "none");
+  const visibleInvite = visibleScreenItems.includes(invite);
 
   const gridRows = gridStyle.gridTemplateRows.trim().split(/\s+/).filter(Boolean);
   const isSingleColumn = document.body.dataset.lobbyFlow === "single-column" || gridRows.length > 1;
@@ -68,18 +72,23 @@ function syncLobbyMarqueeFit(screen, marquee, grid, footer) {
     ? itemHeights.reduce((total, height) => total + height, 0)
       + pixels(gridStyle.rowGap) * Math.max(0, itemHeights.length - 1)
     : Math.max(...itemHeights);
-  const footerHeight = footer ? outerBlockSize(footer) : 0;
+  const footerHeight = visibleScreenItems.includes(footer) ? outerBlockSize(footer) : 0;
+  const inviteHeight = visibleInvite ? outerBlockSize(invite) : 0;
   const screenGap = pixels(screenStyle.rowGap);
   const contentClearance = pixels(screenStyle.getPropertyValue("--lobby-marquee-content-clearance"));
+  const screenGapCount = visibleScreenItems.length;
   const requiredHeight = screenInsets
     + marqueeBlockSize(marquee)
     + gridContentHeight
+    + inviteHeight
     + footerHeight
-    + screenGap * 2
+    + screenGap * screenGapCount
     + contentClearance * 2;
   const currentlyHidden = screen.dataset.lobbyMarquee === "hidden";
   const showThreshold = currentlyHidden ? contentClearance : 0;
-  const nextState = requiredHeight + showThreshold <= availableHeight ? "visible" : "hidden";
+  const canShowMarquee = !isSingleColumn
+    && requiredHeight + showThreshold <= availableHeight;
+  const nextState = canShowMarquee ? "visible" : "hidden";
 
   if (screen.dataset.lobbyMarquee !== nextState) screen.dataset.lobbyMarquee = nextState;
 }
@@ -87,6 +96,7 @@ function syncLobbyMarqueeFit(screen, marquee, grid, footer) {
 function wireLobbyMarqueeFit(screen, marquee) {
   const grid = screen.querySelector(".lobby-screen__grid");
   const footer = screen.querySelector(".lobby-screen__footer");
+  const invite = screen.querySelector(".lobby-screen__app-invite");
   if (!grid || !marquee) return;
 
   let fitFrame = 0;
@@ -101,7 +111,7 @@ function wireLobbyMarqueeFit(screen, marquee) {
   window.addEventListener("resize", scheduleFit, { passive: true });
   if ("ResizeObserver" in window) {
     const observer = new ResizeObserver(scheduleFit);
-    [screen, grid, marquee, footer, ...grid.children]
+    [screen, grid, marquee, footer, invite, ...grid.children]
       .filter(Boolean)
       .forEach((element) => observer.observe(element));
   }
