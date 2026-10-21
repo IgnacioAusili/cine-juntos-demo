@@ -15,7 +15,113 @@ const LOBBY_MARQUEE_EXTRA_MESSAGES = [
 ];
 const LOBBY_MARQUEE_SPEED_PX_PER_SECOND = 26;
 
+function pixels(value) {
+  const amount = Number.parseFloat(value);
+  return Number.isFinite(amount) ? amount : 0;
+}
+
+function outerBlockSize(element) {
+  const style = getComputedStyle(element);
+  return element.getBoundingClientRect().height
+    + pixels(style.marginBlockStart)
+    + pixels(style.marginBlockEnd);
+}
+
+function marqueeBlockSize(marquee) {
+  const rectHeight = marquee.getBoundingClientRect().height;
+  if (rectHeight > 0) return rectHeight;
+
+  const style = getComputedStyle(marquee);
+  const minHeight = pixels(style.minHeight);
+  if (style.boxSizing === "border-box") return minHeight;
+  return minHeight
+    + pixels(style.paddingBlockStart)
+    + pixels(style.paddingBlockEnd)
+    + pixels(style.borderBlockStartWidth)
+    + pixels(style.borderBlockEndWidth);
+}
+
+function syncLobbyMarqueeFit(screen, marquee, grid, footer) {
+  if (!document.body.classList.contains("page-context--lobby")) return;
+
+  const screenStyle = getComputedStyle(screen);
+  const screenRect = screen.getBoundingClientRect();
+  const screenInsets = pixels(screenStyle.paddingBlockStart)
+    + pixels(screenStyle.paddingBlockEnd)
+    + pixels(screenStyle.borderBlockStartWidth)
+    + pixels(screenStyle.borderBlockEndWidth);
+  const minHeight = pixels(screenStyle.minHeight);
+  const cssHeight = minHeight || screenRect.height;
+  const heightLimit = screenStyle.boxSizing === "border-box"
+    ? cssHeight
+    : cssHeight + screenInsets;
+  const availableHeight = Math.min(screenRect.height, heightLimit);
+
+  const gridStyle = getComputedStyle(grid);
+  const items = [...grid.children].filter((item) => getComputedStyle(item).display !== "none");
+  if (items.length === 0) return;
+
+  const gridRows = gridStyle.gridTemplateRows.trim().split(/\s+/).filter(Boolean);
+  const isSingleColumn = document.body.dataset.lobbyFlow === "single-column" || gridRows.length > 1;
+  const itemHeights = items.map(outerBlockSize);
+  const gridContentHeight = isSingleColumn
+    ? itemHeights.reduce((total, height) => total + height, 0)
+      + pixels(gridStyle.rowGap) * Math.max(0, itemHeights.length - 1)
+    : Math.max(...itemHeights);
+  const footerHeight = footer ? outerBlockSize(footer) : 0;
+  const screenGap = pixels(screenStyle.rowGap);
+  const contentClearance = pixels(screenStyle.getPropertyValue("--lobby-marquee-content-clearance"));
+  const requiredHeight = screenInsets
+    + marqueeBlockSize(marquee)
+    + gridContentHeight
+    + footerHeight
+    + screenGap * 2
+    + contentClearance * 2;
+  const currentlyHidden = screen.dataset.lobbyMarquee === "hidden";
+  const showThreshold = currentlyHidden ? contentClearance : 0;
+  const nextState = requiredHeight + showThreshold <= availableHeight ? "visible" : "hidden";
+
+  if (screen.dataset.lobbyMarquee !== nextState) screen.dataset.lobbyMarquee = nextState;
+}
+
+function wireLobbyMarqueeFit(screen, marquee) {
+  const grid = screen.querySelector(".lobby-screen__grid");
+  const footer = screen.querySelector(".lobby-screen__footer");
+  if (!grid || !marquee) return;
+
+  let fitFrame = 0;
+  const scheduleFit = () => {
+    if (fitFrame) cancelAnimationFrame(fitFrame);
+    fitFrame = requestAnimationFrame(() => {
+      fitFrame = 0;
+      syncLobbyMarqueeFit(screen, marquee, grid, footer);
+    });
+  };
+
+  window.addEventListener("resize", scheduleFit, { passive: true });
+  if ("ResizeObserver" in window) {
+    const observer = new ResizeObserver(scheduleFit);
+    [screen, grid, marquee, footer, ...grid.children]
+      .filter(Boolean)
+      .forEach((element) => observer.observe(element));
+  }
+
+  if (typeof MutationObserver === "function") {
+    const observer = new MutationObserver(scheduleFit);
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ["class", "data-lobby-flow", "data-lobby-layout"],
+    });
+  }
+
+  if (document.fonts?.ready) document.fonts.ready.then(scheduleFit);
+  requestAnimationFrame(() => requestAnimationFrame(scheduleFit));
+}
+
 export function wireLobbyMarqueeContent(screen) {
+  const marquee = screen?.querySelector('.lobby-screen__marquee');
+  if (marquee) wireLobbyMarqueeFit(screen, marquee);
+
   const track = screen?.querySelector('.lobby-screen__marquee-track');
   const sets = [...(track?.querySelectorAll('.lobby-screen__marquee-set') || [])];
   if (sets.length < 4) return;
@@ -169,6 +275,7 @@ export function wireLobbyMarqueeContent(screen) {
   let activeIncomingSet = null;
   const isLobbyMarqueeVisible = () => (
     !screen.hidden
+    && screen.dataset.lobbyMarquee === "visible"
     && document.body.classList.contains('page-context--lobby')
     && document.visibilityState !== "hidden"
   );
@@ -234,7 +341,7 @@ export function wireLobbyMarqueeContent(screen) {
   const marqueeVisibilityObserver = new MutationObserver(syncMarqueePlayback);
   marqueeVisibilityObserver.observe(screen, {
     attributes: true,
-    attributeFilter: ["hidden"],
+    attributeFilter: ["hidden", "data-lobby-marquee"],
   });
   marqueeVisibilityObserver.observe(document.body, {
     attributes: true,

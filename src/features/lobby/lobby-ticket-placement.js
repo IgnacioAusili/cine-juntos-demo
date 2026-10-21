@@ -16,30 +16,6 @@ function syncLobbyTitleIconSize(title, icon) {
   icon.style.setProperty("height", sizeValue);
 }
 
-function getTitleVisualRect(title) {
-  const lines = [...title.querySelectorAll('.lobby-screen__title-line')];
-  const rects = lines.map((line) => line.getBoundingClientRect());
-  if (!rects.length) return title.getBoundingClientRect();
-
-  const bounds = rects.reduce((current, rect) => ({
-    left: Math.min(current.left, rect.left),
-    top: Math.min(current.top, rect.top),
-    right: Math.max(current.right, rect.right),
-    bottom: Math.max(current.bottom, rect.bottom),
-  }), {
-    left: Infinity,
-    top: Infinity,
-    right: -Infinity,
-    bottom: -Infinity,
-  });
-
-  return {
-    ...bounds,
-    width: bounds.right - bounds.left,
-    height: bounds.bottom - bounds.top,
-  };
-}
-
 export function resetLobbyTicketPlacement(screen, ticket) {
   document.body.removeAttribute("data-lobby-ticket-stub");
   ticket?.style.removeProperty("translate");
@@ -89,8 +65,7 @@ export function syncLobbyTitlePlacement(screen, isSingleColumn) {
   const icon = hero?.querySelector('.lobby-screen__title-icon');
   if (!hero) return;
 
-  // El título tiene dos líneas independientes; el ícono debe tomar como
-  // referencia la caja combinada de ambas y no solo la primera línea.
+  // El grid alinea el ícono con el título; acá solo se sincroniza su tamaño.
   icon?.style.removeProperty("transform");
   if (!title || !icon) {
     delete hero.dataset.titlePlacement;
@@ -107,16 +82,6 @@ export function syncLobbyTitlePlacement(screen, isSingleColumn) {
     icon.style.removeProperty("top");
     syncLobbyTitleIconSize(title, icon);
 
-    const titleRect = getTitleVisualRect(title);
-    const baseTransform = getComputedStyle(icon).transform;
-    const iconRect = icon.getBoundingClientRect();
-    const titleCenter = (titleRect.top + titleRect.bottom) / 2;
-    const iconCenter = (iconRect.top + iconRect.bottom) / 2;
-    const verticalShift = titleCenter - iconCenter;
-    if (Number.isFinite(verticalShift) && Math.abs(verticalShift) > 0.01) {
-      const transformPrefix = baseTransform === "none" ? "" : `${baseTransform} `;
-      icon.style.setProperty("transform", `${transformPrefix}translateY(${verticalShift.toFixed(2)}px)`);
-    }
     return;
   }
 

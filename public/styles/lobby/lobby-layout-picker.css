@@ -23,14 +23,13 @@ body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen {
   height: auto;
   min-height: max(0px, calc(100dvh - var(--app-shell-gutter)));
   gap: 0;
-  /* El pie es fixed y la marquesina está oculta: solo queda una fila en flujo. */
+  /* El pie es fixed; el contenido conserva una sola fila en flujo. */
   grid-template-rows: auto;
   align-content: start;
   padding-block: 0 8px;
 }
 
 body.page-context--lobby[data-lobby-flow="single-column"] .site-header,
-body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__marquee,
 body.page-context--lobby[data-lobby-flow="single-column"][data-lobby-layout] .lobby-screen__features {
   display: none;
 }

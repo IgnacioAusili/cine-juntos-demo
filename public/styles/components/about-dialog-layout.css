@@ -24,16 +24,15 @@
 
 @media (min-width: 681px) {
   .about-dialog {
-    width: min(800px, calc(100% - 48px));
-    max-width: 800px;
-    max-height: calc(100dvh - 64px);
-    transform: scale(1.03);
+    width: min(824px, calc(100% - 28px));
+    max-width: 824px;
+    max-height: min(100dvh, calc(103dvh - 65.92px));
   }
 
   .about-dialog__card {
     display: flex;
     flex-direction: column;
-    max-height: calc(100dvh - 66px);
+    max-height: min(100dvh, calc(103dvh - 67.98px));
     overflow: hidden;
     padding: 0;
   }
@@ -102,6 +101,16 @@
   .about-dialog__disclaimer {
     margin-top: 14px;
     line-height: 1.4;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) and (max-height: 500px) and (orientation: landscape) {
+  .about-dialog {
+    max-height: min(100dvh, calc(103dvh - 28.84px));
+  }
+
+  .about-dialog__card {
+    max-height: min(100dvh, calc(103dvh - 30.9px));
   }
 }
 

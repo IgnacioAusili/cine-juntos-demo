@@ -77,10 +77,6 @@
     bottom: auto;
   }
 
-  .lobby-screen__marquee {
-    display: none;
-  }
-
   .lobby-screen__grid {
     width: 100%;
     min-height: 0;

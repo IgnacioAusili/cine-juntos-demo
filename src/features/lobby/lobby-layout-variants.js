@@ -29,8 +29,6 @@ function applyVariant(select, value) {
   if (select) select.value = nextValue;
 }
 
-let lobbyCenterFrame = 0;
-
 export function wireLobbyLayoutVariants() {
   const select = document.querySelector("#lobbyLayoutVariant");
   applyVariant(select, getSavedVariant());

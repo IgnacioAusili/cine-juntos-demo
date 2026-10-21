@@ -89,8 +89,7 @@ export function syncSingleColumnContentCenter(screen, grid, hero, ticket, footer
   const minimumHeroTicketGap = Math.min(heroTicketGap, Math.max(8, declaredGridGap - 4));
   const minimumTop = heroRect.bottom + minimumHeroTicketGap;
 
-  // El boleto conserva su centro vertical. El panel se acomoda después dentro
-  // del espacio restante entre el boleto y el pie legal.
+  // El boleto conserva su centro vertical. El panel ocupa el hueco restante.
   const centeredTop = availableCenter - ticketRect.height / 2;
   const maximumTop = contentBottom - ticketRect.height;
   let targetTop = Math.min(maximumTop, Math.max(minimumTop, centeredTop));

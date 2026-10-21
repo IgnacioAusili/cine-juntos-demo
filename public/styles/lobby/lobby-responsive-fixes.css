@@ -135,13 +135,6 @@
     padding-block: 4px 10px;
   }
 
-  body.page-context--lobby .lobby-screen__marquee {
-    position: absolute;
-    inset-inline: 0;
-    top: 4px;
-    z-index: 0;
-  }
-
   body.page-context--lobby .lobby-screen__grid {
     align-self: start;
     gap: 12px;

@@ -16,7 +16,6 @@ export function syncLobbyContentCenter() {
 
   const isColumns = document.body.dataset.lobbyLayout === "columns";
   const screen = document.querySelector("#lobbyScreen");
-  const marquee = screen?.querySelector('.lobby-screen__marquee');
   const footer = screen?.querySelector('.lobby-screen__footer');
   const grid = screen?.querySelector('.lobby-screen__grid');
   const content = screen
@@ -103,45 +102,21 @@ export function syncLobbyContentCenter() {
   resetSingleColumnTitleGroup(hero);
   hero?.style.removeProperty("translate");
 
-  if (!isColumns || !marquee || !footer) {
+  if (!isColumns || !footer) {
     resetTitleFit(screen?.querySelector('.lobby-screen__title'));
     resetLobbyTicketPlacement(screen, ticket);
     grid.style.setProperty("--lobby-content-center-shift", "0px");
     return;
   }
 
-  // Medimos siempre desde la posición base para no acumular el desplazamiento
-  // anterior al cambiar de viewport o al cambiar la variante.
-  grid.style.setProperty("--lobby-content-center-shift", "0px");
+  // En dos columnas el centro vertical lo determina la pista disponible de la
+  // grilla, que ya reserva espacio para el pie en el layout apaisado.
+  grid.style.removeProperty("--lobby-content-center-shift");
   syncLobbyTicketPlacement(screen, ticket);
   syncLobbyTicketInlinePadding(ticket);
   syncLobbyTextDensity(hero, footer);
   syncLobbyTitleFit(screen, hero, ticket);
   syncLobbyTitlePlacement(screen, false);
-
-  const marqueeRect = marquee.getBoundingClientRect();
-  const footerRect = footer.getBoundingClientRect();
-  const contentRects = content.map((element) => element.getBoundingClientRect());
-  const contentTop = Math.min(...contentRects.map((rect) => rect.top));
-  const contentBottom = Math.max(...contentRects.map((rect) => rect.bottom));
-  const availableCenter = (marqueeRect.bottom + footerRect.top) / 2;
-  const contentCenter = (contentTop + contentBottom) / 2;
-  const contentShift = availableCenter - contentCenter;
-
-  if (Number.isFinite(contentShift)) {
-    grid.style.setProperty("--lobby-content-center-shift", `${contentShift.toFixed(2)}px`);
-
-    // El hero puede tener un levantamiento visual propio; por eso centrar el
-    // grupo completo deja el boleto bajo su centro disponible. Alineamos el
-    // boleto con el punto medio real entre marquesina y pie, sin usar medidas
-    // fijas del viewport.
-    const centeredTicketRect = ticket.getBoundingClientRect();
-    const centeredTicketMiddle = (centeredTicketRect.top + centeredTicketRect.bottom) / 2;
-    const ticketShift = availableCenter - centeredTicketMiddle;
-    if (Number.isFinite(ticketShift)) {
-      ticket.style.setProperty("translate", `0px ${ticketShift.toFixed(2)}px`);
-    }
-  }
 }
 
 export function scheduleLobbyContentCenter() {

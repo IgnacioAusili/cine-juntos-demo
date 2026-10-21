@@ -175,25 +175,8 @@ body:not(.page-context--lobby) .live-badge {
     transform-origin: right center;
   }
 
-  .lobby-screen__hero {
-    transform: translateY(-20px);
-  }
-
-  .lobby-screen__title {
-    transform: translateY(-16px);
-  }
-
-  .lobby-screen__title-icon {
-    transform: translateY(-16px);
-  }
-
-  .lobby-screen__description {
-    transform: translateY(0);
-  }
-
   .lobby-screen__features {
     column-gap: 28px;
-    transform: translateY(14px);
   }
 
   .lobby-screen__feature {

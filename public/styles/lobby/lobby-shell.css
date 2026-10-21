@@ -6,6 +6,15 @@
   --lobby-columns-min-ticket-inline-size: var(--lobby-ticket-track-size, 404px);
 }
 
+/* En el lobby la cabecera queda vacía; su fila y el gap no deben bajar el lienzo. */
+body.page-context--lobby[data-lobby-flow="columns"] .app-shell {
+  row-gap: 0;
+}
+
+body.page-context--lobby[data-lobby-flow="columns"] .app-shell > .site-header {
+  margin-block-end: 0;
+}
+
 /* ============================================================
    LOBBY — "La antesala del cine"
    Layout: hero dramático (izq) + boleto/ticket perforado (der)
@@ -13,13 +22,26 @@
    ============================================================ */
 
 .lobby-screen {
+  --lobby-marquee-content-clearance: clamp(10px, 1.5vh, 18px);
   display: grid;
   min-height: calc(var(--app-viewport-height) - 64px);
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: auto minmax(0, 1fr) auto;
   align-content: space-between;
   justify-items: center;
   gap: 14px;
   padding-block: 4px 18px;
+}
+
+body.page-context--lobby .lobby-screen[data-lobby-marquee="pending"] {
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+
+body.page-context--lobby .lobby-screen[data-lobby-marquee="pending"] .lobby-screen__marquee {
+  visibility: hidden;
+}
+
+body.page-context--lobby .lobby-screen[data-lobby-marquee="hidden"] {
+  grid-template-rows: minmax(0, 1fr) auto;
 }
 
 /* ===== Grid principal: hero | ticket ===== */
@@ -43,7 +65,6 @@
   border-block: 1px solid var(--glass-border);
   mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
-  transform: translateY(-26px);
 }
 
 .lobby-screen__marquee-track {
@@ -139,7 +160,6 @@
 .lobby-screen__hero {
   justify-self: center;
   align-self: center;
-  transform: translateY(-20px);
   display: grid;
   justify-items: start;
   grid-template-columns: auto minmax(0, 1fr);

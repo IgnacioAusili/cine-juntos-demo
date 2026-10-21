@@ -662,3 +662,88 @@ body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__app-inv
   }
 
 }
+
+/* La variante apaisada usa toda la altura disponible y reserva en la grilla
+   solo la fila que ocupa el texto legal. El botón informativo sigue anclado
+   al viewport y no agrega altura ni scroll al documento. */
+@media (min-width: 681px) and (max-width: 980px) and (max-height: 700px) {
+  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .app-shell {
+    height: var(--app-viewport-height);
+    min-height: 0;
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] #lobbyScreen {
+    height: 100%;
+    min-height: 0;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    padding: 0 0 var(--app-shell-gutter);
+  }
+
+  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] #lobbyScreen[data-lobby-marquee="hidden"] {
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+
+  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__grid {
+    align-self: stretch;
+    min-height: 0;
+    margin: 0;
+  }
+
+  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__hero {
+    --lobby-section-gap: clamp(6px, 1.6vh, 10px);
+    transform: none;
+  }
+
+  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__features {
+    margin-top: 0;
+  }
+
+  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__footer {
+    position: static;
+    inset: auto;
+    align-self: end;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    margin: 0;
+  }
+}
+
+body.page-context--lobby #lobbyScreen[data-lobby-marquee="pending"],
+body.page-context--lobby #lobbyScreen[data-lobby-marquee="visible"] {
+  grid-template-rows: auto minmax(0, 1fr) auto;
+}
+
+body.page-context--lobby #lobbyScreen[data-lobby-marquee="hidden"] {
+  grid-template-rows: minmax(0, 1fr) auto;
+}
+
+body.page-context--lobby #lobbyScreen[data-lobby-marquee="hidden"] .lobby-screen__marquee {
+  display: none;
+}
+
+/* En escritorio, el boleto ocupa la pista entre la marquesina y el pie legal.
+   Mantener el pie en el flujo permite que la fila central tenga su altura real. */
+@media (min-width: 981px) {
+  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__footer {
+    position: static;
+    inset: auto;
+    align-self: end;
+    width: 100%;
+    height: var(--lobby-about-panel-size);
+    min-height: 0;
+    margin: 0;
+  }
+}
+
+@media (min-width: 681px) and (max-width: 980px) and (max-height: 700px) {
+  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] #lobbyScreen[data-lobby-marquee="pending"],
+  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] #lobbyScreen[data-lobby-marquee="visible"] {
+    grid-template-rows: auto minmax(0, 1fr) auto;
+  }
+
+  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] #lobbyScreen[data-lobby-marquee="hidden"] {
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+}

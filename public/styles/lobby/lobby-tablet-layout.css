@@ -13,11 +13,11 @@
 @media (min-width: 681px) {
   body.page-context--lobby[data-lobby-layout="columns"] .lobby-screen__title {
     --lobby-title-size: clamp(4.75rem, 11vw, 6.8rem);
-    --lobby-title-lift: calc(var(--lobby-title-size) * 0.175);
+    font-size: var(--lobby-title-size);
   }
 }
 /* Centrado del contenido dentro de la franja que ya define el layout original;
-   la marquesina y el footer conservan sus posiciones propias. */
+   el footer conserva su posición propia. */
 body.page-context--lobby .lobby-screen {
   padding: 0;
 }
@@ -196,33 +196,18 @@ body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__actions
   }
 }
 
-/* El título se dibuja proporcionalmente hacia arriba; compensa ese
-   desplazamiento en el flujo para conservar una altura estable del hero. */
-@media (min-width: 681px) {
-  body.page-context--lobby[data-lobby-layout="columns"] .lobby-screen__title {
-    font-size: var(--lobby-title-size);
-    transform: translateY(calc(-1 * var(--lobby-title-lift)));
-    margin-bottom: calc(-1 * var(--lobby-title-lift));
-  }
-}
-
 @media (min-width: 681px) {
   body.page-context--lobby[data-lobby-layout="columns"] .lobby-screen__grid {
     align-self: stretch;
     align-items: center;
     min-height: 0;
     margin-top: 0;
-    transform: translateY(var(--lobby-content-center-shift, 0px));
   }
 
   body.page-context--lobby[data-lobby-layout="columns"] .lobby-screen__hero,
   body.page-context--lobby[data-lobby-layout="columns"] .lobby-screen__ticket {
     align-self: center;
     margin-top: 0;
-  }
-
-  body.page-context--lobby[data-lobby-layout="columns"] .lobby-screen__hero {
-    transform: translateY(calc(-1 * clamp(30px, 5vh, 44px)));
   }
 }
 
@@ -234,10 +219,4 @@ body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__actions
 
 body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__actions > .button {
   min-height: var(--lobby-ticket-fit-action-height, 42px);
-}
-
-@media (min-width: 981px) {
-  body.page-context--lobby[data-lobby-layout="columns"] .lobby-screen__hero {
-    transform: translateY(calc(-1 * clamp(30px, 5vh, 44px)));
-  }
 }
