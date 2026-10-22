@@ -64,7 +64,24 @@ export function rememberLastRoom(roomCode) {
 
 export function syncJoinRoomButtonState() {
   if (!dom.joinRoomButton) return;
+  if (dom.joinRoomButton.dataset.loading === "true") {
+    dom.joinRoomButton.disabled = true;
+    return;
+  }
   dom.joinRoomButton.disabled = !sanitizeRoomInput(dom.roomInput.value);
+}
+
+export function resetRoomEntryButtons() {
+  if (dom.joinRoomButton) {
+    delete dom.joinRoomButton.dataset.loading;
+    dom.joinRoomButton.removeAttribute("aria-busy");
+    syncJoinRoomButtonState();
+  }
+  if (dom.createRoomButton) {
+    dom.createRoomButton.disabled = false;
+    delete dom.createRoomButton.dataset.loading;
+    dom.createRoomButton.removeAttribute("aria-busy");
+  }
 }
 
 export function consumeRoomCreationAttempt() {

@@ -102,14 +102,15 @@ body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__actions
   }
 
   body.page-context--lobby[data-lobby-layout="columns"] .lobby-screen__title {
+    --lobby-title-size: clamp(4rem, min(11vw, calc(18vh + 0.5rem)), 6.8rem);
     font-size: var(--lobby-title-size);
     justify-self: start;
     text-align: left;
   }
 
   body.page-context--lobby[data-lobby-layout="columns"] .lobby-screen__title-icon {
-    width: clamp(112px, 11vw, 150px);
-    height: clamp(112px, 11vw, 150px);
+    width: clamp(72px, min(150px, max(112px, 11vw), calc(16vh + 16px)), 150px);
+    height: clamp(72px, min(150px, max(112px, 11vw), calc(16vh + 16px)), 150px);
     transform: none;
   }
 
@@ -118,7 +119,7 @@ body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__actions
     max-width: 68ch;
     font-size: clamp(0.98rem, 1.2vw, 1.12rem);
     line-height: 1.5;
-    text-align: left;
+    text-align: center;
     transform: none;
   }
 

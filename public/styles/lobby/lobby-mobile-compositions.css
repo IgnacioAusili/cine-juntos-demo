@@ -4,10 +4,18 @@ body.page-context--lobby {
   --lobby-single-column-hero-row-gap-min: 2px;
   --lobby-single-column-hero-row-gap-fluid: 0.4vh;
   --lobby-single-column-hero-row-gap-max: 4px;
-  --lobby-single-column-copy-font-min: 0.8rem;
-  --lobby-single-column-copy-font-offset: 0.32rem;
-  --lobby-single-column-copy-font-fluid: 1.6vw;
-  --lobby-single-column-copy-font-max: 1rem;
+  --lobby-single-column-title-font-min: 2.45rem;
+  --lobby-single-column-title-font-fluid: calc(1.8rem + 3dvh);
+  --lobby-single-column-title-font-inline: 16cqw;
+  --lobby-single-column-title-font-max: 3.6rem;
+  --lobby-single-column-icon-size-min: 32px;
+  --lobby-single-column-icon-size-fluid: calc(24px + 2.5dvh);
+  --lobby-single-column-icon-size-inline: 13cqw;
+  --lobby-single-column-icon-size-max: 44px;
+  --lobby-single-column-copy-font-min: 0.78rem;
+  --lobby-single-column-copy-font-offset: 0.45rem;
+  --lobby-single-column-copy-font-fluid: 1.05dvh;
+  --lobby-single-column-copy-font-max: 1.08rem;
   --lobby-single-column-copy-line-height-min: 1.32em;
   --lobby-single-column-copy-line-height-fluid: calc(1.28vw - 6.144px);
   --lobby-single-column-copy-line-height-max: 1.48em;
@@ -249,7 +257,7 @@ body.page-context--lobby .lobby-app-install-dialog button:focus-visible {
 }
 
 body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__app-invite {
-  --lobby-app-invite-compact-clearance: 8px;
+  --lobby-app-invite-compact-clearance: 4px;
   display: grid;
   grid-template-columns: 62px minmax(0, 1fr);
   align-items: center;
@@ -633,13 +641,33 @@ body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__app-inv
     transform: none;
   }
 
-  body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__title {
+  body.page-context--lobby[data-lobby-flow="single-column"]
+    .lobby-screen__hero[data-title-placement="centered"] .lobby-screen__title {
     width: max-content;
     max-width: 100%;
     justify-self: center;
-    font-size: clamp(2.45rem, 11.5cqw, 2.8rem);
+    /* El alto disponible da presencia; el ancho del hero evita que el título
+       se desborde en teléfonos angostos. */
+    font-size: clamp(
+      var(--lobby-single-column-title-font-min),
+      min(var(--lobby-single-column-title-font-fluid), var(--lobby-single-column-title-font-inline)),
+      var(--lobby-single-column-title-font-max)
+    );
     line-height: 0.92;
     text-align: center;
+  }
+
+  body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__hero[data-title-placement="centered"] .lobby-screen__title-icon {
+    width: clamp(
+      var(--lobby-single-column-icon-size-min),
+      min(var(--lobby-single-column-icon-size-fluid), var(--lobby-single-column-icon-size-inline)),
+      var(--lobby-single-column-icon-size-max)
+    );
+    height: clamp(
+      var(--lobby-single-column-icon-size-min),
+      min(var(--lobby-single-column-icon-size-fluid), var(--lobby-single-column-icon-size-inline)),
+      var(--lobby-single-column-icon-size-max)
+    );
   }
 
   body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__description {
@@ -667,7 +695,7 @@ body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__app-inv
 /* La variante apaisada usa toda la altura disponible y reserva en la grilla
    solo la fila que ocupa el texto legal. El botón informativo sigue anclado
    al viewport y no agrega altura ni scroll al documento. */
-@media (min-width: 681px) and (max-width: 980px) and (max-height: 700px) {
+@media (min-width: 681px) and (max-width: 980px) {
   body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .app-shell {
     height: var(--app-viewport-height);
     min-height: 0;
@@ -678,7 +706,10 @@ body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__app-inv
     height: 100%;
     min-height: 0;
     grid-template-rows: auto minmax(0, 1fr) auto;
-    padding: 0 0 var(--app-shell-gutter);
+    padding:
+      clamp(4px, 0.66vh, 10px)
+      0
+      clamp(4px, calc(1vh + 4px), var(--app-shell-gutter));
   }
 
   body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] #lobbyScreen[data-lobby-marquee="hidden"] {
@@ -692,7 +723,7 @@ body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__app-inv
   }
 
   body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__hero {
-    --lobby-section-gap: clamp(6px, 1.6vh, 10px);
+    --lobby-section-gap: clamp(6px, calc(8vh - 16px), 32px);
     transform: none;
   }
 
@@ -738,7 +769,7 @@ body.page-context--lobby #lobbyScreen[data-lobby-marquee="hidden"] .lobby-screen
   }
 }
 
-@media (min-width: 681px) and (max-width: 980px) and (max-height: 700px) {
+@media (min-width: 681px) and (max-width: 980px) {
   body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] #lobbyScreen[data-lobby-marquee="pending"],
   body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] #lobbyScreen[data-lobby-marquee="visible"] {
     grid-template-rows: auto minmax(0, 1fr) auto;

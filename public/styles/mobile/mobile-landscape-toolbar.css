@@ -32,8 +32,9 @@
 
 /* En landscape móvil solo la sesión es una superficie de borde a borde. El
    header conserva el gutter exterior para que el tag de sala no quede pegado
-   ni recortado contra los bordes. */
-@media (hover: none) and (pointer: coarse) and (max-height: 500px) and (orientation: landscape) {
+   ni recortado contra los bordes. El viewport acotado también cubre la vista
+   móvil simulada, que puede informar un puntero fino aunque use perfil táctil. */
+@media (max-width: 1000px) and (max-height: 500px) and (orientation: landscape) {
   html.page-context--viewport-landscape:not(.page-context--bottom-chat-keyboard-open):has(
     body:not(.page-context--lobby) .session-view[data-chat-dock="bottom"]
   ) {

@@ -130,7 +130,7 @@ body.page-context--lobby .lobby-screen__about-button.u-touch-hover:hover {
 
 /* En horizontal apaisado el pie forma la segunda fila del lobby. Así la
    primera fila reserva su altura y centra el boleto dentro del espacio real. */
-@media (min-width: 681px) and (max-width: 980px) and (max-height: 700px) {
+@media (min-width: 681px) and (max-width: 980px) {
   body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen {
     padding-block-end: 0;
   }

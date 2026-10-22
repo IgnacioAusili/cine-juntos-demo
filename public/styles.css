@@ -35,3 +35,5 @@
 /* ITCSS: Final compatibility overrides */
 @import url("./styles/late-overrides.css");
 @import url("./styles/lobby/lobby-mobile-compositions.css");
+@import url("./styles/lobby/lobby-actions-layout.css");
+@import url("./styles/lobby/lobby-landscape-ticket.css");

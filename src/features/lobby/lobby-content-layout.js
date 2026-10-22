@@ -1,7 +1,8 @@
 let lobbyCenterFrame = 0;
 
 import { resetTitleFit, syncLobbyTitleFit, syncSingleColumnTitleGroup, resetSingleColumnTitleLift, resetSingleColumnTitleGroup, resetSingleColumnDescriptionWidth, syncLobbyTextDensity, syncLobbyTicketInlinePadding } from "./lobby-title-layout.js";
-import { syncSingleColumnDescriptionWidth, syncSingleColumnContentCenter, syncSingleColumnContentGap, syncSingleColumnTicketPlacement } from "./lobby-content-variants.js";
+import { syncSingleColumnDescriptionWidth, syncSingleColumnContentCenter, syncSingleColumnContentGap } from "./lobby-content-variants.js";
+import { resetSingleColumnTicketFit, syncSingleColumnTicketPlacement } from "./lobby-ticket-fit.js";
 import { resetLobbyTicketPlacement, syncLobbyTicketPlacement, syncLobbyTitlePlacement, syncSingleColumnTicketStub } from "./lobby-ticket-placement.js";
 
 export function syncLobbyContentCenter() {
@@ -57,6 +58,7 @@ export function syncLobbyContentCenter() {
   const isSingleColumn = Boolean(grid) && (
     gridColumns.length < 2 || (isColumns && canMeasureColumns && !columnsHaveRoom)
   );
+  if (!isSingleColumn) resetSingleColumnTicketFit(ticket);
   document.body.dataset.lobbyFlow = isSingleColumn ? "single-column" : "columns";
   syncLobbyTitlePlacement(screen, isSingleColumn);
 

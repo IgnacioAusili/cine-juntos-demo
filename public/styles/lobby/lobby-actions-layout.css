@@ -1,0 +1,15 @@
+/* Aumentamos los botones usando parte del espacio inferior del boleto,
+   sin hacer crecer la tarjeta. */
+body.page-context--lobby[data-lobby-layout] .lobby-screen__actions {
+  --lobby-ticket-action-baseline-height: var(--lobby-ticket-fit-control-height, 40px);
+  --lobby-ticket-action-height: var(--lobby-ticket-fit-action-height, 44px);
+  align-items: center;
+  margin-block-end: min(
+    0px,
+    calc(var(--lobby-ticket-action-baseline-height) - var(--lobby-ticket-action-height))
+  );
+}
+
+body.page-context--lobby[data-lobby-layout] .lobby-screen__actions > .button {
+  min-height: var(--lobby-ticket-action-height);
+}

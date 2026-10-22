@@ -110,11 +110,18 @@ export function syncLobbyTitleFit(screen, hero, ticket) {
   };
 
   resetTitleFit(title);
-  const baseSize = Number.parseFloat(getComputedStyle(title).fontSize);
+  const titleStyle = getComputedStyle(title);
+  const baseSize = Number.parseFloat(titleStyle.fontSize);
   const rootFontSize = Number.parseFloat(getComputedStyle(document.documentElement).fontSize);
+  const configuredMaximumRem = Number.parseFloat(
+    titleStyle.getPropertyValue("--lobby-title-fit-max-rem"),
+  );
   const isSingleColumn = document.body.dataset.lobbyFlow === "single-column";
+  const maximumSizeRem = Number.isFinite(configuredMaximumRem) && configuredMaximumRem > 0
+    ? configuredMaximumRem
+    : TITLE_FIT_MAX_SIZE_REM;
   const viewportMaximumSize = Number.isFinite(rootFontSize)
-    ? rootFontSize * TITLE_FIT_MAX_SIZE_REM
+    ? rootFontSize * maximumSizeRem
     : baseSize;
   const maximumSize = isSingleColumn
     ? Math.min(baseSize, viewportMaximumSize)

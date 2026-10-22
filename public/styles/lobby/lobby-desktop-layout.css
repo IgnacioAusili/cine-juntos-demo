@@ -280,3 +280,47 @@ body.page-context--lobby[data-lobby-flow="single-column"]
   .lobby-screen__hero[data-title-placement="centered"] .lobby-screen__description {
   transform: translateY(-6px);
 }
+
+/* Los tamaños destacados se activan según el ancho medido del hero y de cada
+   opción, sin asociarlos a una categoría de dispositivo. El título se limita
+   y se reduce mediante syncLobbyTitleFit cuando su contenido no cabe. */
+body.page-context--lobby .lobby-screen__hero {
+  container: lobby-hero / inline-size;
+}
+
+body.page-context--lobby[data-lobby-layout="columns"] .lobby-screen__title {
+  --lobby-title-fit-max-rem: 7;
+}
+
+body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__hero {
+  margin-block-end: 4px;
+}
+
+@container lobby-hero (min-width: 500px) {
+  body.page-context--lobby[data-lobby-layout="columns"] .lobby-screen__description {
+    font-size: clamp(1.04rem, 2.1cqw, 1.15rem);
+  }
+
+  body.page-context--lobby[data-lobby-layout="columns"] .lobby-screen__features {
+    column-gap: clamp(12px, 2.5cqw, 18px);
+  }
+
+  body.page-context--lobby[data-lobby-layout="columns"] .lobby-screen__feature {
+    gap: 14px;
+  }
+}
+
+@container (min-width: 170px) {
+  body.page-context--lobby[data-lobby-layout="columns"] .lobby-screen__feature-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  body.page-context--lobby[data-lobby-layout="columns"] .lobby-screen__feature-text strong {
+    font-size: 1rem;
+  }
+
+  body.page-context--lobby[data-lobby-layout="columns"] .lobby-screen__feature-text small {
+    font-size: 0.86rem;
+  }
+}

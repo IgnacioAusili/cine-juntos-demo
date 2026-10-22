@@ -38,6 +38,7 @@ import {
 } from "./room-access.js";
 import {
   rememberLastRoom,
+  resetRoomEntryButtons,
   sanitizeRoomInput,
   syncJoinRoomButtonState,
 } from "./room-input.js";
@@ -49,12 +50,23 @@ import {
 import { setInviteCopyFeedback } from "./room-invite.js";
 import { resetRoomPlayerState } from "./room-player-state.js";
 
+const ROOM_ENTRY_FEEDBACK_MIN_DURATION_MS = 250;
+
 async function closeTransport(transport) {
   try {
     await transport?.close?.();
   } catch {
     // Un transporte de una entrada cancelada ya no tiene estado que conservar.
   }
+}
+
+function keepEntryFeedbackVisible(startedAt) {
+  const remaining = Math.max(
+    0,
+    ROOM_ENTRY_FEEDBACK_MIN_DURATION_MS - (performance.now() - startedAt),
+  );
+  if (!remaining) return Promise.resolve();
+  return new Promise((resolve) => window.setTimeout(resolve, remaining));
 }
 
 export async function joinRoom(rawRoomCode, sourceButton = "join") {
@@ -88,6 +100,7 @@ export async function joinRoom(rawRoomCode, sourceButton = "join") {
     delete inactiveButton.dataset.loading;
     inactiveButton.removeAttribute("aria-busy");
   }
+  const loadingStartedAt = performance.now();
 
   logEvent("room", "Entrando a sala " + roomCode + ".");
 
@@ -104,7 +117,10 @@ export async function joinRoom(rawRoomCode, sourceButton = "join") {
     resetPageUnread();
     state.chat.replyTarget = null;
     nextTransport = await createTransport(roomCode);
-    if (!isRoomOperationCurrent(operationId)) return;
+    if (!isRoomOperationCurrent(operationId)) {
+      await closeTransport(nextTransport);
+      return;
+    }
 
     state.session.knownParticipants = new Set([state.session.clientId]);
     state.session.knownMembers = new Map([[state.session.clientId, getDisplayName()]]);
@@ -122,6 +138,11 @@ export async function joinRoom(rawRoomCode, sourceButton = "join") {
     };
 
     dom.roomBadge.textContent = roomCode;
+    await keepEntryFeedbackVisible(loadingStartedAt);
+    if (!isRoomOperationCurrent(operationId)) {
+      await closeTransport(nextTransport);
+      return;
+    }
     showSession();
     syncComponentAspectLayoutNow();
     roomEntryVideoFocus = watchRoomEntryVideoFocus(userScrollIntentAtEntry);
@@ -172,6 +193,7 @@ export async function joinRoom(rawRoomCode, sourceButton = "join") {
     roomEntryVideoFocus?.cancel();
     finishSystemMessageHydration();
     if (connectStarted) await closeTransport(nextTransport);
+    await keepEntryFeedbackVisible(loadingStartedAt);
     if (!isRoomOperationCurrent(operationId)) return;
     showLobby();
     console.error(error);
@@ -185,16 +207,7 @@ export async function joinRoom(rawRoomCode, sourceButton = "join") {
     logEvent("error", "No se pudo entrar a " + roomCode + ": " + (error.message || error));
   } finally {
     if (isRoomOperationCurrent(operationId)) {
-      if (dom.joinRoomButton) {
-        syncJoinRoomButtonState();
-        delete dom.joinRoomButton.dataset.loading;
-        dom.joinRoomButton.removeAttribute("aria-busy");
-      }
-      if (dom.createRoomButton) {
-        dom.createRoomButton.disabled = false;
-        delete dom.createRoomButton.dataset.loading;
-        dom.createRoomButton.removeAttribute("aria-busy");
-      }
+      resetRoomEntryButtons();
     }
   }
 }

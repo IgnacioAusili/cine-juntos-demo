@@ -1,0 +1,119 @@
+/* Este contenedor agrupa marca e ícono solo en la variante apaisada; en las
+   demás composiciones, sus hijos siguen participando del grid existente. */
+.lobby-screen__brand {
+  display: contents;
+}
+
+@media (min-width: 681px) and (max-width: 980px)
+  and (max-height: 500px) and (orientation: landscape) {
+  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__grid {
+    --lobby-ticket-track-size: clamp(360px, 43.5vw, 370px);
+    --lobby-landscape-ticket-track-gap: 10px;
+    --lobby-landscape-ticket-body-gap: 12px;
+    --lobby-landscape-ticket-padding-top: 16px;
+    --lobby-landscape-ticket-padding-inline: 18px;
+    --lobby-landscape-ticket-padding-bottom: 14px;
+    --lobby-landscape-ticket-head-padding: 10px;
+    --lobby-landscape-ticket-fields-gap: 8px;
+    --lobby-landscape-ticket-control-height: 38px;
+    --lobby-landscape-ticket-action-height: 42px;
+  }
+}
+
+@media (min-width: 681px) and (max-width: 980px)
+  and (max-height: 500px) and (orientation: landscape)
+  and (hover: none) and (pointer: coarse) {
+  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__ticket {
+    width: calc(var(--lobby-ticket-track-size) - var(--lobby-landscape-ticket-track-gap));
+  }
+
+  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__ticket-body {
+    gap: var(--lobby-landscape-ticket-body-gap);
+    padding:
+      var(--lobby-landscape-ticket-padding-top)
+      var(--lobby-landscape-ticket-padding-inline)
+      var(--lobby-landscape-ticket-padding-bottom);
+  }
+
+  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__ticket-head {
+    padding-bottom: var(--lobby-landscape-ticket-head-padding);
+  }
+
+  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__fields {
+    gap: var(--lobby-landscape-ticket-fields-gap);
+  }
+
+  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__fields input:is([type="text"], [type="search"]) {
+    height: var(--lobby-landscape-ticket-control-height);
+    min-height: var(--lobby-landscape-ticket-control-height);
+    line-height: var(--lobby-landscape-ticket-control-height);
+  }
+
+  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__actions > .button {
+    min-height: var(--lobby-landscape-ticket-action-height);
+  }
+}
+
+/* En el lobby móvil apaisado se priorizan el título, la descripción y el
+   boleto. Sin la lista de prestaciones, ambas columnas quedan centradas en
+   el espacio vertical disponible. */
+@media (min-width: 681px) and (max-width: 980px)
+  and (max-height: 500px) and (orientation: landscape) {
+  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__grid {
+    align-items: center;
+  }
+
+  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__hero,
+  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__ticket {
+    align-self: center;
+  }
+
+  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__hero {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "brand"
+      "description";
+    justify-items: stretch;
+    row-gap: 12px;
+    text-align: center;
+  }
+
+  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__brand {
+    grid-area: brand;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__title-icon {
+    --lobby-title-icon-scale: 0.48;
+    --lobby-title-icon-min-size-px: 24px;
+  }
+
+  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__title {
+    --lobby-title-fit-max-rem: 3.6;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0.18em;
+    width: max-content;
+    max-width: 100%;
+    font-size: clamp(2.3rem, 6.4vw, 3.6rem);
+    white-space: nowrap;
+    text-align: left;
+  }
+
+  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__title-line {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__features {
+    display: none;
+  }
+}

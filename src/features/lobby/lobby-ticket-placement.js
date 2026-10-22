@@ -1,15 +1,28 @@
-const TITLE_ICON_SCALE = 1.085;
+const TITLE_ICON_SCALE = 0.95;
 const TITLE_ICON_MIN_SIZE_PX = 56;
 const TITLE_ICON_MAX_SIZE_PX = 160;
 const LOBBY_TICKET_TOP_STUB_MAX_SIDE_WIDTH_PX = 260;
 
 function syncLobbyTitleIconSize(title, icon) {
   const fontSize = Number.parseFloat(getComputedStyle(title).fontSize);
+  const iconStyle = getComputedStyle(icon);
+  const configuredScale = Number.parseFloat(
+    iconStyle.getPropertyValue("--lobby-title-icon-scale"),
+  );
+  const configuredMinimum = Number.parseFloat(
+    iconStyle.getPropertyValue("--lobby-title-icon-min-size-px"),
+  );
   if (!Number.isFinite(fontSize)) return;
 
+  const scale = Number.isFinite(configuredScale) && configuredScale > 0
+    ? configuredScale
+    : TITLE_ICON_SCALE;
+  const minimum = Number.isFinite(configuredMinimum) && configuredMinimum >= 0
+    ? configuredMinimum
+    : TITLE_ICON_MIN_SIZE_PX;
   const size = Math.min(
     TITLE_ICON_MAX_SIZE_PX,
-    Math.max(TITLE_ICON_MIN_SIZE_PX, fontSize * TITLE_ICON_SCALE),
+    Math.max(minimum, fontSize * scale),
   );
   const sizeValue = `${size.toFixed(2)}px`;
   icon.style.setProperty("width", sizeValue);

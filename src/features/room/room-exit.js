@@ -16,7 +16,6 @@ import {
 } from "../chat/index.js";
 import { removeActiveTabRecord } from "./room-access.js";
 import { invalidateRoomOperation, isRoomOperationCurrent, clearUrlRoom } from "./room-navigation.js";
-import { syncJoinRoomButtonState } from "./room-input.js";
 import { setInviteCopyFeedback } from "./room-invite.js";
 
 export async function leaveRoom() {
@@ -53,16 +52,6 @@ export async function leaveRoom() {
   dom.roomBadge.textContent = "Sin sala";
   setInviteCopyFeedback(false);
   dom.roomInput.value = localStorage.getItem(LAST_ROOM_KEY) || "";
-  syncJoinRoomButtonState();
-  if (dom.joinRoomButton) {
-    delete dom.joinRoomButton.dataset.loading;
-    dom.joinRoomButton.removeAttribute("aria-busy");
-  }
-  if (dom.createRoomButton) {
-    dom.createRoomButton.disabled = false;
-    delete dom.createRoomButton.dataset.loading;
-    dom.createRoomButton.removeAttribute("aria-busy");
-  }
   dom.messages.innerHTML = "";
   dom.overlayMessages.innerHTML = "";
   renderPresence();
