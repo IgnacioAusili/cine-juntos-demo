@@ -1,6 +1,5 @@
 const SINGLE_COLUMN_TICKET_FIT_PROPERTIES = [
   "--lobby-ticket-fit-height",
-  "--lobby-ticket-fit-stub-height",
   "--lobby-ticket-fit-padding-top",
   "--lobby-ticket-fit-padding-bottom",
   "--lobby-ticket-fit-body-gap",
@@ -33,19 +32,10 @@ export function syncSingleColumnTicketPlacement(hero, ticket, footer) {
   ) return;
 
   const body = ticket.querySelector('.lobby-screen__ticket-body');
-  const stub = ticket.querySelector('.lobby-screen__ticket-stub');
   const head = ticket.querySelector('.lobby-screen__ticket-head');
   const fields = ticket.querySelector('.lobby-screen__fields');
   const controls = [...(fields?.querySelectorAll('input[type="text"], input[type="search"]') || [])];
   const actionButtons = [...ticket.querySelectorAll('.lobby-screen__actions > .button')];
-  const stubRect = stub?.getBoundingClientRect();
-  const hasTopStub = Boolean(stubRect && stubRect.width > stubRect.height);
-  if (body && hasTopStub) {
-    const sidePadding = Number.parseFloat(getComputedStyle(body).paddingInlineStart);
-    if (Number.isFinite(sidePadding)) {
-      ticket.style.setProperty("--lobby-ticket-fit-padding-top", `${sidePadding.toFixed(2)}px`);
-    }
-  }
   const heroRect = hero.getBoundingClientRect();
   const baseTicketHeight = ticket.getBoundingClientRect().height;
   const footerRect = footer.getBoundingClientRect();
@@ -62,14 +52,6 @@ export function syncSingleColumnTicketPlacement(hero, ticket, footer) {
   if (remainingCompression > 0) {
     // Primero reducimos el boleto completo (la franja naranja se acorta con él).
     ticket.style.setProperty("--lobby-ticket-fit-height", `${targetTicketHeight.toFixed(2)}px`);
-    if (hasTopStub && stubRect) {
-      const stubReduction = Math.min(6, remainingCompression * 0.18);
-      ticket.style.setProperty(
-        "--lobby-ticket-fit-stub-height",
-        `${Math.max(28, stubRect.height - stubReduction).toFixed(2)}px`,
-      );
-      remainingCompression -= stubReduction;
-    }
     const stubInset = Math.min(10, (baseTicketHeight - targetTicketHeight) / 2);
     if (stubInset > 0) {
       ticket.style.setProperty("--lobby-ticket-fit-stub-inset", `${stubInset.toFixed(2)}px`);
@@ -92,11 +74,10 @@ export function syncSingleColumnTicketPlacement(hero, ticket, footer) {
       // reducimos separaciones y controles si todavía no alcanza.
       const topPaddingCapacity = Math.max(0, topPadding - Math.min(4, topPadding));
       const bottomPaddingCapacity = Math.max(0, bottomPadding - Math.min(4, bottomPadding));
-      const paddingCapacity = (hasTopStub ? 0 : topPaddingCapacity) + bottomPaddingCapacity;
+      const paddingCapacity = topPaddingCapacity + bottomPaddingCapacity;
       const paddingReduction = Math.min(remainingCompression, paddingCapacity);
       if (paddingReduction > 0 && paddingCapacity > 0) {
-        const effectiveTopPaddingCapacity = hasTopStub ? 0 : topPaddingCapacity;
-        const topReduction = paddingReduction * (effectiveTopPaddingCapacity / paddingCapacity);
+        const topReduction = paddingReduction * (topPaddingCapacity / paddingCapacity);
         const bottomReduction = paddingReduction - topReduction;
         ticket.style.setProperty(
           "--lobby-ticket-fit-padding-top",

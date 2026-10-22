@@ -45,6 +45,7 @@
 @media (max-width: 680px) {
   body.page-context--lobby .lobby-screen {
     grid-template-rows: auto auto auto;
+    grid-template-columns: minmax(0, 1fr);
     align-content: start;
     min-height: max(0px, calc(100dvh - var(--app-shell-gutter)));
     padding-block: 0 10px;

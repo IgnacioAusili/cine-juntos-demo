@@ -31,13 +31,6 @@ body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__ticket 
   grid-template-rows: minmax(0, 1fr);
 }
 
-body.page-context--lobby[data-lobby-flow="single-column"][data-lobby-ticket-stub="top"] .lobby-screen__ticket {
-  width: min(var(--lobby-ticket-track-size, 404px), 100%);
-  justify-self: center;
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: var(--lobby-ticket-fit-stub-height, var(--lobby-ticket-top-stub-height)) minmax(0, 1fr);
-}
-
 /* El modo apilado se activa cuando el contenido real deja de caber en las
    dos columnas, aunque el viewport siga teniendo más de 680px de ancho. */
 body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="single-column"] .lobby-screen__grid {
@@ -209,12 +202,6 @@ body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__actions
   body.page-context--lobby[data-lobby-layout="columns"] .lobby-screen__ticket {
     align-self: center;
     margin-top: 0;
-  }
-}
-
-@media (min-width: 481px) and (max-width: 680px) {
-  body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__ticket {
-    grid-template-columns: 36px minmax(0, 1fr);
   }
 }
 

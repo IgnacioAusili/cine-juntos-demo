@@ -18,11 +18,8 @@
     --lobby-landscape-ticket-control-height: 38px;
     --lobby-landscape-ticket-action-height: 42px;
   }
-}
 
-@media (min-width: 681px) and (max-width: 980px)
-  and (max-height: 500px) and (orientation: landscape)
-  and (hover: none) and (pointer: coarse) {
+  /* El ancho y la densidad del boleto se adaptan a cualquier viewport apaisado. */
   body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__ticket {
     width: calc(var(--lobby-ticket-track-size) - var(--lobby-landscape-ticket-track-gap));
   }
@@ -115,5 +112,79 @@
 
   body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__features {
     display: none;
+  }
+}
+
+/* En un teléfono angosto apaisado, el ancho del perfil original ya está
+   girado (por ejemplo, 667 × 375), pero sigue dentro del breakpoint móvil.
+   Bajar los mínimos permite conservar hero y boleto en columnas cuando ambos
+   caben en el ancho real; si no caben, el flujo dinámico sigue apilándolos. */
+@media (max-width: 680px) and (max-height: 500px) and (orientation: landscape) {
+  body.page-context--lobby[data-lobby-layout="columns"] .lobby-screen__grid {
+    --lobby-columns-min-hero-inline-size: 240px;
+    --lobby-columns-min-ticket-inline-size: 320px;
+    --lobby-ticket-track-size: 320px;
+    --lobby-grid-column-gap: 8px;
+  }
+
+  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__grid {
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 0.9fr);
+    align-items: center;
+    column-gap: 8px;
+    row-gap: 8px;
+  }
+
+  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__hero {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "brand"
+      "description";
+    justify-items: center;
+    row-gap: 8px;
+    text-align: center;
+  }
+
+  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__brand {
+    grid-area: brand;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__title-icon {
+    --lobby-title-icon-scale: 0.6;
+    --lobby-title-icon-min-size-px: 24px;
+  }
+
+  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__title {
+    --lobby-title-fit-max-rem: 2.3;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0.18em;
+    width: max-content;
+    max-width: 100%;
+    font-size: clamp(2rem, 5.5vw, 2.3rem);
+    white-space: nowrap;
+    text-align: left;
+  }
+
+  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__title-line {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__features {
+    display: none;
+  }
+
+  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__ticket {
+    width: min(var(--lobby-ticket-track-size), 100%);
+    justify-self: center;
   }
 }

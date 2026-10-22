@@ -44,7 +44,7 @@
   position: absolute;
   z-index: 2;
   top: 50%;
-  left: 36px;
+  left: var(--lobby-ticket-stub-width, 36px);
   width: 16px;
   height: 16px;
   border-radius: 999px;

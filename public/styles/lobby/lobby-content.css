@@ -1,4 +1,7 @@
 
+.lobby-screen__ticket {
+  --lobby-ticket-stub-width: 36px;
+}
 
 .lobby-screen__description {
   grid-area: description;
@@ -102,7 +105,7 @@
 .lobby-screen__ticket {
   position: relative;
   display: grid;
-  grid-template-columns: 36px 1fr;
+  grid-template-columns: var(--lobby-ticket-stub-width) minmax(0, 1fr);
   width: min(404px, 100%);
   justify-self: end;
   overflow: hidden;

@@ -1,9 +1,5 @@
 
 
-body.page-context--lobby[data-lobby-ticket-stub="top"] .lobby-screen__ticket {
-  --lobby-ticket-top-stub-height: 36px;
-}
-
 body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__title {
   --lobby-title-lift: 0px;
 }
@@ -32,14 +28,6 @@ body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__title {
   }
 }
 
-/* Cuando el espacio medido del lado derecho se agota, solo cambia la
-   orientación del stub naranja; el resto de la composición permanece igual. */
-body.page-context--lobby[data-lobby-ticket-stub="top"] .lobby-screen__ticket {
-  grid-template-columns: 1fr;
-  grid-template-rows: var(--lobby-ticket-fit-stub-height, var(--lobby-ticket-top-stub-height)) minmax(0, 1fr);
-  width: min(380px, calc(100% - 12px));
-}
-
 body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__title {
   font-size: clamp(3.5rem, 13.7cqw, 4.35rem);
   line-height: 0.92;
@@ -47,45 +35,6 @@ body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__title {
   padding-bottom: 0;
   text-align: left;
   transform: translate(var(--lobby-title-group-shift, 0px), 0);
-}
-
-body.page-context--lobby[data-lobby-ticket-stub="top"] .lobby-screen__ticket-stub {
-  grid-column: 1;
-  grid-row: 1;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  min-height: var(--lobby-ticket-fit-stub-height, var(--lobby-ticket-top-stub-height));
-  padding: 4px 14px;
-  border-right: 0;
-  border-bottom: 0;
-  writing-mode: horizontal-tb;
-  transform: none;
-}
-
-body.page-context--lobby[data-lobby-ticket-stub="top"] .lobby-screen__ticket-body {
-  grid-column: 1;
-  grid-row: 2;
-  padding-inline: var(--lobby-ticket-fit-padding-inline, 18px);
-}
-
-body.page-context--lobby[data-lobby-ticket-stub="top"] .lobby-screen__ticket-perforation {
-  top: var(--lobby-ticket-fit-stub-height, var(--lobby-ticket-top-stub-height));
-  left: 50%;
-  width: 14px;
-  height: 14px;
-  box-shadow: none;
-  transform: translate(-50%, -50%);
-}
-
-body.page-context--lobby[data-lobby-ticket-stub="top"] .lobby-screen__ticket::after {
-  inset: 0;
-  left: 0;
-  width: auto;
-  height: auto;
-  border-radius: inherit;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), transparent 16%);
-  transform: none;
 }
 
 /* Ajustes derivados del layout real: en una sola columna la descripción gana

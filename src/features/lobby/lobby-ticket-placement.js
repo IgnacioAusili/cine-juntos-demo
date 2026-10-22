@@ -1,7 +1,8 @@
 const TITLE_ICON_SCALE = 0.95;
 const TITLE_ICON_MIN_SIZE_PX = 56;
 const TITLE_ICON_MAX_SIZE_PX = 160;
-const LOBBY_TICKET_TOP_STUB_MAX_SIDE_WIDTH_PX = 260;
+const LOBBY_TICKET_COMPACT_STUB_MAX_WIDTH_PX = 320;
+const LOBBY_TICKET_COMPACT_STUB_WIDTH_PX = 28;
 
 function syncLobbyTitleIconSize(title, icon) {
   const fontSize = Number.parseFloat(getComputedStyle(title).fontSize);
@@ -30,46 +31,23 @@ function syncLobbyTitleIconSize(title, icon) {
 }
 
 export function resetLobbyTicketPlacement(screen, ticket) {
-  document.body.removeAttribute("data-lobby-ticket-stub");
+  ticket?.style.removeProperty("--lobby-ticket-stub-width");
   ticket?.style.removeProperty("translate");
   screen?.style.removeProperty("--lobby-ticket-right-shift");
 }
 
-export function syncSingleColumnTicketStub(ticket) {
+export function syncLobbyTicketStubWidth(ticket) {
   if (!ticket) return;
 
-  document.body.removeAttribute("data-lobby-ticket-stub");
-  if (ticket.getBoundingClientRect().width <= LOBBY_TICKET_TOP_STUB_MAX_SIDE_WIDTH_PX) {
-    document.body.dataset.lobbyTicketStub = "top";
+  const ticketWidth = ticket.getBoundingClientRect().width;
+  if (ticketWidth <= LOBBY_TICKET_COMPACT_STUB_MAX_WIDTH_PX) {
+    ticket.style.setProperty(
+      "--lobby-ticket-stub-width",
+      `${LOBBY_TICKET_COMPACT_STUB_WIDTH_PX}px`,
+    );
+  } else {
+    ticket.style.removeProperty("--lobby-ticket-stub-width");
   }
-}
-
-export function syncLobbyTicketPlacement(screen, ticket) {
-  if (!screen || !ticket) return;
-
-  const grid = screen.querySelector('.lobby-screen__grid');
-  if (!grid) return;
-
-  // El grid ya centra el boleto en su segunda pista. Quitar cualquier
-  // desplazamiento antiguo evita que el boleto quede corrido al redimensionar.
-  ticket.style.removeProperty("translate");
-
-  const columns = getComputedStyle(grid).gridTemplateColumns
-    .trim()
-    .split(/\s+/)
-    .map((track) => Number.parseFloat(track));
-  const ticketTrackWidth = columns[1];
-  if (!Number.isFinite(ticketTrackWidth)) return;
-
-  // El modo horizontal reduce el ancho del boleto. Si el umbral se calcula
-  // sobre el modo actualmente aplicado, el boleto entra y sale del umbral en
-  // cada ciclo de ResizeObserver y parpadea entre ambas disposiciones.
-  // Medir siempre el estado lateral hace que la decisión sea estable.
-  document.body.removeAttribute("data-lobby-ticket-stub");
-  const sideTicketRect = ticket.getBoundingClientRect();
-  const sideNeedsTopStub = sideTicketRect.width > ticketTrackWidth;
-  const stubMode = sideNeedsTopStub ? "top" : "side";
-  document.body.dataset.lobbyTicketStub = stubMode;
 }
 
 export function syncLobbyTitlePlacement(screen, isSingleColumn) {

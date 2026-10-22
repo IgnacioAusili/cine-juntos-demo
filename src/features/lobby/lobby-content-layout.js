@@ -3,7 +3,7 @@ let lobbyCenterFrame = 0;
 import { resetTitleFit, syncLobbyTitleFit, syncSingleColumnTitleGroup, resetSingleColumnTitleLift, resetSingleColumnTitleGroup, resetSingleColumnDescriptionWidth, syncLobbyTextDensity, syncLobbyTicketInlinePadding } from "./lobby-title-layout.js";
 import { syncSingleColumnDescriptionWidth, syncSingleColumnContentCenter, syncSingleColumnContentGap } from "./lobby-content-variants.js";
 import { resetSingleColumnTicketFit, syncSingleColumnTicketPlacement } from "./lobby-ticket-fit.js";
-import { resetLobbyTicketPlacement, syncLobbyTicketPlacement, syncLobbyTitlePlacement, syncSingleColumnTicketStub } from "./lobby-ticket-placement.js";
+import { resetLobbyTicketPlacement, syncLobbyTicketStubWidth, syncLobbyTitlePlacement } from "./lobby-ticket-placement.js";
 
 export function syncLobbyContentCenter() {
   lobbyCenterFrame = 0;
@@ -76,7 +76,7 @@ export function syncLobbyContentCenter() {
 
   if (isSingleColumn) {
     resetLobbyTicketPlacement(screen, ticket);
-    syncSingleColumnTicketStub(ticket);
+    syncLobbyTicketStubWidth(ticket);
     grid.style.setProperty("--lobby-content-center-shift", "0px");
     resetSingleColumnTitleLift(hero);
     resetSingleColumnTitleGroup(hero);
@@ -114,7 +114,7 @@ export function syncLobbyContentCenter() {
   // En dos columnas el centro vertical lo determina la pista disponible de la
   // grilla, que ya reserva espacio para el pie en el layout apaisado.
   grid.style.removeProperty("--lobby-content-center-shift");
-  syncLobbyTicketPlacement(screen, ticket);
+  syncLobbyTicketStubWidth(ticket);
   syncLobbyTicketInlinePadding(ticket);
   syncLobbyTextDensity(hero, footer);
   syncLobbyTitleFit(screen, hero, ticket);

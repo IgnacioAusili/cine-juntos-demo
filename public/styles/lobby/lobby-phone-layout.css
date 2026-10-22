@@ -1,7 +1,7 @@
 
 @media (max-width: 680px) {
   body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__ticket {
-    grid-template-columns: 36px minmax(0, 1fr);
+    grid-template-columns: var(--lobby-ticket-stub-width, 36px) minmax(0, 1fr);
     justify-self: center;
   }
 }
