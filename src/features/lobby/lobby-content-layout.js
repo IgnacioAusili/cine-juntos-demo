@@ -2,7 +2,7 @@ let lobbyCenterFrame = 0;
 
 import { resetTitleFit, syncLobbyTitleFit, syncSingleColumnTitleGroup, resetSingleColumnTitleLift, resetSingleColumnTitleGroup, resetSingleColumnDescriptionWidth, syncLobbyTextDensity, syncLobbyTicketInlinePadding } from "./lobby-title-layout.js";
 import { syncSingleColumnDescriptionWidth, syncSingleColumnContentCenter, syncSingleColumnContentGap } from "./lobby-content-variants.js";
-import { resetSingleColumnTicketFit, syncSingleColumnTicketPlacement } from "./lobby-ticket-fit.js";
+import { resetLobbyTicketFit, syncColumnsTicketFit, syncSingleColumnTicketPlacement } from "./lobby-ticket-fit.js";
 import { resetLobbyTicketPlacement, syncLobbyTicketStubWidth, syncLobbyTitlePlacement } from "./lobby-ticket-placement.js";
 
 export function syncLobbyContentCenter() {
@@ -17,6 +17,7 @@ export function syncLobbyContentCenter() {
 
   const isColumns = document.body.dataset.lobbyLayout === "columns";
   const screen = document.querySelector("#lobbyScreen");
+  const marquee = screen?.querySelector('.lobby-screen__marquee');
   const footer = screen?.querySelector('.lobby-screen__footer');
   const grid = screen?.querySelector('.lobby-screen__grid');
   const content = screen
@@ -58,7 +59,7 @@ export function syncLobbyContentCenter() {
   const isSingleColumn = Boolean(grid) && (
     gridColumns.length < 2 || (isColumns && canMeasureColumns && !columnsHaveRoom)
   );
-  if (!isSingleColumn) resetSingleColumnTicketFit(ticket);
+  if (!isSingleColumn) resetLobbyTicketFit(ticket);
   document.body.dataset.lobbyFlow = isSingleColumn ? "single-column" : "columns";
   syncLobbyTitlePlacement(screen, isSingleColumn);
 
@@ -114,6 +115,7 @@ export function syncLobbyContentCenter() {
   // En dos columnas el centro vertical lo determina la pista disponible de la
   // grilla, que ya reserva espacio para el pie en el layout apaisado.
   grid.style.removeProperty("--lobby-content-center-shift");
+  syncColumnsTicketFit(screen, grid, ticket, marquee, footer);
   syncLobbyTicketStubWidth(ticket);
   syncLobbyTicketInlinePadding(ticket);
   syncLobbyTextDensity(hero, footer);

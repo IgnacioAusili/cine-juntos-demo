@@ -9,3 +9,36 @@
 body.page-context--lobby .lobby-screen__about-button {
   transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
 }
+
+/* En columnas, las medidas de compresión vienen de la geometría visible del
+   lobby y conservan como base las alturas y los espacios responsive vigentes. */
+body.page-context--lobby[data-lobby-flow="columns"] .lobby-screen__ticket[data-lobby-ticket-fit] {
+  height: var(--lobby-ticket-fit-height, auto);
+  min-height: 0;
+  top: var(--lobby-ticket-fit-offset-y, 0px);
+}
+
+body.page-context--lobby[data-lobby-flow="columns"] .lobby-screen__ticket[data-lobby-ticket-fit] .lobby-screen__ticket-body {
+  min-height: 0;
+  gap: var(--lobby-ticket-fit-body-gap);
+  padding-top: var(--lobby-ticket-fit-padding-top);
+  padding-bottom: var(--lobby-ticket-fit-padding-bottom);
+}
+
+body.page-context--lobby[data-lobby-flow="columns"] .lobby-screen__ticket[data-lobby-ticket-fit] .lobby-screen__ticket-head {
+  padding-bottom: var(--lobby-ticket-fit-head-padding);
+}
+
+body.page-context--lobby[data-lobby-flow="columns"] .lobby-screen__ticket[data-lobby-ticket-fit] .lobby-screen__fields {
+  gap: var(--lobby-ticket-fit-fields-gap);
+}
+
+body.page-context--lobby[data-lobby-flow="columns"] .lobby-screen__ticket[data-lobby-ticket-fit] .lobby-screen__fields input:is([type="text"], [type="search"]) {
+  height: var(--lobby-ticket-fit-control-height);
+  min-height: var(--lobby-ticket-fit-control-height);
+  line-height: var(--lobby-ticket-fit-control-height);
+}
+
+body.page-context--lobby[data-lobby-flow="columns"] .lobby-screen__ticket[data-lobby-ticket-fit] .lobby-screen__actions > .button {
+  min-height: var(--lobby-ticket-fit-action-height);
+}

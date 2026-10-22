@@ -19,7 +19,7 @@
 .lobby-screen__ticket-stub::before {
   position: absolute;
   z-index: 0;
-  inset: var(--lobby-ticket-fit-stub-inset, 0px) 0;
+  inset: 0;
   background:
     repeating-linear-gradient(
       45deg,

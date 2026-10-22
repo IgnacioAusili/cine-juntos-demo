@@ -1,5 +1,16 @@
 /* Este contenedor agrupa marca e ícono solo en la variante apaisada; en las
    demás composiciones, sus hijos siguen participando del grid existente. */
+@media (max-width: 680px) and (max-height: 500px) and (orientation: landscape) {
+  body.page-context--lobby[data-lobby-layout="columns"] .lobby-screen__grid {
+    --lobby-phone-landscape-hero-width: 100%;
+    --lobby-phone-landscape-title-size: clamp(2.65rem, 7vw, 3rem);
+    --lobby-phone-landscape-title-fit-max-rem: 3;
+    --lobby-phone-landscape-title-icon-size: clamp(64px, 11vw, 76px);
+    --lobby-phone-landscape-description-size: clamp(1.12rem, 3vw, 1.25rem);
+    --lobby-phone-landscape-description-line-height: 1.35;
+  }
+}
+
 .lobby-screen__brand {
   display: contents;
 }
@@ -156,12 +167,15 @@
   }
 
   body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__title-icon {
-    --lobby-title-icon-scale: 0.6;
-    --lobby-title-icon-min-size-px: 24px;
+    flex: 0 0 auto;
+    width: var(--lobby-phone-landscape-title-icon-size);
+    height: var(--lobby-phone-landscape-title-icon-size);
+    min-width: var(--lobby-phone-landscape-title-icon-size);
+    min-height: var(--lobby-phone-landscape-title-icon-size);
   }
 
   body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__title {
-    --lobby-title-fit-max-rem: 2.3;
+    --lobby-title-fit-max-rem: var(--lobby-phone-landscape-title-fit-max-rem);
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
@@ -169,7 +183,7 @@
     gap: 0.18em;
     width: max-content;
     max-width: 100%;
-    font-size: clamp(2rem, 5.5vw, 2.3rem);
+    font-size: var(--lobby-phone-landscape-title-size);
     white-space: nowrap;
     text-align: left;
   }
@@ -186,5 +200,14 @@
   body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__ticket {
     width: min(var(--lobby-ticket-track-size), 100%);
     justify-self: center;
+  }
+
+  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__hero {
+    width: var(--lobby-phone-landscape-hero-width);
+  }
+
+  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__description {
+    font-size: var(--lobby-phone-landscape-description-size);
+    line-height: var(--lobby-phone-landscape-description-line-height);
   }
 }

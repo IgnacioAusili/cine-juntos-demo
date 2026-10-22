@@ -133,6 +133,30 @@
     scrollbar-color: transparent transparent;
   }
 
+  .about-dialog__fixed-header {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: -26px -28px 0 -20px;
+    padding: 26px 28px 0 20px;
+    background: linear-gradient(145deg, rgba(27, 31, 35, 0.98), rgba(11, 15, 18, 0.98));
+  }
+
+  .about-dialog__fixed-header .o-dialog-close {
+    position: static;
+    flex: 0 0 24px;
+    margin-left: auto;
+  }
+
+  .about-dialog__header {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding-right: 0;
+  }
+
   .about-dialog .o-dialog-close {
     right: 16px;
     width: 24px;
@@ -338,6 +362,95 @@
   .about-dialog__disclaimer {
     margin-top: 20px;
     font-size: 0.9rem;
+    line-height: 1.5;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1600px) and (orientation: landscape) and (max-aspect-ratio: 8 / 5) {
+  .about-dialog {
+    width: min(92vw, 1280px);
+    max-width: 1280px;
+    height: fit-content;
+    max-height: min(90dvh, 920px);
+  }
+
+  .about-dialog__card {
+    height: auto;
+    max-height: min(90dvh, 920px);
+  }
+
+  .about-dialog__intro {
+    font-size: clamp(1.12rem, 1.35vw, 1.24rem);
+    line-height: 1.5;
+  }
+
+  .about-dialog__details dt {
+    font-size: 0.88rem;
+  }
+
+  .about-dialog__details dd {
+    font-size: clamp(1.02rem, 1.2vw, 1.12rem);
+  }
+
+  .about-dialog__disclaimer {
+    margin-top: 22px;
+    font-size: clamp(0.94rem, 1.05vw, 1rem);
+  }
+}
+
+@media (min-width: 681px) and (orientation: portrait) {
+  .about-dialog {
+    width: min(82vw, 680px);
+    max-width: 680px;
+    height: min(64dvh, 820px);
+    max-height: calc(100dvh - 32px);
+  }
+
+  .about-dialog__card {
+    height: 100%;
+    max-height: 100%;
+  }
+
+  .about-dialog__fixed-header {
+    padding: 18px clamp(20px, 3vw, 32px) 12px;
+  }
+
+  .about-dialog__content {
+    padding: 0 clamp(20px, 3vw, 32px) 22px;
+  }
+
+  .about-dialog__intro {
+    margin: 16px 0;
+    font-size: clamp(1.06rem, 1.5vw, 1.18rem);
+    line-height: 1.55;
+  }
+
+  .about-dialog__details {
+    gap: 14px;
+  }
+
+  .about-dialog__details > div {
+    grid-template-columns: clamp(76px, 11vw, 92px) minmax(0, 1fr);
+    gap: clamp(12px, 2vw, 18px);
+    padding-bottom: 10px;
+  }
+
+  .about-dialog__details dt {
+    font-size: 0.84rem;
+  }
+
+  .about-dialog__details > div:last-child dt {
+    width: auto;
+  }
+
+  .about-dialog__details dd {
+    font-size: clamp(0.94rem, 1.25vw, 1rem);
+    line-height: 1.5;
+  }
+
+  .about-dialog__disclaimer {
+    margin-top: 18px;
+    font-size: clamp(0.86rem, 1.15vw, 0.94rem);
     line-height: 1.5;
   }
 }

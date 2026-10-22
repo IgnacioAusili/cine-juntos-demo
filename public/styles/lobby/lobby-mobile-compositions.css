@@ -616,6 +616,16 @@ body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__app-inv
     display: none;
   }
 }
+
+/* En tabletas verticales, el flujo apilado evita mantener las dos columnas
+   solo porque el boleto alcanza a entrar por unos pocos píxeles. La grilla de
+   una pista también deja que el cálculo del lobby active sus estilos apilados. */
+@media (min-width: 681px) and (orientation: portrait) {
+  body.page-context--lobby[data-lobby-layout="columns"] .lobby-screen__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 @media (max-width: 680px) {
   body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__grid {
     gap: clamp(12px, 1.8vh, 18px);
