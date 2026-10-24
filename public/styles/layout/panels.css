@@ -63,6 +63,12 @@
   border-bottom-left-radius: 0;
 }
 
+/* Al contraer el dock inferior, el reproductor vuelve a ser un panel cerrado. */
+.session-view.session-view--chat-collapsed[data-chat-dock="bottom"]
+  .player-frame:not(.mini-player-surface) {
+  border-bottom: 1px solid var(--glass-border-strong);
+}
+
 /* Si el chat inferior queda contraído con espacio lateral visible, el video
    recupera sus esquinas inferiores redondeadas. */
 .session-view.session-view--chat-collapsed:not(.session-view--layout-edge-to-edge)[data-chat-dock="bottom"]

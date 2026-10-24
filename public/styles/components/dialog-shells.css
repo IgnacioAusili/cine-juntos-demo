@@ -21,9 +21,16 @@
 
 .about-dialog {
   box-sizing: border-box;
-  width: calc(100% - 20px);
+  width: calc(
+    100% - var(--about-dialog-viewport-inset) - var(--about-dialog-viewport-inset)
+  );
   max-width: none;
-  max-height: calc(100dvh - 24px);
+  height: calc(
+    100dvh - var(--about-dialog-viewport-inset) - var(--about-dialog-viewport-inset)
+  );
+  max-height: calc(
+    100dvh - var(--about-dialog-viewport-inset) - var(--about-dialog-viewport-inset)
+  );
   padding: 0;
   overflow: hidden;
   border: 1px solid var(--glass-border-strong);

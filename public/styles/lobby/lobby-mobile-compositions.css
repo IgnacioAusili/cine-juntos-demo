@@ -445,6 +445,20 @@ body.page-context--lobby .lobby-screen__app-invite-button {
   right: 8px;
   bottom: 10px;
   touch-action: manipulation;
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    color 140ms ease;
+}
+
+@media (hover: hover) {
+  body.page-context--lobby .lobby-screen__app-invite-button:not(:disabled):hover {
+    border-color: rgba(240, 140, 58, 0.72);
+    background: rgba(240, 140, 58, 0.28);
+    box-shadow: 0 0 0 2px rgba(240, 140, 58, 0.1);
+    color: #fff0dc;
+  }
 }
 
 body.page-context--lobby .lobby-screen__app-invite-button svg {
@@ -455,10 +469,8 @@ body.page-context--lobby .lobby-screen__app-invite-button svg {
 }
 
 body.page-context--lobby .lobby-screen__app-invite-button [data-lobby-install-label] {
-  display: inline-flex;
-  align-items: center;
+  display: block;
   line-height: 1;
-  transform: translateY(1px);
 }
 
 body.page-context--lobby .lobby-screen__app-invite-button:focus-visible {
@@ -587,7 +599,7 @@ body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__app-inv
   position: static;
   grid-column: 2;
   align-self: center;
-  min-height: 24px;
+  min-height: 22px;
   padding: 2px 6px;
   font-size: 0.63rem;
 }

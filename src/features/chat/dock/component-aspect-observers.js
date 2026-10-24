@@ -94,6 +94,14 @@ export function wireComponentAspectObservers({
   videoPlayer.addEventListener("loadedmetadata", () => {
     scheduleComponentLayoutMeasure("center-video");
   });
+  window.addEventListener("resize", () => scheduleComponentLayoutMeasure(), {
+    passive: true,
+  });
+  window.visualViewport?.addEventListener(
+    "resize",
+    () => scheduleComponentLayoutMeasure(),
+    { passive: true },
+  );
   window.addEventListener("chat-layout-settled", () => {
     scheduleComponentLayoutMeasure("center-video");
   }, { passive: true });

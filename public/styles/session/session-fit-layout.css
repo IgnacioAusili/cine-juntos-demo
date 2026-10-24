@@ -78,6 +78,12 @@ body:not(.page-context--lobby)
    estos estilos solo representan el estado elegido. */
 .session-view[data-chat-dock="right"] .o-workspace {
   flex-wrap: nowrap;
+  min-height: 0;
+}
+
+.session-view.session-view--viewport-edge-to-edge[data-chat-dock="right"] .o-workspace {
+  /* Sin el borde exterior, 1px de cobertura evita que el fondo asome por redondeo. */
+  height: calc(var(--app-viewport-height) + 1px);
 }
 
 .session-view[data-chat-dock="right"] .o-video-area {

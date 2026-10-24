@@ -1,6 +1,7 @@
 
 
 .about-dialog {
+  --about-dialog-viewport-inset: 20px;
   --about-dialog-header-surface-end: color-mix(
     in srgb,
     var(--about-dialog-surface-start) 40%,
@@ -53,19 +54,23 @@
 
 @media (min-width: 681px) {
   .about-dialog {
-    max-height: min(100dvh, calc(103dvh - 65.92px));
+    max-height: calc(
+      100dvh - var(--about-dialog-viewport-inset) - var(--about-dialog-viewport-inset)
+    );
   }
 
   .about-dialog__card {
     display: flex;
     flex-direction: column;
-    max-height: min(100dvh, calc(103dvh - 67.98px));
-    overflow-x: hidden;
-    overflow-y: auto;
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden;
     padding: 0;
   }
 
   .about-dialog__fixed-header {
+    position: static;
+    top: auto;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -95,8 +100,11 @@
   }
 
   .about-dialog__content {
-    flex: 0 0 auto;
-    overflow: visible;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
     padding: 0 12px 12px;
     scrollbar-width: none;
     scrollbar-color: transparent transparent;
@@ -130,22 +138,28 @@
 
 @media (hover: none) and (pointer: coarse) and (max-height: 500px) and (orientation: landscape) {
   .about-dialog {
-    max-height: min(100dvh, calc(103dvh - 28.84px));
+    max-height: calc(
+      100dvh - var(--about-dialog-viewport-inset) - var(--about-dialog-viewport-inset)
+    );
   }
 
   .about-dialog__card {
-    max-height: min(100dvh, calc(103dvh - 30.9px));
+    max-height: 100%;
   }
 }
 
 @media (max-width: 680px) {
   .about-dialog {
     position: relative;
-    max-height: calc(100dvh - 16px);
+    max-height: calc(
+      100dvh - var(--about-dialog-viewport-inset) - var(--about-dialog-viewport-inset)
+    );
   }
 
   .about-dialog__card {
-    max-height: calc(100dvh - 16px);
+    max-height: calc(
+      100dvh - var(--about-dialog-viewport-inset) - var(--about-dialog-viewport-inset)
+    );
     margin-right: 0;
     --about-dialog-card-top-padding: 26px;
     --about-dialog-fixed-header-vertical-padding: 13px;
@@ -298,8 +312,12 @@
 @media (min-width: 1024px) {
   .about-dialog {
     box-sizing: border-box;
-    height: min(calc(90dvh + 4px), 760px);
-    max-height: calc(100dvh - 32px);
+    height: calc(
+      100dvh - var(--about-dialog-viewport-inset) - var(--about-dialog-viewport-inset)
+    );
+    max-height: calc(
+      100dvh - var(--about-dialog-viewport-inset) - var(--about-dialog-viewport-inset)
+    );
   }
 
   .about-dialog__card {
@@ -399,13 +417,17 @@
 
 @media (min-width: 1024px) and (max-width: 1600px) and (orientation: landscape) and (max-aspect-ratio: 8 / 5) {
   .about-dialog {
-    height: fit-content;
-    max-height: min(90dvh, 920px);
+    height: calc(
+      100dvh - var(--about-dialog-viewport-inset) - var(--about-dialog-viewport-inset)
+    );
+    max-height: calc(
+      100dvh - var(--about-dialog-viewport-inset) - var(--about-dialog-viewport-inset)
+    );
   }
 
   .about-dialog__card {
-    height: auto;
-    max-height: min(90dvh, 920px);
+    height: 100%;
+    max-height: 100%;
   }
 
   .about-dialog__intro {
@@ -429,13 +451,17 @@
 
 @media (min-width: 681px) and (orientation: portrait) {
   .about-dialog {
-    height: fit-content;
-    max-height: calc(100dvh - 32px);
+    height: calc(
+      100dvh - var(--about-dialog-viewport-inset) - var(--about-dialog-viewport-inset)
+    );
+    max-height: calc(
+      100dvh - var(--about-dialog-viewport-inset) - var(--about-dialog-viewport-inset)
+    );
   }
 
   .about-dialog__card {
-    height: auto;
-    max-height: inherit;
+    height: 100%;
+    max-height: 100%;
   }
 
   .about-dialog__fixed-header {

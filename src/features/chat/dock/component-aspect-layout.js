@@ -18,6 +18,7 @@ const messageListShell = chatArea?.querySelector(".chat-message-list-shell");
 const messageForm = chatArea?.querySelector(":scope > .message-form");
 const FULL_PANEL_LAYOUT_CLASS = 'session-view--layout-component-stack';
 const EDGE_TO_EDGE_LAYOUT_CLASS = 'session-view--layout-edge-to-edge';
+const VIEWPORT_EDGE_TO_EDGE_LAYOUT_CLASS = 'session-view--viewport-edge-to-edge';
 const BOTTOM_DOCK_FIT_VIEWPORT_CLASS = 'session-view--bottom-dock-panels-fit-viewport';
 
 let pendingFrame = 0;
@@ -81,8 +82,14 @@ function syncEdgeToEdgeLayout() {
     && sessionBounds.width > 0
     && sessionBounds.left <= shellBounds.left
     && sessionBounds.right >= shellBounds.right;
+  const viewportWidth = document.documentElement.clientWidth || window.innerWidth || 0;
+  const fillsViewportWidth = viewportWidth > 0
+    && sessionBounds.width > 0
+    && sessionBounds.left <= 0
+    && sessionBounds.right >= viewportWidth;
 
   sessionView.classList.toggle(EDGE_TO_EDGE_LAYOUT_CLASS, fillsShellWidth);
+  sessionView.classList.toggle(VIEWPORT_EDGE_TO_EDGE_LAYOUT_CLASS, fillsViewportWidth);
 }
 
 function measureComponentLayout({ allowDuringChatTransition = false } = {}) {

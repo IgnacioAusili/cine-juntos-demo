@@ -144,7 +144,7 @@ export function syncSingleColumnContentCenter(screen, grid, hero, ticket, footer
     const currentInviteCenter = (currentInviteRect.top + currentInviteRect.bottom) / 2;
     const inviteShift = availableInviteCenter - currentInviteCenter;
     if (Number.isFinite(inviteShift)) {
-      appInvite.style.setProperty("--lobby-app-invite-center-shift", `${inviteShift.toFixed(2)}px`);
+      appInvite.style.setProperty("--lobby-app-invite-center-shift", `${Math.round(inviteShift)}px`);
     }
   }
   centerHeroInAvailableSpace(hero, availableTop, targetTop - heroTicketGap);

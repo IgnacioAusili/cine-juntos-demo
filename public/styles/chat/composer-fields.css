@@ -139,6 +139,9 @@
   outline: none;
   resize: none;
   color: var(--text);
+  /* Una secuencia sin espacios puede continuar después de los emojis en la
+     misma línea, en vez de bajar entera al siguiente renglón. */
+  word-break: break-all;
   /* La fuente de interfaz conserva los dígitos como texto; Noto queda como
      fallback para los emojis que esa fuente no contiene. */
   font-family: var(--text-font), "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", ui-sans-serif, sans-serif;
