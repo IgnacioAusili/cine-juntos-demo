@@ -1,11 +1,18 @@
 const TRACK_SELECTOR = '.about-dialog__scrollbar';
 const THUMB_SELECTOR = '.about-dialog__scrollbar-thumb';
+const HEADER_SELECTOR = '.about-dialog__fixed-header';
 
-function syncScrollbar(dialog, card, track, thumb) {
+function syncScrollbar(dialog, card, header, track, thumb) {
   if (!dialog.open) {
     track.hidden = true;
     return;
   }
+
+  const dialogTop = dialog.getBoundingClientRect().top;
+  const headerBottom = header.getBoundingClientRect().bottom;
+  const dialogBorderTop = Number.parseFloat(getComputedStyle(dialog).borderTopWidth) || 0;
+  const trackTop = Math.max(0, headerBottom - dialogTop - dialogBorderTop + 2);
+  track.style.setProperty('--about-dialog-scrollbar-top', `${trackTop}px`);
 
   const maxScroll = Math.max(0, card.scrollHeight - card.clientHeight);
   track.hidden = maxScroll <= 0;
@@ -23,9 +30,10 @@ function syncScrollbar(dialog, card, track, thumb) {
 export function wireAboutDialogScrollbar() {
   const dialog = document.querySelector("#aboutDialog");
   const card = dialog?.querySelector('.about-dialog__card');
+  const header = dialog?.querySelector(HEADER_SELECTOR);
   const track = dialog?.querySelector(TRACK_SELECTOR);
   const thumb = track?.querySelector(THUMB_SELECTOR);
-  if (!dialog || !card || !track || !thumb) return;
+  if (!dialog || !card || !header || !track || !thumb) return;
 
   let frame = 0;
   let hideTimer = 0;
@@ -33,7 +41,7 @@ export function wireAboutDialogScrollbar() {
     if (frame) return;
     frame = window.requestAnimationFrame(() => {
       frame = 0;
-      syncScrollbar(dialog, card, track, thumb);
+      syncScrollbar(dialog, card, header, track, thumb);
     });
   };
 
@@ -62,6 +70,7 @@ export function wireAboutDialogScrollbar() {
   if (window.ResizeObserver) {
     const observer = new ResizeObserver(scheduleSync);
     observer.observe(card);
+    observer.observe(header);
   }
 
   scheduleSync();

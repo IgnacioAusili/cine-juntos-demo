@@ -86,8 +86,7 @@ function syncLobbyMarqueeFit(screen, marquee, grid, footer) {
     + contentClearance * 2;
   const currentlyHidden = screen.dataset.lobbyMarquee === "hidden";
   const showThreshold = currentlyHidden ? contentClearance : 0;
-  const canShowMarquee = !isSingleColumn
-    && requiredHeight + showThreshold <= availableHeight;
+  const canShowMarquee = requiredHeight + showThreshold <= availableHeight;
   const nextState = canShowMarquee ? "visible" : "hidden";
 
   if (screen.dataset.lobbyMarquee !== nextState) screen.dataset.lobbyMarquee = nextState;

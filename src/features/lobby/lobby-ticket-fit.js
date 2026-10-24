@@ -1,3 +1,5 @@
+import { isLobbySoftKeyboardFocusPending } from "./lobby-keyboard-state.js";
+
 const TICKET_FIT_PROPERTIES = [
   "--lobby-ticket-fit-height",
   "--lobby-ticket-fit-padding-top",
@@ -19,7 +21,7 @@ function canFitTicket() {
   // El teclado reduce el viewport visible, pero el boleto debe conservar su
   // tamaño. La página se desplaza hasta el campo enfocado en vez de comprimirlo.
   return !(
-    document.body.dataset.lobbyInputFocused === "true"
+    isLobbySoftKeyboardFocusPending()
     || document.body.dataset.lobbyKeyboardOpen === "true"
     || document.body.dataset.lobbyBrowserKeyboardOpen === "true"
   );

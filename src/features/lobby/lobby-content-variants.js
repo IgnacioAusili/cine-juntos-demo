@@ -59,10 +59,6 @@ export function syncSingleColumnContentCenter(screen, grid, hero, ticket, footer
   appInvite?.style.removeProperty("--lobby-app-invite-center-shift");
   appInvite?.removeAttribute("data-density");
   grid.style.setProperty("--lobby-content-center-shift", "0px");
-  if (
-    document.body.dataset.lobbyInputFocused === "true"
-    || document.body.dataset.lobbyKeyboardOpen === "true"
-  ) return;
 
   hero.style.setProperty("translate", "0px 0px");
   const screenRect = screen.getBoundingClientRect();

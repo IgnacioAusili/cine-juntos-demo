@@ -82,13 +82,9 @@ export function syncLobbyContentCenter() {
     resetSingleColumnTitleLift(hero);
     resetSingleColumnTitleGroup(hero);
     grid.style.removeProperty("--lobby-vertical-content-gap");
-    // En una sola columna el boleto está debajo; no debe limitar el título
-    // como si ocupara una segunda columna lateral.
-    if (window.matchMedia("(max-width: 680px)").matches) {
-      resetTitleFit(screen.querySelector('.lobby-screen__title'));
-    } else {
-      syncLobbyTitleFit(screen, hero, null);
-    }
+    // En una sola columna el boleto está debajo: no debe reducir el título.
+    // El ancho disponible ya se controla desde la escala del hero.
+    resetTitleFit(screen.querySelector('.lobby-screen__title'));
     syncLobbyTitlePlacement(screen, true);
     syncSingleColumnTitleGroup(hero);
     syncSingleColumnDescriptionWidth(hero, ticket);

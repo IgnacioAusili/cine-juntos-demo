@@ -48,6 +48,7 @@
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-xl: 22px;
+  --dialog-close-icon-size: 32px;
   --text-soft: rgba(243, 245, 247, 0.78);
   --text-faint: rgba(243, 245, 247, 0.46);
   --text-font:

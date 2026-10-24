@@ -1,5 +1,23 @@
 
 
+.about-dialog {
+  --about-dialog-header-surface-end: color-mix(
+    in srgb,
+    var(--about-dialog-surface-start) 40%,
+    var(--about-dialog-surface-end) 60%
+  );
+}
+
+@media (max-width: 680px) {
+  .about-dialog {
+    --about-dialog-header-surface-end: color-mix(
+      in srgb,
+      var(--about-dialog-surface-start) 65%,
+      var(--about-dialog-surface-end) 35%
+    );
+  }
+}
+
 .about-dialog a {
   color: var(--teal);
   text-decoration: none;
@@ -26,13 +44,15 @@
   position: sticky;
   top: 0;
   z-index: 2;
-  background: rgba(27, 31, 35, 0.98);
+  background: linear-gradient(
+    var(--about-dialog-surface-gradient-angle),
+    var(--about-dialog-surface-start),
+    var(--about-dialog-header-surface-end)
+  );
 }
 
 @media (min-width: 681px) {
   .about-dialog {
-    width: min(824px, calc(100% - 28px));
-    max-width: 824px;
     max-height: min(100dvh, calc(103dvh - 65.92px));
   }
 
@@ -69,9 +89,9 @@
   }
 
   .about-dialog__fixed-header .o-dialog-close svg {
-    width: 28px;
-    height: 28px;
-    stroke-width: 2;
+    width: var(--dialog-close-icon-size);
+    height: var(--dialog-close-icon-size);
+    stroke-width: 1.8;
   }
 
   .about-dialog__content {
@@ -121,14 +141,15 @@
 @media (max-width: 680px) {
   .about-dialog {
     position: relative;
-    width: calc(100% - 24px);
     max-height: calc(100dvh - 16px);
   }
 
   .about-dialog__card {
     max-height: calc(100dvh - 16px);
     margin-right: 0;
-    padding: 26px 20px 24px;
+    --about-dialog-card-top-padding: 26px;
+    --about-dialog-fixed-header-vertical-padding: 13px;
+    padding: var(--about-dialog-card-top-padding) 20px 24px;
     padding-right: 28px;
     touch-action: pan-y;
     -webkit-overflow-scrolling: touch;
@@ -141,8 +162,9 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    margin: -26px -28px 0 -20px;
-    padding: 26px 28px 0 20px;
+    top: calc(0px - var(--about-dialog-card-top-padding));
+    margin: calc(0px - var(--about-dialog-card-top-padding)) -28px 0 -20px;
+    padding: var(--about-dialog-fixed-header-vertical-padding) 12px var(--about-dialog-fixed-header-vertical-padding) 20px;
   }
 
   .about-dialog__fixed-header .o-dialog-close {
@@ -165,9 +187,20 @@
   }
 
   .about-dialog .o-dialog-close svg {
-    width: 24px;
-    height: 24px;
-    stroke-width: 2;
+    width: var(--dialog-close-icon-size);
+    height: var(--dialog-close-icon-size);
+    stroke-width: 1.8;
+  }
+
+  .about-dialog__fixed-header .o-dialog-close {
+    flex-basis: 42px;
+    width: 42px;
+    height: 42px;
+  }
+
+  .about-dialog__fixed-header .o-dialog-close svg {
+    width: var(--dialog-close-icon-size);
+    height: var(--dialog-close-icon-size);
   }
 
   .about-dialog__eyebrow {
@@ -225,7 +258,7 @@
 
   .about-dialog__scrollbar {
     position: absolute;
-    top: 40px;
+    top: var(--about-dialog-scrollbar-top, 40px);
     right: 0;
     bottom: 40px;
     display: block;
@@ -265,9 +298,7 @@
 @media (min-width: 1024px) {
   .about-dialog {
     box-sizing: border-box;
-    width: min(980px, calc(100vw - 56px));
-    max-width: 980px;
-    height: min(90dvh, 760px);
+    height: min(calc(90dvh + 4px), 760px);
     max-height: calc(100dvh - 32px);
   }
 
@@ -299,8 +330,8 @@
   }
 
   .about-dialog__fixed-header .o-dialog-close svg {
-    width: 32px;
-    height: 32px;
+    width: var(--dialog-close-icon-size);
+    height: var(--dialog-close-icon-size);
   }
 
   .about-dialog__eyebrow {
@@ -368,8 +399,6 @@
 
 @media (min-width: 1024px) and (max-width: 1600px) and (orientation: landscape) and (max-aspect-ratio: 8 / 5) {
   .about-dialog {
-    width: min(92vw, 1280px);
-    max-width: 1280px;
     height: fit-content;
     max-height: min(90dvh, 920px);
   }
@@ -400,8 +429,6 @@
 
 @media (min-width: 681px) and (orientation: portrait) {
   .about-dialog {
-    width: min(82vw, 680px);
-    max-width: 680px;
     height: fit-content;
     max-height: calc(100dvh - 32px);
   }

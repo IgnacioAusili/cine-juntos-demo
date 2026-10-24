@@ -180,6 +180,16 @@
   -webkit-backdrop-filter: blur(16px);
 }
 
+.image-lightbox__close .image-lightbox__icon {
+  width: var(--dialog-close-icon-size);
+  height: var(--dialog-close-icon-size);
+  flex-basis: var(--dialog-close-icon-size);
+}
+
+.image-lightbox__close .image-lightbox__icon.lucide {
+  stroke-width: 1.8;
+}
+
 .image-lightbox__zoom-label {
   display: flex;
   align-items: center;

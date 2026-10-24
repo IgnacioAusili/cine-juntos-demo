@@ -28,8 +28,8 @@
   position: absolute;
   top: 12px;
   right: 16px;
-  width: 18px;
-  height: 18px;
+  width: 40px;
+  height: 40px;
   border: 0;
   border-radius: 0;
   background: transparent;
@@ -45,8 +45,8 @@
 }
 
 .o-dialog-close svg {
-  width: 18px;
-  height: 18px;
+  width: var(--dialog-close-icon-size);
+  height: var(--dialog-close-icon-size);
   stroke-width: 1.8;
 }
 
@@ -79,7 +79,7 @@
   align-items: center;
   gap: 12px;
   margin-bottom: 16px;
-  padding-right: 24px;
+  padding-right: 36px;
 }
 
 .player-dialog__header h2 {

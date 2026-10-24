@@ -2,7 +2,8 @@
 
 .lobby-screen__grid {
   --lobby-grid-column-gap: 10px;
-  --lobby-columns-min-hero-inline-size: 384px;
+  /* El flujo en columnas espera hasta conservar el ancho del hero apilado. */
+  --lobby-columns-min-hero-inline-size: 580px;
   --lobby-columns-min-ticket-inline-size: var(--lobby-ticket-track-size, 404px);
 }
 

@@ -1,3 +1,9 @@
+.about-dialog {
+  --about-dialog-surface-start: rgba(27, 31, 35, 0.98);
+  --about-dialog-surface-end: rgba(11, 15, 18, 0.98);
+  --about-dialog-surface-gradient-angle: 145deg;
+}
+
 .app-dialog {
   max-width: 400px;
   width: calc(100% - 32px);
@@ -14,14 +20,19 @@
 }
 
 .about-dialog {
-  width: min(520px, calc(100% - 32px));
-  max-width: 520px;
+  box-sizing: border-box;
+  width: calc(100% - 20px);
+  max-width: none;
   max-height: calc(100dvh - 24px);
   padding: 0;
   overflow: hidden;
   border: 1px solid var(--glass-border-strong);
   border-radius: 16px;
-  background: linear-gradient(145deg, rgba(27, 31, 35, 0.98), rgba(11, 15, 18, 0.98));
+  background: linear-gradient(
+    var(--about-dialog-surface-gradient-angle),
+    var(--about-dialog-surface-start),
+    var(--about-dialog-surface-end)
+  );
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.58), 0 0 36px rgba(240, 140, 58, 0.1);
 }
 

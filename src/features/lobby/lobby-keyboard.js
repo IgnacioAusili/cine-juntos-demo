@@ -35,6 +35,23 @@ function getLayoutViewportHeight() {
   ) || getViewportHeight();
 }
 
+function getResizedEmbeddedViewportHeight(viewportHeight) {
+  const frame = window.frameElement;
+  if (!frame || !viewportHeight) return 0;
+
+  // getBoundingClientRect reporta el iframe reducido por la escala del
+  // Mirador; clientHeight sigue en píxeles CSS del viewport interno.
+  const frameHeight = Math.round(frame.clientHeight);
+  const layoutHeight = Math.round(
+    document.documentElement.clientHeight || window.innerHeight || 0,
+  );
+  return frameHeight > 0
+    && Math.abs(frameHeight - viewportHeight) <= 1
+    && Math.abs(frameHeight - layoutHeight) <= 1
+    ? frameHeight
+    : 0;
+}
+
 function readRestingViewport() {
   try {
     const saved = JSON.parse(sessionStorage.getItem(RESTING_VIEWPORT_STORAGE_KEY) || "null");
@@ -49,13 +66,13 @@ function readRestingViewport() {
   return null;
 }
 
-function saveRestingViewport() {
+function saveRestingViewport(layoutHeight = getLayoutViewportHeight()) {
   if (!restingBrowserViewportHeight || !restingBrowserViewportWidth) return;
   try {
     sessionStorage.setItem(RESTING_VIEWPORT_STORAGE_KEY, JSON.stringify({
       height: restingBrowserViewportHeight,
       width: restingBrowserViewportWidth,
-      layoutHeight: getLayoutViewportHeight(),
+      layoutHeight,
     }));
   } catch {
     // El ajuste del viewport no depende de que el navegador permita storage.
@@ -122,6 +139,21 @@ function syncBrowserKeyboardLayout() {
     return;
   }
 
+  // En el Mirador el iframe cambia de alto al redimensionar el dispositivo.
+  // Ese cambio real de viewport no es el teclado ni las barras del navegador.
+  const embeddedViewportHeight = getResizedEmbeddedViewportHeight(viewportHeight);
+  if (
+    embeddedViewportHeight
+    && Math.abs(embeddedViewportHeight - restingBrowserViewportHeight) > 1
+  ) {
+    clearBrowserKeyboardLayout();
+    restingBrowserViewportHeight = embeddedViewportHeight;
+    restingBrowserViewportWidth = viewportWidth;
+    saveRestingViewport(embeddedViewportHeight);
+    scheduleLobbyContentCenter();
+    return;
+  }
+
   if (
     activeLobbyInput
     || body.dataset.lobbyInputFocused === "true"
@@ -137,7 +169,7 @@ function syncBrowserKeyboardLayout() {
     // desde la barra. Al volver al alto normal, actualizar la referencia para
     // que el siguiente cambio de viewport se detecte desde el tamaño correcto.
     restingBrowserViewportHeight = viewportHeight;
-    saveRestingViewport();
+    saveRestingViewport(embeddedViewportHeight || getLayoutViewportHeight());
     return;
   }
 
@@ -265,11 +297,18 @@ export function wireLobbyKeyboardRestore() {
   const viewportHeight = getViewportHeight();
   const viewportWidth = getViewportWidth();
   const savedRestingViewport = readRestingViewport();
+  const embeddedViewportHeight = getResizedEmbeddedViewportHeight(viewportHeight);
+  const savedViewportWasResizedInFrame = Boolean(
+    embeddedViewportHeight
+    && savedRestingViewport
+    && Math.abs(savedRestingViewport.height - embeddedViewportHeight) > 1,
+  );
   if (
     document.body.classList.contains("page-context--lobby")
     && savedRestingViewport
     && savedRestingViewport.width === viewportWidth
     && savedRestingViewport.height - viewportHeight > KEYBOARD_DELTA_PX
+    && !savedViewportWasResizedInFrame
   ) {
     restingBrowserViewportHeight = savedRestingViewport.height;
     restingBrowserViewportWidth = savedRestingViewport.width;
@@ -285,7 +324,7 @@ export function wireLobbyKeyboardRestore() {
       });
     });
   } else {
-    restingBrowserViewportHeight = viewportHeight;
+    restingBrowserViewportHeight = embeddedViewportHeight || viewportHeight;
     restingBrowserViewportWidth = viewportWidth;
     saveRestingViewport();
   }

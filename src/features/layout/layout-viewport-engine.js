@@ -9,8 +9,22 @@ export function getViewportMetrics(force = false) {
   const viewport = window.visualViewport;
   const documentElement = document.documentElement;
   const currentViewportHeight = getCurrentViewportHeight();
+  const previousViewportHeight = layoutMetricsState.lastViewportMetrics?.height || 0;
+  const frame = window.frameElement;
+  // getBoundingClientRect incluye la escala visual que aplica el Mirador al
+  // iframe; clientHeight conserva el tamaño real del viewport del documento.
+  const frameHeight = Math.round(frame?.clientHeight || 0);
+  const frameMatchesViewport = Boolean(
+    frameHeight
+    && Math.abs(frameHeight - currentViewportHeight) <= 1
+    && Math.abs(frameHeight - (documentElement.clientHeight || window.innerHeight)) <= 1,
+  );
+  const embeddedViewportResized = frameMatchesViewport
+    && previousViewportHeight > 0
+    && Math.abs(frameHeight - previousViewportHeight) > 1;
   const hasReducedViewport = !force && Boolean(
-    layoutMetricsState.lastViewportMetrics?.height
+    !embeddedViewportResized
+      && layoutMetricsState.lastViewportMetrics?.height
       && isViewportReducedForKeyboard(
         layoutMetricsState.lastViewportMetrics.height,
         currentViewportHeight,
@@ -33,11 +47,13 @@ export function getViewportMetrics(force = false) {
     || 0;
   const layoutHeight = fullscreenActive
     ? currentViewportHeight
-    : (hasReducedViewport && layoutMetricsState.lastViewportMetrics?.height)
-      || getLargeViewportHeight()
-      || window.innerHeight
-      || viewport?.height
-      || 0;
+    : embeddedViewportResized
+      ? frameHeight
+      : (hasReducedViewport && layoutMetricsState.lastViewportMetrics?.height)
+        || getLargeViewportHeight()
+        || window.innerHeight
+        || viewport?.height
+        || 0;
   const metrics = {
     width: Math.round(
       layoutWidth || viewport?.width || 0,
