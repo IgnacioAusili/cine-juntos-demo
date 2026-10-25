@@ -62,6 +62,8 @@
 
 /* El visor vive en la capa superior del navegador y no dentro del chat. */
 .image-lightbox {
+  --dialog-close-icon-size: 20px;
+  --image-lightbox-overlay-background: rgba(4, 7, 9, 0.48);
   box-sizing: border-box;
   width: 100vw;
   max-width: none;
@@ -73,7 +75,7 @@
   overflow: hidden;
   overscroll-behavior: none;
   color: #fff;
-  background: rgba(4, 7, 9, 0.38);
+  background: var(--image-lightbox-overlay-background);
 }
 
 .image-lightbox::backdrop {
@@ -99,8 +101,8 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
   align-items: stretch;
   gap: 0;
-  width: 102px;
-  height: 32px;
+  width: 112px;
+  height: 36px;
   box-sizing: border-box;
   padding: 0;
   border: 0;
@@ -133,9 +135,9 @@
 
 .image-lightbox__icon {
   display: block;
-  width: 18px;
-  height: 18px;
-  flex: 0 0 18px;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
   color: currentColor;
   overflow: visible;
 }
@@ -198,7 +200,7 @@
   height: 100%;
   min-width: 0;
   color: rgba(255, 255, 255, 0.78);
-  font-size: 0.72rem;
+  font-size: 0.76rem;
   text-align: center;
   user-select: none;
 }

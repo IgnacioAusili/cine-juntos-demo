@@ -3,6 +3,7 @@ import {
   REMOTE_IMAGE_EXTENSIONS,
   REMOTE_VIDEO_EXTENSIONS,
 } from "../../../core/utils.js";
+import { appendInlineFormatting, appendRemoteImage, hasInlineFormatting } from "./chat-inline-formatting.js";
 
 export function appendMessageContent(container, text) {
   const trimmedText = String(text || "").trim();
@@ -21,6 +22,14 @@ export function appendMessageContent(container, text) {
 
     link.append(img);
     container.append(link);
+    return;
+  }
+
+  if (hasInlineFormatting(trimmedText)) {
+    const textNode = document.createElement("div");
+    textNode.className = "message__text";
+    appendInlineFormatting(textNode, trimmedText, appendRichTextSegment);
+    container.append(textNode);
     return;
   }
 
@@ -93,6 +102,42 @@ export function appendMessageContent(container, text) {
   container.append(link);
 }
 
+function appendRichTextSegment(container, text) {
+  const urlPattern = /https?:\/\/[^\s<>"']+/gi;
+  let cursor = 0;
+  let match;
+
+  while ((match = urlPattern.exec(text))) {
+    const candidate = match[0].replace(/[),.;]+$/g, "");
+    let url;
+    try {
+      url = new URL(candidate).toString();
+    } catch {
+      continue;
+    }
+
+    const urlEnd = match.index + candidate.length;
+    appendEmojiAwareText(container, text.slice(cursor, match.index));
+    if (isRemoteVideoUrl(url)) {
+      appendVideoPreview(container, url, candidate);
+    } else if (isRemoteImageUrl(url)) {
+      appendRemoteImage(container, url);
+    } else {
+      const link = document.createElement("a");
+      link.className = "message__link";
+      link.href = url;
+      link.target = "_blank";
+      link.rel = "noreferrer";
+      link.textContent = candidate;
+      container.append(link);
+    }
+    cursor = urlEnd;
+    urlPattern.lastIndex = urlEnd;
+  }
+
+  appendEmojiAwareText(container, text.slice(cursor));
+}
+
 export function truncateText(text, maxLength) {
   const value = String(text || "").trim();
   if (value.length <= maxLength) return value;
@@ -128,7 +173,7 @@ function parseExplicitImageUrl(text) {
 function isEmojiOnlyText(text) {
   const value = String(text || "").trim();
   if (!value) return false;
-  return /^[\p{Extended_Pictographic}\p{Emoji_Presentation}\p{Regional_Indicator}\u200D\uFE0F\s]+$/u.test(value);
+  return /^(?:\p{Extended_Pictographic}|\p{Emoji_Presentation}|\p{Regional_Indicator}|\u200D|\uFE0F|\s)+$/u.test(value);
 }
 
 function appendEmojiAwareText(container, text) {

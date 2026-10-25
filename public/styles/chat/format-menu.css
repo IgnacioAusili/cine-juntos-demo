@@ -1,0 +1,211 @@
+.chat-format-menu {
+  --chat-format-menu-layer: 9600;
+  --chat-format-menu-border-width: 1px;
+  --chat-format-menu-border-radius: 9px;
+  --chat-format-menu-padding: 5px;
+  --chat-format-menu-item-height: 34px;
+  --chat-format-menu-item-radius: 5px;
+  --chat-format-menu-item-padding: 0 10px;
+  --chat-format-menu-font-size: 0.84rem;
+  --chat-format-menu-editor-gap: 8px;
+  --chat-format-menu-editor-padding: 6px;
+  --chat-format-menu-input-height: 34px;
+  --chat-format-menu-input-radius: 5px;
+  --chat-format-menu-input-padding: 0 8px;
+  --chat-format-menu-input-border-width: 1px;
+  --chat-format-menu-input-width: 220px;
+  --chat-format-menu-focus-outline: 2px;
+  --chat-format-menu-focus-offset: 1px;
+  --chat-format-menu-error-size: 0.74rem;
+  --chat-format-menu-actions-gap: 6px;
+  --chat-format-menu-item-gap: 14px;
+  --chat-format-menu-symbol-size: 0.78em;
+  --chat-format-menu-submenu-offset: 1px;
+  --chat-format-menu-submenu-layer: 1;
+  --chat-format-menu-viewport-margin: 8px;
+  --chat-format-menu-submenu-viewport-width: calc(100vw - 2 * var(--chat-format-menu-viewport-margin));
+  --chat-format-menu-submenu-max-height: calc(100vh - 16px);
+  --chat-format-menu-status-size: 0.72rem;
+  --chat-format-menu-submenu-arrow-size: 1.25em;
+  --chat-format-menu-submenu-arrow-line-height: 1;
+  --chat-format-menu-full-width: 100%;
+  position: fixed;
+  z-index: var(--chat-format-menu-layer);
+  display: grid;
+  width: max-content;
+  min-width: 0;
+  box-sizing: border-box;
+  border: var(--chat-format-menu-border-width) solid var(--glass-border-strong);
+  border-radius: var(--chat-format-menu-border-radius);
+  background: var(--bg-soft);
+  box-shadow: var(--shadow-lg);
+  padding: var(--chat-format-menu-padding);
+  color: var(--text);
+}
+
+.chat-format-menu[hidden] {
+  display: none;
+}
+
+.chat-format-menu button {
+  display: flex;
+  width: var(--chat-format-menu-full-width);
+  box-sizing: border-box;
+  min-height: var(--chat-format-menu-item-height);
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--chat-format-menu-item-gap);
+  border: 0;
+  border-radius: var(--chat-format-menu-item-radius);
+  background: transparent;
+  color: inherit;
+  padding: var(--chat-format-menu-item-padding);
+  font: inherit;
+  font-size: var(--chat-format-menu-font-size);
+  text-align: left;
+  cursor: pointer;
+}
+
+.chat-format-menu__symbol {
+  color: var(--muted-2);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--chat-format-menu-symbol-size);
+  white-space: nowrap;
+}
+
+.chat-format-menu[data-hover-enabled="true"] button:hover,
+.chat-format-menu[data-keyboard-navigation="true"] button:focus-visible {
+  outline: none;
+  background: var(--glass-highlight);
+}
+
+.chat-format-menu__actions {
+  display: grid;
+  width: var(--chat-format-menu-full-width);
+}
+
+.chat-format-menu__actions[hidden],
+.chat-format-menu__link-actions-list[hidden],
+.chat-format-menu__styles-submenu-wrap[hidden] {
+  display: none;
+}
+
+.chat-format-menu__styles-group {
+  position: relative;
+  width: var(--chat-format-menu-full-width);
+}
+
+.chat-format-menu__submenu-arrow {
+  color: var(--muted-2);
+  font-size: var(--chat-format-menu-submenu-arrow-size);
+  line-height: var(--chat-format-menu-submenu-arrow-line-height);
+}
+
+.chat-format-menu__styles-submenu-wrap {
+  position: absolute;
+  z-index: var(--chat-format-menu-submenu-layer);
+  top: 0;
+  left: calc(var(--chat-format-menu-full-width) - var(--chat-format-menu-submenu-offset));
+  width: max-content;
+  min-width: 0;
+  max-width: var(--chat-format-menu-submenu-viewport-width);
+  box-sizing: border-box;
+  max-height: var(--chat-format-menu-submenu-max-height);
+  overflow-y: auto;
+  border: var(--chat-format-menu-border-width) solid var(--glass-border-strong);
+  border-radius: var(--chat-format-menu-border-radius);
+  background: var(--bg-soft);
+  box-shadow: var(--shadow-lg);
+  padding: var(--chat-format-menu-padding);
+}
+
+.chat-format-menu__styles-group[data-submenu-side="left"] .chat-format-menu__styles-submenu-wrap {
+  right: calc(var(--chat-format-menu-full-width) - var(--chat-format-menu-submenu-offset));
+  left: auto;
+}
+
+.chat-format-menu__styles-group[data-submenu-side="below"] .chat-format-menu__styles-submenu-wrap {
+  top: calc(var(--chat-format-menu-full-width) - var(--chat-format-menu-submenu-offset));
+  right: auto;
+  left: 0;
+}
+
+.chat-format-menu__styles-submenu {
+  display: grid;
+}
+
+.chat-format-menu__styles-submenu[hidden] {
+  display: none;
+}
+
+.chat-format-menu__clipboard-status {
+  padding: var(--chat-format-menu-editor-padding);
+  color: var(--danger);
+  font-size: var(--chat-format-menu-status-size);
+}
+
+.chat-format-menu__clipboard-status[hidden] {
+  display: none;
+}
+
+.chat-format-menu__link-actions-list {
+  display: grid;
+}
+
+.chat-format-menu__link-form {
+  display: grid;
+  gap: var(--chat-format-menu-editor-gap);
+  padding: var(--chat-format-menu-editor-padding);
+}
+
+.chat-format-menu__link-form[hidden] {
+  display: none;
+}
+
+.chat-format-menu__link-label {
+  display: grid;
+  gap: var(--chat-format-menu-editor-gap);
+  color: var(--muted);
+  font-size: var(--chat-format-menu-font-size);
+}
+
+.chat-format-menu__url {
+  min-width: var(--chat-format-menu-input-width);
+  min-height: var(--chat-format-menu-input-height);
+  border: var(--chat-format-menu-input-border-width) solid var(--line);
+  border-radius: var(--chat-format-menu-input-radius);
+  background: var(--bg-deep);
+  color: var(--text);
+  padding: var(--chat-format-menu-input-padding);
+  font: inherit;
+  font-size: var(--chat-format-menu-font-size);
+}
+
+.chat-format-menu__url:focus-visible {
+  outline: var(--chat-format-menu-focus-outline) solid var(--accent-2);
+  outline-offset: var(--chat-format-menu-focus-offset);
+}
+
+.chat-format-menu__url[aria-invalid="true"] {
+  border-color: var(--danger);
+}
+
+.chat-format-menu__link-error {
+  color: var(--danger);
+  font-size: var(--chat-format-menu-error-size);
+}
+
+.chat-format-menu__link-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--chat-format-menu-actions-gap);
+}
+
+.chat-format-menu__link-actions button[type="submit"] {
+  background: var(--accent-2);
+  color: var(--bg-deep);
+}
+
+.chat-format-menu__link-actions-list button {
+  white-space: nowrap;
+}

@@ -78,7 +78,7 @@
     padding-left: 4px;
   }
 
-  html.page-context--viewport-landscape body:not(.page-context--lobby) .session-view[data-chat-dock="right"] .chat-area > .message-form .message-form__input-wrapper textarea {
+  html.page-context--viewport-landscape body:not(.page-context--lobby) .session-view[data-chat-dock="right"] .chat-area > .message-form .message-form__input-wrapper .message-form__rich-editor {
     min-height: 30px;
     max-height: 66px;
     padding-block: 5px;
@@ -124,7 +124,7 @@
     border-radius: 16px;
   }
 
-  html.page-context--viewport-landscape body:not(.page-context--lobby) .session-view[data-chat-dock] .player-frame .message-form.message-form--overlay .message-form__input-wrapper textarea {
+  html.page-context--viewport-landscape body:not(.page-context--lobby) .session-view[data-chat-dock] .player-frame .message-form.message-form--overlay .message-form__input-wrapper .message-form__rich-editor {
     min-height: 30px;
     max-height: 66px;
     padding: 5px 6px;

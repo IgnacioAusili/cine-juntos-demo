@@ -120,8 +120,8 @@
   /* iOS Safari amplía la página al enfocar controles de texto menores a
      16px. La línea explícita también centra el placeholder dentro de la
      altura compacta del composer sin alterar el layout de escritorio. */
-  body:not(.page-context--lobby) .message-form .message-form__input-wrapper textarea,
-  body:not(.page-context--lobby) .message-form.message-form--overlay .message-form__input-wrapper textarea {
+  body:not(.page-context--lobby) .message-form .message-form__input-wrapper .message-form__rich-editor,
+  body:not(.page-context--lobby) .message-form.message-form--overlay .message-form__input-wrapper .message-form__rich-editor {
     font-size: 16px;
     line-height: 20px;
   }

@@ -1,0 +1,93 @@
+.chat-link-confirmation {
+  --chat-link-dialog-width: min(420px, calc(100vw - 32px));
+  --chat-link-dialog-radius: 12px;
+  --chat-link-dialog-padding: 20px;
+  --chat-link-dialog-gap: 12px;
+  --chat-link-dialog-button-radius: 6px;
+  --chat-link-dialog-button-padding: 8px 12px;
+  --chat-link-dialog-border-width: 1px;
+  --chat-link-dialog-backdrop: color-mix(in srgb, var(--bg-deep) 62%, transparent);
+  --chat-link-dialog-title-size: 1.08rem;
+  --chat-link-dialog-url-size: 0.84rem;
+  --chat-link-dialog-url-max-height: 5em;
+  --chat-link-dialog-remember-gap: 8px;
+  --chat-link-dialog-remember-size: 0.88rem;
+  --chat-link-dialog-focus-width: 2px;
+  --chat-link-dialog-focus-offset: 2px;
+  width: var(--chat-link-dialog-width);
+  max-width: var(--chat-link-dialog-width);
+  border: var(--chat-link-dialog-border-width) solid var(--glass-border-strong);
+  border-radius: var(--chat-link-dialog-radius);
+  background: var(--bg-soft);
+  box-shadow: var(--shadow-lg);
+  color: var(--text);
+  padding: var(--chat-link-dialog-padding);
+  font: inherit;
+}
+
+.chat-link-confirmation::backdrop {
+  background: var(--chat-link-dialog-backdrop);
+}
+
+.chat-link-confirmation h2,
+.chat-link-confirmation p {
+  margin: 0;
+}
+
+.chat-link-confirmation h2 {
+  font-size: var(--chat-link-dialog-title-size);
+}
+
+.chat-link-confirmation > p {
+  margin-top: var(--chat-link-dialog-gap);
+  color: var(--text-soft);
+  overflow-wrap: anywhere;
+}
+
+.chat-link-confirmation__url {
+  max-height: var(--chat-link-dialog-url-max-height);
+  overflow: auto;
+  color: var(--accent-2);
+  font-size: var(--chat-link-dialog-url-size);
+}
+
+.chat-link-confirmation__remember {
+  display: flex;
+  align-items: center;
+  gap: var(--chat-link-dialog-remember-gap);
+  margin-top: var(--chat-link-dialog-gap);
+  color: var(--text-soft);
+  font-size: var(--chat-link-dialog-remember-size);
+}
+
+.chat-link-confirmation__remember input {
+  accent-color: var(--accent-2);
+}
+
+.chat-link-confirmation__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--chat-link-dialog-remember-gap);
+  margin-top: calc(var(--chat-link-dialog-gap) * 1.5);
+}
+
+.chat-link-confirmation__actions button {
+  border: var(--chat-link-dialog-border-width) solid var(--glass-border-strong);
+  border-radius: var(--chat-link-dialog-button-radius);
+  background: var(--glass-highlight);
+  color: var(--text);
+  padding: var(--chat-link-dialog-button-padding);
+  font: inherit;
+  cursor: pointer;
+}
+
+.chat-link-confirmation__actions button:focus-visible {
+  outline: var(--chat-link-dialog-focus-width) solid var(--accent-2);
+  outline-offset: var(--chat-link-dialog-focus-offset);
+}
+
+.chat-link-confirmation__actions .chat-link-confirmation__open {
+  border-color: transparent;
+  background: var(--accent-2);
+  color: var(--bg-deep);
+}

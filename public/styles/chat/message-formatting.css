@@ -1,0 +1,119 @@
+:root {
+  --chat-format-strike-thickness: 0.08em;
+  --chat-format-strike-center: 50%;
+  --chat-format-strike-background-size: 100% 100%;
+  --message-spoiler-hidden-opacity: 0.48;
+  --message-spoiler-revealed-opacity: 1;
+  --message-spoiler-duration: 140ms;
+  --message-spoiler-blur: blur(0.2em);
+  --message-spoiler-outline: 2px;
+  --message-monospace-copy-outline: 2px;
+  --message-monospace-copy-outline-offset: 2px;
+  --message-monospace-copy-feedback-size: 1.05em;
+  --message-monospace-copy-feedback-gap: 0.3em;
+  --message-monospace-copy-feedback-duration: 220ms;
+  --message-monospace-copy-feedback-offset: 3px;
+  --message-monospace-copy-feedback-scale: 0.72;
+  --message-monospace-copy-feedback-visible-scale: 1;
+  --message-monospace-copy-feedback-opacity: 1;
+}
+
+.message-form__rich-editor {
+  --chat-rich-link-underline-offset: 2px;
+}
+
+.message__monospace {
+  --message-monospace-size: 0.92em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--message-monospace-size);
+}
+
+.message__monospace--copyable {
+  cursor: pointer;
+}
+
+.message__copy-confirmation {
+  display: inline-flex;
+  width: 0;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  margin-inline-start: 0;
+  color: var(--copy-confirm-color);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(var(--message-monospace-copy-feedback-offset)) scale(var(--message-monospace-copy-feedback-scale));
+  transition:
+    width var(--message-monospace-copy-feedback-duration) ease,
+    margin-inline-start var(--message-monospace-copy-feedback-duration) ease,
+    opacity var(--message-monospace-copy-feedback-duration) ease,
+    transform var(--message-monospace-copy-feedback-duration) ease;
+  vertical-align: middle;
+}
+
+.message__copy-confirmation svg {
+  width: var(--message-monospace-copy-feedback-size);
+  height: var(--message-monospace-copy-feedback-size);
+  flex: 0 0 var(--message-monospace-copy-feedback-size);
+}
+
+.message__monospace--copied .message__copy-confirmation {
+  width: var(--message-monospace-copy-feedback-size);
+  margin-inline-start: var(--message-monospace-copy-feedback-gap);
+  opacity: var(--message-monospace-copy-feedback-opacity);
+  transform: translateY(0) scale(var(--message-monospace-copy-feedback-visible-scale));
+}
+
+.message__monospace--copyable:focus-visible {
+  outline: var(--message-monospace-copy-outline) solid var(--accent-2);
+  outline-offset: var(--message-monospace-copy-outline-offset);
+}
+
+.message__italic,
+.message-form__rich-editor .chat-rich-editor__italic {
+  font-style: italic;
+}
+
+.message__spoiler,
+.message-form__rich-editor .chat-rich-editor__spoiler {
+  background: transparent;
+  color: var(--muted);
+  filter: var(--message-spoiler-blur);
+  opacity: var(--message-spoiler-hidden-opacity);
+  cursor: pointer;
+  transition: opacity var(--message-spoiler-duration) ease;
+}
+
+.message__spoiler:focus-visible {
+  outline: var(--message-spoiler-outline) solid var(--accent-2);
+  outline-offset: var(--message-spoiler-outline);
+}
+
+.message__spoiler.message__spoiler--revealed,
+.message-form__rich-editor .chat-rich-editor__spoiler--revealed {
+  filter: none;
+  color: inherit;
+  opacity: var(--message-spoiler-revealed-opacity);
+}
+
+.message__strike,
+.message-form__rich-editor .chat-format-strike {
+  background-image: linear-gradient(
+    to bottom,
+    transparent calc(var(--chat-format-strike-center) - var(--chat-format-strike-thickness) / 2),
+    currentColor calc(var(--chat-format-strike-center) - var(--chat-format-strike-thickness) / 2),
+    currentColor calc(var(--chat-format-strike-center) + var(--chat-format-strike-thickness) / 2),
+    transparent calc(var(--chat-format-strike-center) + var(--chat-format-strike-thickness) / 2)
+  );
+  background-repeat: no-repeat;
+  background-size: var(--chat-format-strike-background-size);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  text-decoration: none;
+}
+
+.message-form__rich-editor .chat-rich-editor__link {
+  color: var(--accent-2);
+  text-decoration: underline;
+  text-underline-offset: var(--chat-rich-link-underline-offset);
+}

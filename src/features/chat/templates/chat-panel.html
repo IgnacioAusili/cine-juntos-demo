@@ -129,16 +129,18 @@
               <div class="image-preview-container" id="imagePreview" hidden></div>
               <div class="message-form__input-wrapper">
                 <div class="message-form__textarea-shell">
-                  <textarea
+                  <div
                     id="messageInput"
-                    autocomplete="off"
-                    autocapitalize="off"
+                    class="message-form__rich-editor"
+                    contenteditable="true"
+                    role="textbox"
+                    aria-label="Mensaje"
+                    aria-multiline="true"
+                    data-placeholder="Mensaje"
                     spellcheck="false"
                     data-bwignore="true"
                     data-lpignore="true"
-                      placeholder="Mensaje"
-                    rows="1"
-                  ></textarea>
+                  ></div>
                   <div class="composer-scrollbar" aria-hidden="true">
                     <div class="composer-scrollbar__thumb"></div>
                   </div>

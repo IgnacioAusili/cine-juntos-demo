@@ -116,7 +116,7 @@ body.page-context--lobby .lobby-screen__about-button:hover,
 body.page-context--lobby .lobby-screen__about-button:focus-visible,
 body.page-context--lobby .lobby-screen__about-button.u-touch-hover,
 body.page-context--lobby .lobby-screen__about-button.u-touch-hover:hover {
-  transform: translateY(-2px);
+  --lobby-about-visual-hover-offset: -2px;
 }
 
 @media (max-width: 680px) {

@@ -83,7 +83,7 @@ export function bindGroupHeader(header, items = getGroupItems(header)) {
     item.classList.add('message--system-group-member');
     item.oncontextmenu = null;
     item.onclick = (event) => {
-      if (event.target instanceof HTMLElement && event.target.closest("button, input, textarea, select")) {
+      if (event.target instanceof HTMLElement && event.target.closest("button, input, textarea, select, [contenteditable='true']")) {
         return;
       }
       event.stopPropagation();

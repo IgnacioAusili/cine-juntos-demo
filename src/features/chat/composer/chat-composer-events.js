@@ -1,27 +1,36 @@
 import { dom } from "../../../core/dom.js";
 import { logEvent, state } from "../../../core/state.js";
-import { CHAT_DOCK_META } from "../../../core/utils.js";
-import { autoResizeMessageInput, handlePasteEvent, hideEmojiPicker, normalizeEmojiShortcodesInput, repositionEmojiPicker, submitMessageFrom, toggleEmojiPicker, updateCharCounter, wireFloatingComposerLayout, wireComposerScrollbar } from "./chat-input.js";
+import { autoResizeMessageInput, handlePasteEvent, hideEmojiPicker, normalizeEmojiShortcodesInput, repositionEmojiPicker, submitMessageFrom, toggleEmojiPicker, updateCharCounter, wireComposerScrollbar } from "./chat-input.js";
 import { setReplyTarget } from "../messages/chat-reply.js";
-import { checkScrollPosition, syncUnreadBadgesWithVisibility } from "../messages/unread-counters.js";
-import { fillChatHistoryViewport, loadOlderChatHistory } from "../messages/chat-history.js";
-import { copyMessageText, hideMessageMenu, showMessageMenu } from "../messages/message-menu.js";
-import { setChatDock, setExternalChatAutoExpandEnabled, setInsideChatAutoExpandEnabled, setInsideChatStyle, setInsideChatVisible, syncChatAutoExpandControls, syncExternalChatCollapseHandleOffset, wireResponsiveSessionLayout } from "../chat-layout.js";
-import { scheduleMessageTimeAdjustment } from "../messages/message-time-layout.js";
+import { copyMessageText, hideMessageMenu, openMessageMenuLink } from "../messages/message-menu.js";
 import { focusChatInput } from "./chat-input-focus.js";
-import { hideTooltip } from "../../icons-tooltips.js";
-import { applyDampenedWheelScroll, clearCollapsePointerHover, handleCollapseButtonClick, hasVerticalScroll, isMobileChatLayout, setCollapsePointerHover, isCollapsePointerHovered, shouldBlockWheelForComposerControl, shouldBlockWheelForContainer, shouldBlockWheelForTextarea } from "../chat-event-helpers.js";
+import { isMobileChatLayout } from "../chat-event-helpers.js";
+import { wireChatFormatMenu } from "./chat-format-menu.js";
+import { deleteRichEditorForward, getRichEditorSelection, insertRichEditorText, installRichEditor, normalizeRichEditorMarkup } from "./chat-rich-editor.js";
+import { wireChatLinkConfirmation } from "../messages/chat-link-confirmation.js";
+import { wireChatComposerDropTargets } from "./chat-composer-drag-drop.js";
 
 export function wireChatComposerEvents() {
+  installRichEditor(dom.messageInput);
+  installRichEditor(dom.overlayMessageInput);
+  wireChatComposerDropTargets();
+  wireChatLinkConfirmation();
+  const emojiSelections = new WeakMap();
+  dom.messageEmojiButton.addEventListener("pointerdown", () => {
+    emojiSelections.set(dom.messageEmojiButton, getRichEditorSelection(dom.messageInput));
+  });
+  dom.overlayEmojiButton.addEventListener("pointerdown", () => {
+    emojiSelections.set(dom.overlayEmojiButton, getRichEditorSelection(dom.overlayMessageInput));
+  });
 dom.messageEmojiButton.addEventListener("click", () => {
   if (dom.sessionView?.dataset.chatDock === "bottom") {
     logEvent("mobile-keyboard-debug", `emoji:trigger-click ${JSON.stringify({ button: dom.messageEmojiButton.id, activeElement: document.activeElement?.id || document.activeElement?.tagName || null, inputFocused: document.activeElement === dom.messageInput })}`);
   }
-  toggleEmojiPicker(dom.messageInput, dom.messageEmojiButton);
+  toggleEmojiPicker(dom.messageInput, dom.messageEmojiButton, emojiSelections.get(dom.messageEmojiButton));
 });
 
 dom.overlayEmojiButton.addEventListener("click", () => {
-  toggleEmojiPicker(dom.overlayMessageInput, dom.overlayEmojiButton);
+  toggleEmojiPicker(dom.overlayMessageInput, dom.overlayEmojiButton, emojiSelections.get(dom.overlayEmojiButton));
 });
 
 [dom.emojiPopover].forEach((popover) => {
@@ -101,6 +110,10 @@ dom.messageMenu.addEventListener("click", (event) => {
   if (!action || !state.chat.menuMessage) return;
   if (action === "copy") copyMessageText(state.chat.menuMessage);
   if (action === "reply") setReplyTarget(state.chat.menuMessage, state.chat.menuReplyInput);
+  if (action === "open-link") {
+    openMessageMenuLink();
+    return;
+  }
   hideMessageMenu();
 });
 
@@ -121,6 +134,7 @@ dom.overlayMessageForm.addEventListener("submit", (event) => {
   const isOverlay = input === dom.overlayMessageInput;
   wireComposerScrollbar(input);
   input.addEventListener("input", () => {
+    normalizeRichEditorMarkup(input);
     normalizeEmojiShortcodesInput(input);
     autoResizeMessageInput(input);
     updateCharCounter(input, isOverlay);
@@ -132,7 +146,20 @@ dom.overlayMessageForm.addEventListener("submit", (event) => {
       updateCharCounter(input, isOverlay);
     }, 0),
   );
+  input.addEventListener("paste", (event) => {
+    const items = Array.from(event.clipboardData?.items || []);
+    if (items.some((item) => item.type.includes("image"))) return;
+    const text = event.clipboardData?.getData("text/plain");
+    if (!text) return;
+    event.preventDefault();
+    insertRichEditorText(input, text);
+  });
   input.addEventListener("keydown", (event) => {
+    if (event.key === "Delete" && !event.isComposing && !event.shiftKey && !event.ctrlKey && !event.metaKey && !event.altKey) {
+      event.preventDefault();
+      deleteRichEditorForward(input);
+      return;
+    }
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       if (input === dom.messageInput && dom.sessionView?.dataset.chatDock === "bottom") {
@@ -142,6 +169,7 @@ dom.overlayMessageForm.addEventListener("submit", (event) => {
     }
   });
 });
+wireChatFormatMenu([dom.messageInput, dom.overlayMessageInput]);
 
 dom.messageInput.addEventListener("paste", (event) =>
   handlePasteEvent(event, false),

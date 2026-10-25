@@ -1,5 +1,5 @@
 import { dom } from "../../core/dom.js";
-import { captureExternalChatCollapseScroll, setExternalChatCollapsed } from "./chat-layout.js";
+import { setExternalChatCollapsed } from "./chat-layout.js";
 import { hideTooltip } from "../icons-tooltips.js";
 
 const MOBILE_CHAT_LAYOUT_QUERY = "(max-width: 980px)";
@@ -72,7 +72,6 @@ export function handleCollapseButtonClick() {
 }
 
 const CHAT_SCROLL_WHEEL_MULTIPLIER = 0.35;
-const DOM_DELTA_PIXEL = 0;
 const DOM_DELTA_LINE = 1;
 const DOM_DELTA_PAGE = 2;
 export function getWheelScrollDelta(event, container) {
@@ -158,7 +157,7 @@ export function shouldBlockWheelForComposerControl(control, event) {
   if (!control || event.ctrlKey || !event.deltaY) return false;
 
   const form = control.closest("form");
-  const input = form?.querySelector("textarea");
+  const input = form?.querySelector(".message-form__rich-editor");
   const messages = form === dom.overlayMessageForm ? dom.overlayMessages : dom.messages;
 
   // Los botones acompañan al input: solo frenan la rueda si alguno de los dos

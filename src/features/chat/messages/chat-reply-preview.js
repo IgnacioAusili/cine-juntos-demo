@@ -45,7 +45,9 @@ function createReplyPreviewContent(container) {
   const textBtn = document.createElement("button");
   textBtn.type = "button";
   textBtn.className = 'reply-preview__text';
-  textBtn.innerHTML = `<span class="reply-preview__name">${state.chat.replyTarget.name}</span><span class="reply-preview__body">${truncateText(state.chat.replyTarget.text || "", 58)}</span>`;
+  const replyText = truncateText(state.chat.replyTarget.text || "", 58);
+  const replyBodyClass = replyText === "(Imagen)" ? " reply-preview__body--image" : "";
+  textBtn.innerHTML = `<span class="reply-preview__name">${state.chat.replyTarget.name}</span><span class="reply-preview__body${replyBodyClass}">${replyText}</span>`;
   const preferredScrollContainer = container === dom.overlayReplyPreview ? dom.overlayMessages : dom.messages;
   textBtn.addEventListener("click", () =>
     scrollToMessage(state.chat.replyTarget.id, preferredScrollContainer),

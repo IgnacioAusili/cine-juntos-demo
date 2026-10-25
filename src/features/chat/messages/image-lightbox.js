@@ -114,6 +114,7 @@ function ensureLightbox() {
     event.stopPropagation();
     closeLightbox();
   });
+  lightbox.addEventListener("keydown", handleKeydown, true);
   lightbox.addEventListener("wheel", (event) => {
     event.preventDefault();
     event.stopPropagation();
@@ -200,7 +201,11 @@ function closeLightbox() {
 
 function handleKeydown(event) {
   if (!lightbox?.open) return;
-  if (event.key === "+" || event.key === "=") {
+  if (event.key === "Escape") {
+    event.preventDefault();
+    event.stopPropagation();
+    closeLightbox();
+  } else if (event.key === "+" || event.key === "=") {
     event.preventDefault();
     changeScale(SCALE_STEP);
   } else if (event.key === "-" || event.key === "_") {

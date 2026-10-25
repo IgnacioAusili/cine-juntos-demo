@@ -125,7 +125,7 @@
   body.page-context--lobby .lobby-screen__about-button:focus-visible,
   body.page-context--lobby .lobby-screen__about-button.u-touch-hover,
   body.page-context--lobby .lobby-screen__about-button.u-touch-hover:hover {
-    transform: translateY(4px);
+    --lobby-about-visual-hover-offset: -2px;
   }
 }
 

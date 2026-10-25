@@ -6,7 +6,8 @@ export function createSwipeReply(
   { onReply, companions = [], pointerCaptureTarget = bubble },
 ) {
   const swipeTargets = [bubble, ...companions].filter(Boolean);
-  const captureTarget = pointerCaptureTarget || bubble;
+  const defaultCaptureTarget = pointerCaptureTarget || bubble;
+  let activeCaptureTarget = defaultCaptureTarget;
   // El rail reservado por el layout permite deslizar sin que la burbuja toque el borde.
   const THRESHOLD = 34, MAX_DRAG = 48, LOCK_DIST = 10, V_BIAS = 12;
   const RESTORE_MS = 340, EPS = 2;
@@ -100,9 +101,10 @@ export function createSwipeReply(
   }
   function finalize() {
     tracking = directionLocked = false;
-    if (pointerId != null && captureTarget.hasPointerCapture?.(pointerId)) {
-      try { captureTarget.releasePointerCapture(pointerId); } catch { /* liberada */ }
+    if (pointerId != null && activeCaptureTarget.hasPointerCapture?.(pointerId)) {
+      try { activeCaptureTarget.releasePointerCapture(pointerId); } catch { /* liberada */ }
     }
+    activeCaptureTarget = defaultCaptureTarget;
     pointerId = null;
     pointerType = "";
     startX = startY = currentX = currentY = currentDx = currentDy = offset = progress = 0;
@@ -127,6 +129,10 @@ export function createSwipeReply(
     cancelAnimation();
     bubble.classList.remove('message--swipe-confirmed');
     window.clearTimeout(confirmPulseTimer);
+    // Capturar en el artículo retargetea el click y rompe enlaces internos.
+    activeCaptureTarget = typeof event.target?.setPointerCapture === "function"
+      ? event.target
+      : defaultCaptureTarget;
     pointerId = event.pointerId;
     pointerType = event.pointerType || "mouse";
     tracking = true;
@@ -143,7 +149,7 @@ export function createSwipeReply(
   }
   function capturePointer() {
     if (pointerId == null) return;
-    try { captureTarget.setPointerCapture(pointerId); } catch { /* invalida */ }
+    try { activeCaptureTarget.setPointerCapture(pointerId); } catch { /* invalida */ }
   }
   function cancelSwipe(shouldAnimate) {
     if (shouldAnimate && offset > 0) {

@@ -128,12 +128,12 @@
 
   .lobby-screen__about-button:hover,
   .lobby-screen__about-button:focus-visible {
-    transform: translateY(3px);
+    --lobby-about-visual-hover-offset: -2px;
   }
 
   .lobby-screen__about-button.u-touch-hover,
   .lobby-screen__about-button.u-touch-hover:hover {
-    transform: translateY(3px);
+    --lobby-about-visual-hover-offset: -2px;
   }
 
   /* Cargar usa el estado nativo de presión: evita que JS y :hover compitan

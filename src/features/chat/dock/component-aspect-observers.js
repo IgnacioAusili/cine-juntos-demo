@@ -105,12 +105,12 @@ export function wireComponentAspectObservers({
   videoPlayer.addEventListener("loadedmetadata", () => {
     scheduleComponentLayoutMeasure("center-video");
   });
-  window.addEventListener("resize", () => scheduleComponentLayoutMeasure(), {
+  window.addEventListener("resize", () => scheduleComponentLayoutMeasure("responsive-resize"), {
     passive: true,
   });
   window.visualViewport?.addEventListener(
     "resize",
-    () => scheduleComponentLayoutMeasure(),
+    () => scheduleComponentLayoutMeasure("responsive-resize"),
     { passive: true },
   );
   window.addEventListener("chat-layout-settled", () => {

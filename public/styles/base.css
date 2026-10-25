@@ -202,7 +202,9 @@ select:focus {
   background: rgba(7, 9, 11, 0.85);
 }
 
-.message-form textarea:focus,.message-form.message-form--overlay textarea:focus {
+.message-form textarea:focus,
+.message-form .message-form__rich-editor:focus,
+.message-form.message-form--overlay textarea:focus {
   border-color: var(--glass-border-strong);
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.06);
 }

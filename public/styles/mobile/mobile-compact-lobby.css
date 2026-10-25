@@ -113,7 +113,7 @@
     min-height: 30px;
   }
 
-  body:not(.page-context--lobby) .message-form .message-form__input-wrapper textarea {
+  body:not(.page-context--lobby) .message-form .message-form__input-wrapper .message-form__rich-editor {
     height: 30px;
     min-height: 30px;
     padding-block: 5px;

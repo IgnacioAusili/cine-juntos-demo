@@ -27,6 +27,7 @@ let pendingScrollTarget = "";
 let pendingScrollSuppression = false;
 let scrollTargetRevision = 0;
 let initialSessionScrollPending = true;
+let centerVideoOnNextSequentialLayoutChange = false;
 
 function isIntentionalChatScrollTransitionActive() {
   return Boolean(
@@ -112,11 +113,17 @@ function measureComponentLayout({ allowDuringChatTransition = false } = {}) {
   if (
     sessionView?.classList.contains('session-view--chat-layout-transitioning')
     && !allowDuringChatTransition
-  ) return;
+  ) {
+    centerVideoOnNextSequentialLayoutChange = false;
+    return;
+  }
 
   const isFullscreen = Boolean(document.fullscreenElement)
     || document.body.classList.contains('page-context--fullscreen');
-  if (isFullscreen && sessionView?.dataset.chatDock === "bottom") return;
+  if (isFullscreen && sessionView?.dataset.chatDock === "bottom") {
+    centerVideoOnNextSequentialLayoutChange = false;
+    return;
+  }
 
   const targetLayout = resolveBottomDockLayout({
     sessionView,
@@ -127,13 +134,22 @@ function measureComponentLayout({ allowDuringChatTransition = false } = {}) {
     chatTools,
     messageListShell,
   });
-  if (!targetLayout.hasMeasuredPanels && sessionView?.dataset.chatDock === "bottom") return;
+  if (!targetLayout.hasMeasuredPanels && sessionView?.dataset.chatDock === "bottom") {
+    centerVideoOnNextSequentialLayoutChange = false;
+    return;
+  }
 
   const scrollTransitionActive = isIntentionalChatScrollTransitionActive();
   if (scrollTransitionActive) pendingScrollTarget = "";
 
+  // ResizeObserver también se activa por cambios en el compositor y los
+  // mensajes. Esos reflows ajustan el layout, pero no deben apropiarse del
+  // scroll ni deshacer la posición que eligió una transición del dock.
+  const shouldCenterVideoOnSequentialLayoutChange = centerVideoOnNextSequentialLayoutChange;
+  centerVideoOnNextSequentialLayoutChange = false;
   if (
-    targetLayout.requiresSequentialLayout
+    shouldCenterVideoOnSequentialLayoutChange
+    && targetLayout.requiresSequentialLayout
     && !wasSequential
     && !sessionView.classList.contains('session-view--chat-collapsed')
     && !pendingScrollTarget
@@ -211,6 +227,9 @@ function measureComponentLayout({ allowDuringChatTransition = false } = {}) {
 }
 
 function scheduleComponentLayoutMeasure(scrollTarget = "") {
+  if (scrollTarget === "responsive-resize") {
+    centerVideoOnNextSequentialLayoutChange = true;
+  }
   if (scrollTarget === "suppress-scroll" || isIntentionalChatScrollTransitionActive()) {
     pendingScrollTarget = "";
     pendingScrollSuppression = true;

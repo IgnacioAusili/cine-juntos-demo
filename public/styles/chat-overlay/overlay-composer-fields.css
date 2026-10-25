@@ -49,9 +49,9 @@
 
 .player-frame[data-chat-style="panel"] .message-form.message-form--overlay .message-form__input-wrapper {
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.025)),
-    rgba(255, 255, 255, 0.055);
-  border-color: rgba(255, 255, 255, 0.11);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
+    rgba(255, 255, 255, 0.045);
+  border-color: rgba(255, 255, 255, 0.09);
 }
 
 .message-form.message-form--overlay::after {
@@ -87,12 +87,12 @@
 .player-frame[data-chat-style="float"] .message-form.message-form--overlay .message-form__input-wrapper {
   background: linear-gradient(
     90deg,
-    rgba(12, 15, 17, 0.43) 0%,
-    rgba(12, 15, 17, 0.33) 56%,
-    rgba(12, 15, 17, 0.24) 82%,
-    rgba(12, 15, 17, 0.24) 100%
+    rgba(12, 15, 17, 0.45) 0%,
+    rgba(12, 15, 17, 0.37) 56%,
+    rgba(12, 15, 17, 0.30) 82%,
+    rgba(12, 15, 17, 0.30) 100%
   );
-  border-color: rgba(255, 255, 255, 0.065);
+  border-color: rgba(255, 255, 255, 0.08);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   background-clip: padding-box;
@@ -102,7 +102,7 @@
     0 2px 8px -6px rgba(0, 0, 0, 0.12);
 }
 
-.message-form.message-form--overlay .message-form__input-wrapper textarea {
+.message-form.message-form--overlay .message-form__input-wrapper .message-form__rich-editor {
   flex: 1 1 auto;
   width: 100%;
   min-width: 0;
@@ -118,9 +118,14 @@
   padding-right: 68px;
   font-size: 0.78rem;
   line-height: 20px;
+  max-height: 86px;
   outline: none;
   resize: none;
   color: var(--text);
+  overflow-y: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  cursor: text;
   /* La fuente de interfaz conserva los dígitos como texto; Noto queda como
      fallback para los emojis que esa fuente no contiene. */
   font-family: var(--text-font), "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", ui-sans-serif, sans-serif;
@@ -129,7 +134,7 @@
   -ms-overflow-style: none;
 }
 
-.message-form.message-form--overlay .message-form__input-wrapper textarea::-webkit-scrollbar {
+.message-form.message-form--overlay .message-form__input-wrapper .message-form__rich-editor::-webkit-scrollbar {
   width: 0;
   height: 0;
 }

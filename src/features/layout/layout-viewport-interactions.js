@@ -64,7 +64,7 @@ function isRightChatScrollableTarget(target) {
       || Boolean(target.closest([
         '.session-view[data-chat-dock="right"] .chat-message-list',
         ".session-view[data-chat-dock=\"right\"] .chat-scrollbar",
-        ".session-view[data-chat-dock=\"right\"] textarea",
+        ".session-view[data-chat-dock=\"right\"] .message-form__rich-editor",
       ].join(",")))
     );
 }
@@ -161,7 +161,7 @@ function isBottomChatScrollableTarget(target) {
       || Boolean(target.closest([
         '.session-view[data-chat-dock="bottom"] .chat-message-list',
         ".session-view[data-chat-dock=\"bottom\"] .chat-scrollbar",
-        ".session-view[data-chat-dock=\"bottom\"] textarea",
+        ".session-view[data-chat-dock=\"bottom\"] .message-form__rich-editor",
       ].join(",")))
     );
 }

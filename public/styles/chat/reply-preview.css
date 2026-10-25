@@ -74,7 +74,7 @@
 }
 
 .reply-preview__name {
-  font-size: 0.62rem;
+  font-size: 0.68rem;
   font-weight: 700;
   color: var(--reply-participant-accent, var(--accent-2));
   line-height: 1.05;
@@ -92,6 +92,10 @@
   overflow: hidden;
   text-overflow: ellipsis;
   transition: color 0.15s ease;
+}
+
+.reply-preview__body--image {
+  font-size: 0.68rem;
 }
 
 .reply-preview__close {

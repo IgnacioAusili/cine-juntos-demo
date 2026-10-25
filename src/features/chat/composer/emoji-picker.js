@@ -4,7 +4,9 @@ import { EMOJI_PICKER_ITEMS, replaceEmojiShortcodes } from "../../../core/utils.
 import { focusChatInput } from "./chat-input-focus.js";
 import { isMobileLayout, logMobileInteraction } from "./chat-input-debug.js";
 import { EMOJI_PAGE_COLUMNS, positionEmojiPopover } from "./emoji-picker-layout.js";
+import { insertRichEditorText, normalizeRichEditorShortcodes } from "./chat-rich-editor.js";
 
+const richEditorSelections = new WeakMap();
 const EMOJI_POPOVER_TRANSITION_MS = 150;
 
 const EMOJI_FONT_SHORTHAND = '0.82rem "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji"';
@@ -137,7 +139,7 @@ export function buildEmojiPicker() {
   });
 }
 
-export async function toggleEmojiPicker(input, anchor) {
+export async function toggleEmojiPicker(input, anchor, savedSelection = null) {
   logMobileInteraction("emoji:toggle-start", input, {
     anchor: anchor?.id || null,
     anchorFocused: document.activeElement === anchor,
@@ -150,8 +152,11 @@ export async function toggleEmojiPicker(input, anchor) {
     return;
   }
 
-  const selectionStart = input?.selectionStart ?? input?.value.length ?? 0;
-  const selectionEnd = input?.selectionEnd ?? input?.value.length ?? 0;
+  const selectionStart = savedSelection?.start ?? input?.selectionStart ?? input?.value.length ?? 0;
+  const selectionEnd = savedSelection?.end ?? input?.selectionEnd ?? input?.value.length ?? 0;
+  if (input?.isContentEditable) {
+    richEditorSelections.set(input, { start: selectionStart, end: selectionEnd });
+  }
   const openRequestId = ++emojiPickerOpenRequestId;
   await preloadEmojiFont();
   if (openRequestId !== emojiPickerOpenRequestId) return;
@@ -212,6 +217,7 @@ export function hideEmojiPicker() {
 
 export function normalizeEmojiShortcodesInput(input) {
   if (!input) return false;
+  if (input.isContentEditable) return normalizeRichEditorShortcodes(input, replaceEmojiShortcodes);
 
   const originalValue = input.value;
   if (!originalValue.includes(":")) return false;
@@ -236,6 +242,12 @@ function insertEmoji(emoji) {
   if (!state.ui.activeEmojiInput) return;
   const input = state.ui.activeEmojiInput;
   logMobileInteraction("emoji:insert-start", input, { emoji, activeEmojiInput: input.id || null });
+  if (input.isContentEditable) {
+    insertRichEditorText(input, emoji, richEditorSelections.get(input));
+    richEditorSelections.delete(input);
+    hideEmojiPicker();
+    return;
+  }
   const start = input.selectionStart ?? input.value.length;
   const end = input.selectionEnd ?? input.value.length;
   input.value = `${input.value.slice(0, start)}${emoji}${input.value.slice(end)}`;

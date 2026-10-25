@@ -1,13 +1,24 @@
 .image-preview-container {
+  --image-preview-gap: 8px;
+  --image-preview-item-width: 120px;
+  --image-preview-min-item-width: 88px;
+  --image-preview-padding: 6px;
+
   display: flex;
   flex-direction: row;
+  flex-wrap: nowrap;
   align-items: center;
-  gap: 4px;
+  gap: var(--image-preview-gap);
   width: fit-content;
   max-width: 100%;
   min-width: 0;
   box-sizing: border-box;
-  padding: 4px;
+  align-self: center;
+  padding: var(--image-preview-padding);
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
   background: rgba(255, 255, 255, 0.03);
   border: 1px dashed rgba(255, 255, 255, 0.15);
   border-radius: 6px;
@@ -21,14 +32,16 @@
 .image-preview-container__item {
   position: relative;
   display: inline-block;
-  flex: 0 1 120px;
-  width: 120px;
+  flex: 0 1 var(--image-preview-item-width);
+  width: var(--image-preview-item-width);
   height: 62px;
   min-height: 62px;
-  min-width: 0;
+  min-width: var(--image-preview-min-item-width);
   border-radius: 5px;
   overflow: hidden;
-  border: 1px solid var(--line);
+  border: 1px solid var(--glass-border-strong);
+  background: var(--bg-deep);
+  box-shadow: var(--shadow-sm);
 }
 
 .image-preview-container__image-trigger {
@@ -71,11 +84,40 @@
 .image-preview-container__remove-button svg {
   display: block;
   flex: none;
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   stroke-width: 2.5;
 }
 
 .image-preview-container__remove-button:hover {
   background: var(--danger);
+}
+
+.message-form__drop-overlay {
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  border: inherit;
+  border-style: dashed;
+  border-color: var(--teal-glow-soft);
+  border-radius: inherit;
+  background: var(--chat-drop-overlay-background);
+  color: var(--text);
+  font: inherit;
+  text-align: center;
+  pointer-events: none;
+}
+
+.message-form--drag-ready .message-form__drop-overlay {
+  display: flex;
+  border-color: var(--teal-glow-soft);
+}
+
+.message-form--drag-hover .message-form__drop-overlay {
+  border-color: var(--accent-2);
+  background: var(--chat-drop-overlay-hover-background);
+  box-shadow: var(--shadow-glow-teal);
 }

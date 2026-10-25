@@ -26,6 +26,10 @@
   text-align: left;
 }
 
+.message-menu button[hidden] {
+  display: none;
+}
+
 .message-menu button svg {
   width: 15px;
   height: 15px;

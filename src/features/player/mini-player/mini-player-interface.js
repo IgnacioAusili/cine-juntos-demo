@@ -16,13 +16,15 @@ import {
   toggleMiniEmojiPicker,
   toggleMiniChatOverlay,
   wireMirrorChatScrollbar,
+  captureMiniEmojiSelection,
 } from "./mini-player-chat-mirror.js";
 import { setInsideChatAutoExpandEnabled } from "../../chat/chat-layout.js";
 import { wireMiniPlayerShortcuts } from "./mini-player-shortcuts.js";
 import { wireTouchHover } from "../../../core/touch-interactions.js";
+import { installRichEditor } from "../../chat/composer/chat-rich-editor.js";
 
 const VIDEO_EVENTS = ["play", "pause", "ended", "timeupdate", "seeked", "ratechange", "volumechange"];
-const PROXY_CONTROL_SELECTOR = "button, input:not([data-player-scroll-indicator]), select, textarea";
+const PROXY_CONTROL_SELECTOR = "button, input:not([data-player-scroll-indicator]), select, textarea, [contenteditable='true']";
 
 export function movePlayerInterface(surface, options = {}) {
   const {
@@ -114,7 +116,7 @@ function createInteractiveMirror(source, targetDocument) {
   let removeTouchVolumeHovers = [];
 
   element.addEventListener("click", (event) => {
-    if (event.target.matches?.("input, select, textarea")) return;
+    if (event.target.matches?.("input, select, textarea, [contenteditable='true']")) return;
     if (
       source === dom.playerChat
       && event.target.closest?.("#insideChatAutoExpandSwitch, [data-proxy-for=\"insideChatAutoExpandSwitch\"]")
@@ -214,6 +216,12 @@ function createInteractiveMirror(source, targetDocument) {
   sync();
 
   if (source === dom.playerChat) {
+    element.addEventListener("pointerdown", (event) => {
+      const emojiButton = event.target.closest?.(
+        "#overlayEmojiButton, [data-proxy-for=\"overlayEmojiButton\"]",
+      );
+      if (emojiButton) captureMiniEmojiSelection(element);
+    });
     const preventMirrorComposerFocus = (event) => {
       if (!window.matchMedia?.("(max-width: 980px)").matches) return;
 
@@ -327,6 +335,7 @@ function copyControlState(source, element) {
   source.querySelectorAll(PROXY_CONTROL_SELECTOR).forEach((sourceControl, index) => {
     const proxy = element.querySelector(`[data-proxy-index="${index}"]`);
     if (!proxy) return;
+    if (proxy.isContentEditable) installRichEditor(proxy);
     proxy.disabled = sourceControl.disabled;
     proxy.value = sourceControl.value;
     proxy.checked = sourceControl.checked;

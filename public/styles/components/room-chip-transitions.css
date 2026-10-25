@@ -28,7 +28,7 @@
   width: 18px;
   height: 18px;
   stroke-width: 3;
-  color: #7ef0ab;
+  color: var(--copy-confirm-color);
 }
 
 .room-chip .app-status {

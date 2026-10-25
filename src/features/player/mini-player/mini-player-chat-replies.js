@@ -11,7 +11,7 @@ export function wireMiniMessageReplies(sourceMessages, mirrorMessages, surfaceEl
     if (mirrorItem.classList.contains('message--system-group-member') && mirrorItem.dataset.groupClickWired !== "true") {
       mirrorItem.dataset.groupClickWired = "true";
       mirrorItem.addEventListener("click", (event) => {
-        if (event.target.closest?.("button, input, textarea, select")) return;
+        if (event.target.closest?.("button, input, textarea, select, [contenteditable='true']")) return;
         const toggle = findMiniGroupToggle(mirrorItem);
         if (!toggle || toggle.classList.contains('u-transitioning')) return;
         event.stopPropagation();
@@ -21,7 +21,7 @@ export function wireMiniMessageReplies(sourceMessages, mirrorMessages, surfaceEl
         animateMiniSystemGroupTransition(toggle, expanded);
       });
     }
-    const sourceItem = sourceMessages.querySelector(`[data-message-id=\"${CSS.escape(mirrorItem.dataset.messageId || "")}\"]`);
+    const sourceItem = sourceMessages.querySelector(`[data-message-id="${CSS.escape(mirrorItem.dataset.messageId || "")}"]`);
     const message = sourceItem?._chatMessage;
     const isMediaOnly = mirrorItem.classList.contains("message--media-only");
     const bubble = mirrorItem.querySelector('.message__bubble, .message__media-strip');

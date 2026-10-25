@@ -9,6 +9,7 @@
 
 /* ===== Acceso a información del proyecto ===== */
 .lobby-screen__about-button {
+  --lobby-about-visual-hover-offset: 0px;
   position: fixed;
   right: 8px;
   bottom: 8px;
@@ -17,14 +18,35 @@
   width: 36px;
   height: 36px;
   place-items: center;
+  border: 0;
+  border-radius: 999px;
+  padding: 0;
+  background: transparent;
+  color: var(--teal);
+  box-shadow: none;
+  cursor: pointer;
+  transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+}
+
+.lobby-screen__about-visual {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
   border: 1px solid rgba(47, 184, 164, 0.46);
   border-radius: 999px;
   background: rgba(20, 24, 28, 0.82);
-  color: var(--teal);
+  color: inherit;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28), 0 0 18px rgba(47, 184, 164, 0.14);
   backdrop-filter: blur(10px);
-  cursor: pointer;
+  transform: translateY(var(--lobby-about-visual-hover-offset, 0px));
   transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+  pointer-events: none;
+}
+
+.lobby-screen__about-icon {
+  display: grid;
+  place-items: center;
 }
 
 .lobby-screen__about-button svg {
@@ -45,23 +67,34 @@ body:not(.page-context--lobby) .lobby-screen__about-button {
 
 .lobby-screen__about-button:hover,
 .lobby-screen__about-button:focus-visible {
+  --lobby-about-visual-hover-offset: -2px;
+}
+
+.lobby-screen__about-button:hover .lobby-screen__about-visual,
+.lobby-screen__about-button:focus-visible .lobby-screen__about-visual {
   border-color: var(--teal);
   background: rgba(47, 184, 164, 0.16);
-  transform: translateY(-2px);
 }
 
 @media (hover: none) {
   .lobby-screen__about-button:hover:not(.u-touch-hover) {
+    --lobby-about-visual-hover-offset: 0px;
+  }
+
+  .lobby-screen__about-button:hover:not(.u-touch-hover) .lobby-screen__about-visual {
     border-color: rgba(47, 184, 164, 0.46);
     background: rgba(20, 24, 28, 0.82);
-    transform: translateX(14px);
   }
 
   .lobby-screen__about-button.u-touch-hover,
   .lobby-screen__about-button.u-touch-hover:hover {
+    --lobby-about-visual-hover-offset: -2px;
+  }
+
+  .lobby-screen__about-button.u-touch-hover .lobby-screen__about-visual,
+  .lobby-screen__about-button.u-touch-hover:hover .lobby-screen__about-visual {
     border-color: var(--teal);
     background: rgba(47, 184, 164, 0.16);
-    transform: translateY(-2px);
   }
 }
 

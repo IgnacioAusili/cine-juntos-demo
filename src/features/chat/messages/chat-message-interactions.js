@@ -60,6 +60,8 @@ export function wireMessageInteractions(
     longPressTriggered = false;
     longPressPointerId = event.pointerId;
     longPressStart = { x: event.clientX, y: event.clientY };
+    const link = event.target.closest?.("a[href]");
+    const linkHref = link && bubble.contains(link) ? link.href : "";
     state.chat.longPressStart = { x: event.clientX, y: event.clientY, message };
     window.clearTimeout(state.chat.longPressTimer);
     state.chat.longPressTimer = window.setTimeout(() => {
@@ -68,7 +70,7 @@ export function wireMessageInteractions(
         && longPressStart
       ) {
         longPressTriggered = true;
-        showMessageMenu(message, event.clientX, event.clientY, replyInput);
+        showMessageMenu(message, event.clientX, event.clientY, replyInput, linkHref);
       }
     }, LONG_PRESS_DELAY);
   }
@@ -86,7 +88,9 @@ export function wireMessageInteractions(
   interactionTarget.addEventListener("contextmenu", (event) => {
     if (!isWithinInteractionBand(event)) return;
     event.preventDefault();
-    showMessageMenu(message, event.clientX, event.clientY, replyInput);
+    const link = event.target.closest?.("a[href]");
+    const linkHref = link && bubble.contains(link) ? link.href : "";
+    showMessageMenu(message, event.clientX, event.clientY, replyInput, linkHref);
   });
 
   interactionTarget.addEventListener("dragstart", (event) => {
@@ -110,7 +114,7 @@ export function wireMessageInteractions(
   interactionTarget.addEventListener("pointerdown", (event) => {
     if (event.button && event.button !== 0) return;
     if (!isWithinInteractionBand(event)) return;
-    if (event.target instanceof HTMLElement && event.target.closest("button, input, textarea, select")) {
+    if (event.target instanceof HTMLElement && event.target.closest("button, input, textarea, select, [contenteditable='true']")) {
       return;
     }
     if (!allowSwipeInsideBubble && bubble.contains(event.target)) {

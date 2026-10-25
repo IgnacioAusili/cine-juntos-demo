@@ -1,11 +1,17 @@
 // Menu contextual del mensaje: posicion, ocultado y copiado de texto.
 import { dom } from "../../../core/dom.js";
 import { state, logEvent } from "../../../core/state.js";
+import { openChatLinkInNewWindow } from "./chat-link-confirmation.js";
 
-export function showMessageMenu(message, x, y, replyInput = null) {
+let currentLinkHref = "";
+
+export function showMessageMenu(message, x, y, replyInput = null, linkHref = "") {
   clearMessageMenuSourceState();
   state.chat.menuMessage = message;
   state.chat.menuReplyInput = replyInput;
+  currentLinkHref = getOpenableLinkHref(linkHref);
+  const openLinkButton = dom.messageMenu.querySelector('[data-action="open-link"]');
+  if (openLinkButton) openLinkButton.hidden = !currentLinkHref;
   state.chat.messageMenuOpenedAt = Date.now();
   dom.messageMenu.hidden = false;
   const rect = dom.messageMenu.getBoundingClientRect();
@@ -20,7 +26,26 @@ export function hideMessageMenu() {
   clearMessageMenuSourceState();
   state.chat.menuMessage = null;
   state.chat.menuReplyInput = null;
+  currentLinkHref = "";
   dom.messageMenu.hidden = true;
+}
+
+export function openMessageMenuLink() {
+  if (!currentLinkHref) return;
+  openChatLinkInNewWindow(currentLinkHref);
+  hideMessageMenu();
+}
+
+function getOpenableLinkHref(value) {
+  const candidate = String(value || "").trim();
+  if (!candidate) return "";
+
+  try {
+    const url = new URL(candidate, window.location.href);
+    return ["http:", "https:"].includes(url.protocol) ? url.href : "";
+  } catch {
+    return "";
+  }
 }
 
 function markMessageMenuSource(message, replyInput) {

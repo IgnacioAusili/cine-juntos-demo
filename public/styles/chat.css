@@ -12,3 +12,6 @@
 @import url("./chat/system-message-groups.css");
 @import url("./chat/system-message-roll.css");
 @import url("./chat/char-counter.css");
+@import url("./chat/format-menu.css");
+@import url("./chat/message-formatting.css");
+@import url("./chat/link-confirmation.css");

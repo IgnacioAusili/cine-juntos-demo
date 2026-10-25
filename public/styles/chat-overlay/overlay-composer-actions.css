@@ -9,7 +9,7 @@
   transform: none;
 }
 
-.player-frame .message-form.message-form--overlay .message-form__input-wrapper textarea {
+.player-frame .message-form.message-form--overlay .message-form__input-wrapper .message-form__rich-editor {
   padding-right: 6px;
 }
 

@@ -1,7 +1,9 @@
 import { dom } from "../../../core/dom.js";
-import { state, logEvent } from "../../../core/state.js";
+import { getRichEditorTextLength } from "./chat-rich-editor.js";
+import { logEvent } from "../../../core/state.js";
 import { MAX_CHARS, withShortcutHint } from "../../../core/utils.js";
 import { refreshTooltipForTarget } from "../../icons-tooltips.js";
+import { setSyncStatus } from "../../session/session-ui.js";
 
 const sendButtonMarkup = new WeakMap();
 
@@ -238,7 +240,7 @@ export function updateCharCounter(input, isOverlay) {
   const counter = isOverlay ? dom.overlayCharCounter : dom.mainCharCounter;
   const form = isOverlay ? dom.overlayMessageForm : dom.messageForm;
   const sendBtn = isOverlay ? dom.overlayMessageSend : dom.mainMessageSend;
-  const len = input.value.length;
+  const len = input.isContentEditable ? getRichEditorTextLength(input) : input.value.length;
   const remaining = Math.max(0, MAX_CHARS - len);
   const progress = Math.min(1, len / MAX_CHARS);
   const isOver = len >= MAX_CHARS;

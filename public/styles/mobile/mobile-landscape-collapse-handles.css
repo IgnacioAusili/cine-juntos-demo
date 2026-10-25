@@ -38,7 +38,7 @@
     padding-left: 4px;
   }
 
-  html.page-context--viewport-landscape body:not(.page-context--lobby) .session-view[data-chat-dock="bottom"] .message-form .message-form__input-wrapper textarea {
+  html.page-context--viewport-landscape body:not(.page-context--lobby) .session-view[data-chat-dock="bottom"] .message-form .message-form__input-wrapper .message-form__rich-editor {
     min-height: 30px;
     max-height: 66px;
     padding-block: 5px;

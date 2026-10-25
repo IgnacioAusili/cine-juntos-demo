@@ -1,9 +1,11 @@
 import { focusChatInput } from "../../chat/composer/chat-input-focus.js";
+import { getRichEditorSelection, insertRichEditorText } from "../../chat/composer/chat-rich-editor.js";
 
 const EMOJI_POPOVER_TAIL_INSET_PX = 12;
 const EMOJI_POPOVER_TRANSITION_MS = 150;
 const MOBILE_CHAT_LAYOUT_QUERY = "(max-width: 980px)";
 const miniEmojiPopoverHideTimers = new WeakMap();
+const miniEmojiSelections = new WeakMap();
 
 function isMobileChatLayout() { return Boolean(window.matchMedia && window.matchMedia(MOBILE_CHAT_LAYOUT_QUERY).matches); }
 function getMirrorChatInput(element) { return element.querySelector("#overlayMessageInput, [data-proxy-for=\"overlayMessageInput\"]"); }
@@ -19,8 +21,10 @@ export function toggleMiniEmojiPicker(element) {
     return;
   }
 
-  const selectionStart = input.selectionStart ?? input.value.length;
-  const selectionEnd = input.selectionEnd ?? input.value.length;
+  const savedSelection = miniEmojiSelections.get(element)
+    || (input.isContentEditable ? getRichEditorSelection(input) : null);
+  const selectionStart = savedSelection?.start ?? input.selectionStart ?? input.value.length;
+  const selectionEnd = savedSelection?.end ?? input.selectionEnd ?? input.value.length;
   const hideTimer = miniEmojiPopoverHideTimers.get(popover);
   if (hideTimer) {
     window.clearTimeout(hideTimer);
@@ -98,6 +102,13 @@ function insertMiniEmoji(surface, target) {
   const input = surface.querySelector("#overlayMessageInput, [data-proxy-for=\"overlayMessageInput\"]");
   if (!option || !input) return;
 
+  if (input.isContentEditable) {
+    insertRichEditorText(input, option.textContent, miniEmojiSelections.get(surface));
+    miniEmojiSelections.delete(surface);
+    hideMiniEmojiPopover(surface.querySelector('.emoji-popover--mini'));
+    return;
+  }
+
   const start = input.selectionStart ?? input.value.length;
   const end = input.selectionEnd ?? input.value.length;
   input.value = `${input.value.slice(0, start)}${option.textContent}${input.value.slice(end)}`;
@@ -109,4 +120,9 @@ function insertMiniEmoji(surface, target) {
     focusChatInput(input, position, position);
   }
   hideMiniEmojiPopover(surface.querySelector('.emoji-popover--mini'));
+}
+
+export function captureMiniEmojiSelection(element) {
+  const input = element?.querySelector("#overlayMessageInput, [data-proxy-for=\"overlayMessageInput\"]");
+  if (input?.isContentEditable) miniEmojiSelections.set(element, getRichEditorSelection(input));
 }

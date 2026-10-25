@@ -125,7 +125,7 @@
   }
 }
 
-.message-form .message-form__input-wrapper textarea {
+.message-form .message-form__rich-editor {
   flex: 1 1 auto;
   width: 100%;
   min-width: 0;
@@ -147,17 +147,22 @@
      fallback para los emojis que esa fuente no contiene. */
   font-family: var(--text-font), "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", ui-sans-serif, sans-serif;
   line-height: 1.28;
+  max-height: 118px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  cursor: text;
   overscroll-behavior: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
 
-.message-form .message-form__input-wrapper textarea::-webkit-scrollbar {
+.message-form .message-form__input-wrapper .message-form__rich-editor::-webkit-scrollbar {
   width: 0;
   height: 0;
 }
 
-.message-form .message-form__input-wrapper:not([data-expanded="true"]) textarea {
+.message-form .message-form__input-wrapper:not([data-expanded="true"]) .message-form__rich-editor {
   line-height: 20px;
 }
 
@@ -166,18 +171,18 @@
     padding-left: 4px;
   }
 
-  .message-form .message-form__input-wrapper textarea {
+  .message-form .message-form__input-wrapper .message-form__rich-editor {
     font-size: 0.95rem;
     padding-inline: 8px;
   }
 
-  .message-form .message-form__input-wrapper:not([data-expanded="true"]) textarea {
+  .message-form .message-form__input-wrapper:not([data-expanded="true"]) .message-form__rich-editor {
     padding-left: 8px;
   }
 
   /* La métrica de la fuente deja unos píxeles de aire visual en el último
      renglón. Este reparto compacto compensa esa métrica sin recortar texto. */
-  .message-form .message-form__input-wrapper[data-expanded="true"] textarea {
+  .message-form .message-form__input-wrapper[data-expanded="true"] .message-form__rich-editor {
     padding-top: 1px;
     padding-bottom: 5px;
   }
@@ -230,6 +235,12 @@
 
 .message-form .message-form__textarea-shell[data-scrollbar-visible="true"] .composer-scrollbar {
   opacity: 1;
+}
+
+.message-form__rich-editor:empty::before {
+  color: var(--muted);
+  content: attr(data-placeholder);
+  pointer-events: none;
 }
 
 .message-form .composer-scrollbar__thumb {

@@ -7,13 +7,13 @@ import { markParticipantActive } from "../../presence/index.js";
 import { clearReplyTarget } from "../messages/chat-reply.js";
 import { renderMessage } from "../messages/chat-render.js";
 import { completeAutoOpenedChatResponse } from "../chat-layout.js";
-import { queuePinnedChatScrollSync } from "../dock/chat-scroll-sync.js";
 import { focusChatInput } from "./chat-input-focus.js";
-import { compressImageBase64, renderImagePreview, clearPendingImage } from "../messages/image-compress.js";
+import { addPendingImageDataUrl, clearPendingImage, compressImageBase64, getImageSourceFingerprint } from "../messages/image-compress.js";
 import { isMobileLayout, logMobileInteraction } from "./chat-input-debug.js";
 import { normalizeEmojiShortcodesInput } from "./emoji-picker.js";
-import { getSpamCooldownRemaining, hashImageFingerprint, registerMessageForSpamCheck, updateCharCounter, updateSpamCooldownButtons } from "./chat-spam-guard.js";
+import { getSpamCooldownRemaining, registerMessageForSpamCheck, updateCharCounter, updateSpamCooldownButtons } from "./chat-spam-guard.js";
 import { autoResizeMessageInput } from "./chat-input-layout.js";
+import { getRichEditorTextLength } from "./chat-rich-editor.js";
 
 export function sendMessage(text, attachedImage) {
   if (!state.session.activeRoom || !state.session.transport) {
@@ -78,7 +78,8 @@ export function submitMessageFrom(input) {
     return;
   }
 
-  if (input.value.length >= MAX_CHARS) {
+  const messageLength = input.isContentEditable ? getRichEditorTextLength(input) : input.value.length;
+  if (messageLength >= MAX_CHARS) {
     const counter = isOverlay ? dom.overlayCharCounter : dom.mainCharCounter;
     if (counter) {
       counter.classList.add("char-counter--shake");
@@ -139,27 +140,48 @@ export function handlePasteEvent(event, isOverlay) {
     if (item.type.indexOf("image") !== -1) {
       event.preventDefault();
       const file = item.getAsFile();
-      if (!file) continue;
-
-      const reader = new FileReader();
-      reader.onload = (loadEvent) => {
-        const rawBase64 = loadEvent.target.result;
-        compressImageBase64(rawBase64, 800, 800, 0.7, (compressedBase64) => {
-          const nextImages = (isOverlay ? state.chat.pendingOverlayImage : state.chat.pendingImage).slice(0, 2);
-          if (nextImages.length >= 2) return;
-          const fingerprint = hashImageFingerprint(compressedBase64);
-          if (fingerprint && nextImages.some((image) => hashImageFingerprint(image) === fingerprint)) return;
-          nextImages.push(compressedBase64);
-          if (isOverlay) {
-            state.chat.pendingOverlayImage = nextImages;
-          } else {
-            state.chat.pendingImage = nextImages;
-          }
-          renderImagePreview(isOverlay);
-        });
-      };
-      reader.readAsDataURL(file);
+      if (file) addPendingImageFile(file, isOverlay);
       break;
     }
   }
+}
+
+export function addPendingImageFile(file, isOverlay) {
+  const imageType = getImageType(file);
+  if (!imageType) return false;
+  const currentImages = isOverlay ? state.chat.pendingOverlayImage : state.chat.pendingImage;
+  if (currentImages.length >= 2) return false;
+
+  const reader = new FileReader();
+  reader.onload = (loadEvent) => {
+    const rawBase64 = String(loadEvent.target?.result || "");
+    const sourceFingerprint = getImageSourceFingerprint(rawBase64);
+    const commitImage = (image) => {
+      addPendingImageDataUrl(isOverlay, image, sourceFingerprint);
+    };
+
+    if (imageType === "image/gif") {
+      commitImage(rawBase64);
+      return;
+    }
+    compressImageBase64(rawBase64, 800, 800, 0.7, commitImage);
+  };
+  reader.readAsDataURL(file.type === imageType ? file : new Blob([file], { type: imageType }));
+  return true;
+}
+
+function getImageType(file) {
+  if (file?.type?.toLowerCase().startsWith("image/")) return file.type.toLowerCase();
+  const extension = String(file?.name || "").split(".").pop()?.toLowerCase();
+  const knownTypes = {
+    avif: "image/avif",
+    bmp: "image/bmp",
+    gif: "image/gif",
+    jpeg: "image/jpeg",
+    jpg: "image/jpeg",
+    png: "image/png",
+    svg: "image/svg+xml",
+    webp: "image/webp",
+  };
+  return knownTypes[extension] || "";
 }

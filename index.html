@@ -407,7 +407,11 @@
             aria-label="Acerca de Cine Juntos"
             data-tooltip="Acerca de Cine Juntos"
           >
-            <span data-lucide="circle-alert" aria-hidden="true"></span>
+            <span class="lobby-screen__about-visual" aria-hidden="true">
+              <span class="lobby-screen__about-icon">
+                <span data-lucide="circle-alert"></span>
+              </span>
+            </span>
           </button>
         </footer>
       </section>
@@ -773,16 +777,18 @@
                 <div class="image-preview-container" id="overlayImagePreview" hidden></div>
                 <div class="message-form__input-wrapper">
                   <div class="message-form__textarea-shell">
-                    <textarea
+                    <div
                       id="overlayMessageInput"
-                      autocomplete="off"
-                      autocapitalize="off"
+                      class="message-form__rich-editor"
+                      contenteditable="true"
+                      role="textbox"
+                      aria-label="Mensaje"
+                      aria-multiline="true"
+                      data-placeholder="Mensaje"
                       spellcheck="false"
                       data-bwignore="true"
                       data-lpignore="true"
-                      placeholder="Mensaje"
-                      rows="1"
-                    ></textarea>
+                    ></div>
                     <div class="composer-scrollbar" aria-hidden="true">
                       <div class="composer-scrollbar__thumb"></div>
                     </div>
@@ -942,16 +948,18 @@
               <div class="image-preview-container" id="imagePreview" hidden></div>
               <div class="message-form__input-wrapper">
                 <div class="message-form__textarea-shell">
-                  <textarea
+                  <div
                     id="messageInput"
-                    autocomplete="off"
-                    autocapitalize="off"
+                    class="message-form__rich-editor"
+                    contenteditable="true"
+                    role="textbox"
+                    aria-label="Mensaje"
+                    aria-multiline="true"
+                    data-placeholder="Mensaje"
                     spellcheck="false"
                     data-bwignore="true"
                     data-lpignore="true"
-                      placeholder="Mensaje"
-                    rows="1"
-                  ></textarea>
+                  ></div>
                   <div class="composer-scrollbar" aria-hidden="true">
                     <div class="composer-scrollbar__thumb"></div>
                   </div>
@@ -1006,6 +1014,10 @@
         <button type="button" data-action="reply">
           <span data-lucide="reply" aria-hidden="true"></span>
           <span>Responder</span>
+        </button>
+        <button type="button" data-action="open-link" hidden>
+          <span data-lucide="external-link" aria-hidden="true"></span>
+          <span>Abrir en ventana nueva</span>
         </button>
       </div>
       <div class="tooltip-layer" id="tooltipLayer" hidden></div>

@@ -188,7 +188,7 @@
   border-radius: 17px;
 }
 
-.mini-player-surface.player-frame .message-form.message-form--overlay .message-form__input-wrapper textarea {
+.mini-player-surface.player-frame .message-form.message-form--overlay .message-form__input-wrapper .message-form__rich-editor {
   box-sizing: border-box;
   padding: var(--mini-player-composer-input-padding-block) var(--mini-player-composer-input-padding-inline);
   padding-right: var(--mini-player-composer-input-padding-inline);
@@ -201,7 +201,7 @@
   height: var(--mini-player-composer-input-height);
 }
 
-.mini-player-surface.player-frame .message-form.message-form--overlay .message-form__input-wrapper:not([data-expanded="true"]) textarea {
+.mini-player-surface.player-frame .message-form.message-form--overlay .message-form__input-wrapper:not([data-expanded="true"]) .message-form__rich-editor {
   height: var(--mini-player-composer-input-height);
   min-height: var(--mini-player-composer-input-height);
   padding-block: var(--mini-player-composer-input-padding-block);
@@ -244,7 +244,7 @@
 
 /* La caja del campo conserva su alto mínimo; el textarea compacto centra
    una línea y los botones ocupan su propio espacio dentro de la fila. */
-.mini-player-surface .message-form.message-form--overlay .message-form__input-wrapper textarea {
+.mini-player-surface .message-form.message-form--overlay .message-form__input-wrapper .message-form__rich-editor {
   min-height: 27px;
   max-height: 48px;
   font-size: 0.68rem;

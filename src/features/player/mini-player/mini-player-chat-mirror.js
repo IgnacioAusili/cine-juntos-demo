@@ -15,6 +15,7 @@ export {
 };
 export { wireMiniMessageReplies } from "./mini-player-chat-replies.js";
 export { toggleMiniEmojiPicker } from "./mini-player-chat-emoji.js";
+export { captureMiniEmojiSelection } from "./mini-player-chat-emoji.js";
 
 
 function getMirrorChatInput(element) {
