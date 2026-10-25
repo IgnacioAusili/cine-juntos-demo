@@ -5,6 +5,7 @@ import {
   hasLoadedVideo,
   resolveBottomDockLayout,
 } from "./component-aspect-measurement.js";
+import { chatDockTransitionState } from "./chat-layout-transition-state.js";
 
 const sessionView = document.querySelector("#sessionView");
 const appShell = document.querySelector(".app-shell");
@@ -23,7 +24,18 @@ const BOTTOM_DOCK_FIT_VIEWPORT_CLASS = 'session-view--bottom-dock-panels-fit-vie
 
 let pendingFrame = 0;
 let pendingScrollTarget = "";
+let pendingScrollSuppression = false;
+let scrollTargetRevision = 0;
 let initialSessionScrollPending = true;
+
+function isIntentionalChatScrollTransitionActive() {
+  return Boolean(
+    sessionView?.classList.contains('session-view--chat-scroll-snap-locked')
+    || chatDockTransitionState.pendingBottomToRightSwitch
+    || chatDockTransitionState.pendingChatDockSwitch
+    || chatDockTransitionState.bottomChatTransition,
+  );
+}
 
 function applyComponentLayoutState({
   requiresSequentialLayout,
@@ -117,24 +129,37 @@ function measureComponentLayout({ allowDuringChatTransition = false } = {}) {
   });
   if (!targetLayout.hasMeasuredPanels && sessionView?.dataset.chatDock === "bottom") return;
 
+  const scrollTransitionActive = isIntentionalChatScrollTransitionActive();
+  if (scrollTransitionActive) pendingScrollTarget = "";
+
   if (
     targetLayout.requiresSequentialLayout
     && !wasSequential
     && !sessionView.classList.contains('session-view--chat-collapsed')
     && !pendingScrollTarget
+    && !pendingScrollSuppression
+    && !scrollTransitionActive
   ) {
     pendingScrollTarget = "center-video";
   }
 
   applyComponentLayoutState(targetLayout);
 
-  const scrollTarget = pendingScrollTarget;
+  const scrollTarget = pendingScrollSuppression || scrollTransitionActive
+    ? ""
+    : pendingScrollTarget;
   pendingScrollTarget = "";
+  pendingScrollSuppression = scrollTransitionActive;
   const shouldResolveInitialScroll = initialSessionScrollPending && !sessionView?.hidden;
   if (!scrollTarget && !shouldResolveInitialScroll) return;
   if (!sessionView) return;
 
+  const scheduledScrollRevision = scrollTargetRevision;
   window.requestAnimationFrame(() => {
+    if (
+      scheduledScrollRevision !== scrollTargetRevision
+      || isIntentionalChatScrollTransitionActive()
+    ) return;
     if (sessionView.hidden) return;
 
     const isCollapsed = sessionView.classList.contains('session-view--chat-collapsed');
@@ -186,9 +211,17 @@ function measureComponentLayout({ allowDuringChatTransition = false } = {}) {
 }
 
 function scheduleComponentLayoutMeasure(scrollTarget = "") {
-  if (scrollTarget === "reveal-chat") {
+  if (scrollTarget === "suppress-scroll" || isIntentionalChatScrollTransitionActive()) {
+    pendingScrollTarget = "";
+    pendingScrollSuppression = true;
+    scrollTargetRevision += 1;
+  } else if (scrollTarget === "reveal-chat" && !pendingScrollSuppression) {
     pendingScrollTarget = "reveal-chat";
-  } else if (scrollTarget === "center-video" && pendingScrollTarget !== "reveal-chat") {
+  } else if (
+    scrollTarget === "center-video"
+    && pendingScrollTarget !== "reveal-chat"
+    && !pendingScrollSuppression
+  ) {
     pendingScrollTarget = "center-video";
   }
   if (pendingFrame) return;

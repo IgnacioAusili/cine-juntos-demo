@@ -34,54 +34,65 @@ export function wireComponentAspectObservers({
     attributeFilter: ["data-chat-dock"],
   });
 
-  let expandedChatTransitionPending = false;
+  let visibilityTransitionPending = false;
   const layoutStateObserver = new MutationObserver((records) => {
     const currentClasses = new Set(sessionView.className.split(/\s+/));
     let shouldMeasure = false;
     let shouldReveal = false;
     let shouldCenterVideo = false;
+    let shouldSuppressScroll = false;
 
     for (const record of records) {
       if (record.attributeName !== "class") continue;
 
       const previousClasses = new Set((record.oldValue || "").split(/\s+/));
-      const justExpanded = previousClasses.has("chat-collapsed")
-        && !currentClasses.has("chat-collapsed");
-      const justCollapsed = !previousClasses.has("chat-collapsed")
-        && currentClasses.has("chat-collapsed");
-      const transitionJustSettled = previousClasses.has("chat-layout-transitioning")
-        && !currentClasses.has("chat-layout-transitioning");
+      const justExpanded = previousClasses.has("session-view--chat-collapsed")
+        && !currentClasses.has("session-view--chat-collapsed");
+      const justCollapsed = !previousClasses.has("session-view--chat-collapsed")
+        && currentClasses.has("session-view--chat-collapsed");
+      const transitionJustSettled = previousClasses.has("session-view--chat-layout-transitioning")
+        && !currentClasses.has("session-view--chat-layout-transitioning");
 
       if (justExpanded) {
-        if (currentClasses.has("chat-layout-transitioning")) {
-          expandedChatTransitionPending = true;
+        if (currentClasses.has("session-view--chat-layout-transitioning")) {
+          visibilityTransitionPending = true;
         } else {
           shouldMeasure = true;
           shouldReveal = true;
         }
       }
 
-      if (transitionJustSettled && expandedChatTransitionPending) {
-        expandedChatTransitionPending = false;
+      if (transitionJustSettled && visibilityTransitionPending) {
+        visibilityTransitionPending = false;
         shouldMeasure = true;
-        shouldReveal = true;
+        shouldSuppressScroll = true;
       }
 
       if (transitionJustSettled && dockLayoutTransitionPending) {
         dockLayoutTransitionPending = false;
         shouldMeasure = true;
-        shouldReveal = true;
+        shouldSuppressScroll = true;
       }
 
       if (justCollapsed) {
         shouldMeasure = true;
-        shouldCenterVideo = true;
+        if (currentClasses.has("session-view--chat-layout-transitioning")) {
+          visibilityTransitionPending = true;
+        } else {
+          shouldCenterVideo = true;
+        }
       }
     }
 
     if (shouldMeasure) {
       scheduleComponentLayoutMeasure(
-        shouldReveal ? "reveal-chat" : shouldCenterVideo ? "center-video" : "",
+        shouldSuppressScroll
+          ? "suppress-scroll"
+          : shouldReveal
+            ? "reveal-chat"
+            : shouldCenterVideo
+              ? "center-video"
+              : "",
       );
     }
   });
@@ -103,7 +114,11 @@ export function wireComponentAspectObservers({
     { passive: true },
   );
   window.addEventListener("chat-layout-settled", () => {
-    scheduleComponentLayoutMeasure("center-video");
+    const shouldCenterCollapsedBottomDock = sessionView.dataset.chatDock === "bottom"
+      && sessionView.classList.contains("session-view--chat-collapsed");
+    scheduleComponentLayoutMeasure(
+      shouldCenterCollapsedBottomDock ? "center-video" : "suppress-scroll",
+    );
   }, { passive: true });
 
   scheduleComponentLayoutMeasure();

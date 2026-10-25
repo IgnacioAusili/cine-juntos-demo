@@ -1,5 +1,5 @@
 import { dom } from "../../../core/dom.js";
-import { getPageScrollContainer, getPageScrollTop, isFullscreenPageActive, scrollPageTo } from "./chat-page-scroll.js";
+import { getPageScrollContainer, getPageScrollMax, getPageScrollTop, isFullscreenPageActive, scrollPageTo } from "./chat-page-scroll.js";
 import { syncComponentAspectLayoutNow } from "./component-aspect-layout.js";
 import { chatDockTransitionState, getChatDockOperations } from "./chat-layout-transition-state.js";
 import { easeBottomChatCurtainProgress, easeBottomChatRevealProgress, getWorkspaceRowHeights, getWorkspaceContentHeight, getCollapsedWorkspaceContentHeight } from "./chat-dock-transition-measurements.js";
@@ -139,14 +139,16 @@ export function cancelBottomChatTransition() {
 export function completeDesktopBottomChatTransition(transition) {
   if (chatDockTransitionState.bottomChatTransition !== transition) return;
 
+  const shouldPinExpandedChatToBottom = !transition.collapsed;
   window.cancelAnimationFrame(transition.frameId);
   window.clearTimeout(transition.timeoutId);
   settleBottomControlsLayout(transition);
   restoreBottomChatScrollAnchoring(transition);
   chatDockTransitionState.bottomChatTransition = null;
-  getChatDockOperations().setCollapseHandleTransitioning(false);
-  getChatDockOperations().scheduleExternalChatCollapseHandleOffset();
   clearBottomChatTransitionVisuals();
+  getChatDockOperations().setCollapseHandleTransitioning(false);
+  if (shouldPinExpandedChatToBottom) scrollPageTo(getPageScrollMax(), "auto");
+  getChatDockOperations().scheduleExternalChatCollapseHandleOffset();
 }
 
 export function setDesktopBottomChatCurtainProgress(progress) {
@@ -194,13 +196,15 @@ export function setDesktopBottomTransitionRowsProgress(transition, progress) {
 export function completeMobileBottomChatTransition(transition) {
   if (chatDockTransitionState.bottomChatTransition !== transition) return;
 
+  const shouldPinExpandedChatToBottom = !transition.collapsed;
   window.cancelAnimationFrame(transition.frameId);
   window.clearTimeout(transition.timeoutId);
   restoreBottomChatScrollAnchoring(transition);
   chatDockTransitionState.bottomChatTransition = null;
-  getChatDockOperations().setCollapseHandleTransitioning(false);
-  getChatDockOperations().scheduleExternalChatCollapseHandleOffset();
   clearBottomChatTransitionVisuals();
+  getChatDockOperations().setCollapseHandleTransitioning(false);
+  if (shouldPinExpandedChatToBottom) scrollPageTo(getPageScrollMax(), "auto");
+  getChatDockOperations().scheduleExternalChatCollapseHandleOffset();
 }
 
 export function stepMobileBottomChatTransition(transition, force = false) {
@@ -374,7 +378,7 @@ export function animateDesktopBottomChatExpand() {
     true,
     BOTTOM_CHAT_CURTAIN_MS + BOTTOM_CHAT_SCROLL_TIMEOUT_MS + 80,
   );
-  transition.targetScrollTop = getChatDockOperations().getBottomDockChatScrollTop();
+  transition.targetScrollTop = getPageScrollMax();
   if (animateRows) {
     dom.workspace.style.setProperty(
       "grid-template-rows",
@@ -455,10 +459,7 @@ export function animateBottomChatExpand() {
     startRows: getWorkspaceRowHeights(),
     targetRows: [0, 0],
     startScrollTop: getPageScrollTop(),
-    // El layout contraído ya tiene la altura final estable del documento.
-    // Calcular el destino después de abrir la grilla incluye el overflow
-    // temporal de la cortina y luego provoca un clamp visible al limpiarla.
-    targetScrollTop: getChatDockOperations().getBottomDockChatScrollTop(),
+    targetScrollTop: 0,
   };
   chatDockTransitionState.bottomChatTransition = transition;
   lockBottomChatScrollAnchoring(transition);
@@ -468,6 +469,7 @@ export function animateBottomChatExpand() {
   // después se revela desde la unión superior hacia abajo.
   getChatDockOperations().applyExternalChatCollapsed(false);
   transition.targetRows = getWorkspaceRowHeights();
+  transition.targetScrollTop = getPageScrollMax();
   getChatDockOperations().setCollapseHandleTransitioning(
     true,
     BOTTOM_CHAT_CURTAIN_MS + BOTTOM_CHAT_SCROLL_TIMEOUT_MS + 80,

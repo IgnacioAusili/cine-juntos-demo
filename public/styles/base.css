@@ -21,6 +21,16 @@
   box-sizing: border-box;
 }
 
+::selection {
+  background-color: var(--amber);
+  color: var(--bg-deep);
+}
+
+::-moz-selection {
+  background-color: var(--amber);
+  color: var(--bg-deep);
+}
+
 [hidden] {
   display: none !important;
 }

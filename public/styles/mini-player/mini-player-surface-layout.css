@@ -4,6 +4,13 @@
   --player-chat-max-height: 330px;
   --player-chat-bottom-inset: 8px;
   --chat-composer-reserve: 62px;
+  --mini-player-composer-height: 32px;
+  --mini-player-composer-input-height: 30px;
+  --mini-player-composer-control-size: 24px;
+  --mini-player-composer-input-padding-inline: 6px;
+  --mini-player-composer-input-padding-block: 7px;
+  --mini-player-composer-line-height: 16px;
+  --mini-player-composer-edge-padding: 4px;
 }
 @container mini-player (max-height: 250px) {
   .mini-player-surface .player-chat {
@@ -168,21 +175,78 @@
   padding: 0 6px 6px;
 }
 
-.mini-player-surface .message-form.message-form--overlay .message-form__input-wrapper {
-  min-height: 32px;
+.mini-player-surface.player-frame .message-form.message-form--overlay .message-form__input-wrapper {
+  min-height: var(--mini-player-composer-height);
   width: 100%;
+  box-sizing: border-box;
+  align-items: center;
   border-radius: 18px;
+  padding: 0 var(--mini-player-composer-edge-padding);
 }
 
-.mini-player-surface .message-form.message-form--overlay .message-form__input-wrapper[data-expanded="true"] {
+.mini-player-surface.player-frame .message-form.message-form--overlay .message-form__input-wrapper[data-expanded="true"] {
   border-radius: 17px;
 }
 
+.mini-player-surface.player-frame .message-form.message-form--overlay .message-form__input-wrapper textarea {
+  box-sizing: border-box;
+  padding: var(--mini-player-composer-input-padding-block) var(--mini-player-composer-input-padding-inline);
+  padding-right: var(--mini-player-composer-input-padding-inline);
+  line-height: var(--mini-player-composer-line-height);
+  text-align: left;
+}
+
+.mini-player-surface.player-frame .message-form.message-form--overlay .message-form__input-wrapper:not([data-expanded="true"]) .message-form__textarea-shell {
+  align-self: center;
+  height: var(--mini-player-composer-input-height);
+}
+
+.mini-player-surface.player-frame .message-form.message-form--overlay .message-form__input-wrapper:not([data-expanded="true"]) textarea {
+  height: var(--mini-player-composer-input-height);
+  min-height: var(--mini-player-composer-input-height);
+  padding-block: var(--mini-player-composer-input-padding-block);
+  line-height: var(--mini-player-composer-line-height);
+}
+
+.mini-player-surface.player-frame .message-form.message-form--overlay .message-form__input-wrapper[data-expanded="true"] {
+  align-items: flex-end;
+}
+
+.mini-player-surface.player-frame .message-form.message-form--overlay .message-form__input-wrapper[data-expanded="true"] .message-form__textarea-shell {
+  height: auto;
+}
+
+.mini-player-surface.player-frame .message-form.message-form--overlay .message-form__input-wrapper .icon-button,
+.mini-player-surface.player-frame .message-form.message-form--overlay .message-form__input-wrapper .icon-button--emoji-trigger,
+.mini-player-surface.player-frame .message-form.message-form--overlay .message-form__input-wrapper .icon-button--send {
+  width: var(--mini-player-composer-control-size);
+  min-height: var(--mini-player-composer-control-size);
+  height: var(--mini-player-composer-control-size);
+  display: grid;
+  flex: 0 0 var(--mini-player-composer-control-size);
+  align-self: center;
+  place-items: center;
+  margin: 0;
+}
+
+.mini-player-surface.player-frame .message-form.message-form--overlay .message-form__input-wrapper .icon-button--emoji-trigger {
+  color: rgba(255, 255, 255, 0.68);
+}
+
+.mini-player-surface.player-frame .message-form.message-form--overlay .message-form__input-wrapper .icon-button--send {
+  color: var(--accent-2);
+}
+
+/* Al crecer el campo, los controles vuelven a acompañar el borde inferior. */
+.mini-player-surface.player-frame .message-form.message-form--overlay .message-form__input-wrapper[data-expanded="true"] .icon-button {
+  align-self: flex-end;
+}
+
+/* La caja del campo conserva su alto mínimo; el textarea compacto centra
+   una línea y los botones ocupan su propio espacio dentro de la fila. */
 .mini-player-surface .message-form.message-form--overlay .message-form__input-wrapper textarea {
   min-height: 27px;
   max-height: 48px;
-  padding: 5px 6px;
-  padding-right: 52px;
   font-size: 0.68rem;
   line-height: 1.2;
 }
@@ -197,22 +261,6 @@
   border: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
-}
-
-.mini-player-surface .message-form.message-form--overlay .message-form__input-wrapper .icon-button--emoji-trigger {
-  right: 28px;
-  top: 50%;
-  bottom: auto;
-  transform: translateY(-50%) !important;
-  color: rgba(255, 255, 255, 0.68);
-}
-
-.mini-player-surface .message-form.message-form--overlay .message-form__input-wrapper .icon-button--send {
-  right: 3px;
-  top: 50%;
-  bottom: auto;
-  transform: translateY(-50%) !important;
-  color: var(--accent-2);
 }
 
 @keyframes scrollMiniPlayerEnter {

@@ -14,6 +14,7 @@ import {
 import { movePlayerInterface } from "./mini-player-interface.js";
 import { trackMiniPlayerReturnHint } from "./mini-player-return-hint.js";
 import { clampMiniPlayerPosition, wireMiniPlayerDrag } from "./mini-player-drag.js";
+import { wireMiniPlayerChatPlacement } from "./mini-player-chat-placement.js";
 
 let miniSurface = null;
 let pictureInPictureWindow = null;
@@ -22,6 +23,7 @@ let miniPlayerInterface = null;
 let stopMiniPlayerReturnHintTracking = null;
 let stopMiniPlayerDrag = null;
 let stopMiniPlayerOverlayControls = null;
+let stopMiniPlayerChatPlacement = null;
 
 export function wireMiniPlayerEvents() {
   dom.playerMiniPlayerButton?.addEventListener("click", () => {
@@ -161,6 +163,8 @@ function openScrollMiniPlayer() {
 
 function activateMiniPlayer(mode) {
   state.player.miniPlayerMode = mode;
+  stopMiniPlayerChatPlacement?.();
+  stopMiniPlayerChatPlacement = wireMiniPlayerChatPlacement(miniSurface);
   if (miniSurface) {
     miniSurface.classList.remove('mini-player-surface--initializing');
     const surfaceToReveal = miniSurface;
@@ -203,6 +207,8 @@ function restoreMainPlayer() {
   miniPlayerInterface = null;
   stopMiniPlayerDrag?.();
   stopMiniPlayerDrag = null;
+  stopMiniPlayerChatPlacement?.();
+  stopMiniPlayerChatPlacement = null;
   stopMiniPlayerOverlayControls?.();
   stopMiniPlayerOverlayControls = null;
   stopMiniPlayerReturnHintTracking?.();

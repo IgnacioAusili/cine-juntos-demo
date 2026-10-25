@@ -170,6 +170,24 @@ export function syncExternalChatCollapseHandleOffset() {
         ),
       );
   dom.sessionView.style.setProperty("--chat-bottom-dock-handle-top", `${handleTop}px`);
+  const workspaceStyle = getComputedStyle(dom.workspace);
+  const shellStyle = getComputedStyle(dom.sessionView.closest(".app-shell"));
+  const shellGutter = Number.parseFloat(
+    getComputedStyle(dom.sessionView).getPropertyValue("--app-shell-gutter"),
+  ) || 0;
+  const shellPaddingTop = Number.parseFloat(shellStyle.paddingTop) || 0;
+  const bottomInset = Number.parseFloat(
+    workspaceStyle.getPropertyValue("--component-stack-viewport-bottom-inset"),
+  ) || 0;
+  const videoViewportInset = bottomInset * 2;
+  const isFullscreen = Boolean(document.fullscreenElement)
+    || document.body.classList.contains("page-context--fullscreen");
+  // El shell normal reserva su gutter superior y el workspace reserva dos
+  // gutters más para el reproductor. Compensar los que se quitaron evita que
+  // la flecha baje cuando se usa la variante sin márgenes.
+  const removedVerticalInsets = isFullscreen
+    ? 0
+    : Math.max(0, shellGutter + shellGutter * 2 - shellPaddingTop - videoViewportInset);
   const collapsedHandleTop = playerControlBarRect
     ? isPortraitMobileBottomDock
       ? Math.max(
@@ -180,7 +198,15 @@ export function syncExternalChatCollapseHandleOffset() {
           - 20,
         ),
       )
-      : Math.max(0, Math.round(playerControlBarRect.top - workspaceRect.top - 36))
+      : Math.max(
+        0,
+        Math.round(
+          playerControlBarRect.top
+          - workspaceRect.top
+          - 36
+          - removedVerticalInsets,
+        ),
+      )
     : handleTop;
   dom.sessionView.style.setProperty(
     "--chat-bottom-dock-collapsed-handle-top",
