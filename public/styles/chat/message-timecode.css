@@ -1,0 +1,8 @@
+.message__video-ts--inline {
+  --message-timecode-inline-height: 18px;
+  --message-timecode-inline-margin: 2px;
+
+  height: var(--message-timecode-inline-height);
+  margin-inline: var(--message-timecode-inline-margin);
+  vertical-align: middle;
+}

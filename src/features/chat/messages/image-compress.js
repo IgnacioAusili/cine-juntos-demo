@@ -6,39 +6,12 @@ import {
 } from "../dock/chat-scroll-sync.js";
 import { hashImageFingerprint } from "../composer/chat-spam-guard.js";
 import { createForeignDocumentIcon } from "../../foreign-lucide-icon.js";
+import { enableHorizontalWheelScroll } from "./horizontal-wheel-scroll.js";
 
 const pendingImageFingerprints = {
   main: [],
   overlay: [],
 };
-const imagePreviewWheelListeners = new WeakSet();
-
-function enableImagePreviewWheelScroll(container) {
-  if (imagePreviewWheelListeners.has(container)) return;
-
-  imagePreviewWheelListeners.add(container);
-  container.addEventListener("wheel", (event) => {
-    if (event.ctrlKey) return;
-
-    const delta = event.deltaX || event.deltaY;
-    if (!delta) return;
-
-    const lineHeight = Number.parseFloat(getComputedStyle(container).lineHeight) || 16;
-    const multiplier = event.deltaMode === 1
-      ? lineHeight
-      : event.deltaMode === 2
-        ? container.clientWidth
-        : 1;
-    const currentScroll = container.scrollLeft;
-    const maxScroll = container.scrollWidth - container.clientWidth;
-    const nextScroll = Math.max(0, Math.min(maxScroll, currentScroll + (delta * multiplier)));
-
-    if (nextScroll === currentScroll) return;
-    event.preventDefault();
-    container.scrollLeft = nextScroll;
-  }, { passive: false });
-}
-
 export function getImageSourceFingerprint(image) {
   const value = String(image || "").trim();
   if (!value) return "";
@@ -127,7 +100,7 @@ export function renderImagePreview(isOverlay) {
   const wasPinnedToBottom = isPinnedToBottom(messagesContainer);
 
   if (!container) return;
-  enableImagePreviewWheelScroll(container);
+  enableHorizontalWheelScroll(container);
 
   const pendingImages = Array.isArray(images) ? images.slice(0, 2) : [];
   if (!pendingImages.length) {

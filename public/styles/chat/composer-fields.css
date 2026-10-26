@@ -90,7 +90,7 @@
   border-radius: 17px;
 }
 
-.message-form .message-form__input-wrapper:focus-within {
+.message-form .message-form__input-wrapper:has(.message-form__rich-editor:focus) {
   border-color: var(--accent-2);
   box-shadow:
     0 16px 26px -12px rgba(0, 0, 0, 0.48),

@@ -2,7 +2,7 @@
 .player-frame .chat-message-list.chat-message-list--overlay .message__video-ts,
 .mini-player-surface .chat-message-list.chat-message-list--overlay .message__video-ts {
   --message-video-ts-hover-lift: -1px;
-  --message-video-ts-text-offset: -0.5px;
+  --message-video-ts-text-offset: 0px;
   --message-video-ts-motion-duration: 0.2s;
 }
 
@@ -48,9 +48,13 @@
 
 .message__meta-name {
   display: block;
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 700;
   color: var(--participant-accent, var(--muted-2));
+}
+
+.message__meta .message__video-ts {
+  align-self: center;
 }
 
 .message__video-ts,
@@ -135,8 +139,8 @@
   letter-spacing: 0.01em;
   margin: 0;
   text-align: right;
-  pointer-events: none;
-  user-select: none;
+  pointer-events: auto;
+  user-select: text;
   background: none;
   padding-left: 0;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
@@ -196,7 +200,8 @@
   shape-outside: inset(calc(100% - 19px) 0 0);
 }
 
-.message__bubble:not(.message__bubble--emoji-only) .message__emoji {
+.message__bubble:not(.message__bubble--emoji-only) .message__emoji,
+.reply-preview__body .message__emoji {
   font-family: var(--emoji-font-family);
   font-size: 1.12em;
   line-height: 1;

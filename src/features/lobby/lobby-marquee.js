@@ -58,6 +58,7 @@ function syncLobbyMarqueeFit(screen, marquee, grid, footer) {
   const availableHeight = Math.min(screenRect.height, heightLimit);
 
   const gridStyle = getComputedStyle(grid);
+  const gridStartClearance = pixels(gridStyle.marginBlockStart);
   const items = [...grid.children].filter((item) => getComputedStyle(item).display !== "none");
   if (items.length === 0) return;
   const invite = screen.querySelector(".lobby-screen__app-invite");
@@ -75,18 +76,15 @@ function syncLobbyMarqueeFit(screen, marquee, grid, footer) {
   const footerHeight = visibleScreenItems.includes(footer) ? outerBlockSize(footer) : 0;
   const inviteHeight = visibleInvite ? outerBlockSize(invite) : 0;
   const screenGap = pixels(screenStyle.rowGap);
-  const contentClearance = pixels(screenStyle.getPropertyValue("--lobby-marquee-content-clearance"));
   const screenGapCount = visibleScreenItems.length;
   const requiredHeight = screenInsets
     + marqueeBlockSize(marquee)
     + gridContentHeight
+    + gridStartClearance
     + inviteHeight
     + footerHeight
-    + screenGap * screenGapCount
-    + contentClearance * 2;
-  const currentlyHidden = screen.dataset.lobbyMarquee === "hidden";
-  const showThreshold = currentlyHidden ? contentClearance : 0;
-  const canShowMarquee = requiredHeight + showThreshold <= availableHeight;
+    + screenGap * screenGapCount;
+  const canShowMarquee = requiredHeight + gridStartClearance <= availableHeight;
   const nextState = canShowMarquee ? "visible" : "hidden";
 
   if (screen.dataset.lobbyMarquee !== nextState) screen.dataset.lobbyMarquee = nextState;

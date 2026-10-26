@@ -1,8 +1,9 @@
 // Cableado de interacciones del mensaje: listeners de puntero, long-press y contextmenu.
 // El motor de gesto vive en swipe-reply.js.
 import { state } from "../../../core/state.js";
+import { dom } from "../../../core/dom.js";
 import { createSwipeReply } from "./swipe-reply.js";
-import { showMessageMenu } from "./message-menu.js";
+import { hideMessageMenu, showMessageMenu } from "./message-menu.js";
 
 const LONG_PRESS_DELAY = 560;
 
@@ -47,6 +48,7 @@ export function wireMessageInteractions(
   let longPressPointerId = null;
   let longPressStart = null;
   let longPressTriggered = false;
+  let textSelectionPointerId = null;
 
   function clearLongPress() {
     window.clearTimeout(state.chat.longPressTimer);
@@ -88,6 +90,10 @@ export function wireMessageInteractions(
   interactionTarget.addEventListener("contextmenu", (event) => {
     if (!isWithinInteractionBand(event)) return;
     event.preventDefault();
+    if (dom.messageMenu && !dom.messageMenu.hidden) {
+      hideMessageMenu();
+      return;
+    }
     const link = event.target.closest?.("a[href]");
     const linkHref = link && bubble.contains(link) ? link.href : "";
     showMessageMenu(message, event.clientX, event.clientY, replyInput, linkHref);
@@ -115,6 +121,30 @@ export function wireMessageInteractions(
     if (event.button && event.button !== 0) return;
     if (!isWithinInteractionBand(event)) return;
     if (event.target instanceof HTMLElement && event.target.closest("button, input, textarea, select, [contenteditable='true']")) {
+      return;
+    }
+    if (event.pointerType !== "touch" && event.target instanceof Element) {
+      const contentTarget = event.target.closest(".message__content");
+      if (contentTarget && bubble.contains(contentTarget)) {
+        // Deja que el navegador inicie la selección nativa en el texto del chat.
+        textSelectionPointerId = event.pointerId;
+        return;
+      }
+      const textMetaTarget = event.target.closest(".message__meta, .message__time-anchor");
+      if (textMetaTarget && (textMetaTarget.matches(".message__meta") || bubble.contains(textMetaTarget))) {
+        textSelectionPointerId = null;
+        return;
+      }
+    }
+    const horizontalMediaStrip = event.target instanceof Element
+      ? event.target.closest(".message__media-strip")
+      : null;
+    if (
+      event.pointerType === "touch"
+      && horizontalMediaStrip
+      && horizontalMediaStrip.scrollWidth > horizontalMediaStrip.clientWidth
+    ) {
+      armLongPress(event);
       return;
     }
     if (!allowSwipeInsideBubble && bubble.contains(event.target)) {
@@ -147,18 +177,35 @@ export function wireMessageInteractions(
 
   interactionTarget.addEventListener("pointerup", (event) => {
     clearLongPress();
+    if (textSelectionPointerId === event.pointerId) {
+      textSelectionPointerId = null;
+      const timeTarget = event.target instanceof Element
+        ? event.target.closest(".message__time-anchor")
+        : null;
+      if (timeTarget && bubble.contains(timeTarget)) {
+        const selection = window.getSelection();
+        if (selection) {
+          const range = document.createRange();
+          range.selectNodeContents(bubble);
+          selection.removeAllRanges();
+          selection.addRange(range);
+        }
+      }
+    }
     if (event.pointerId !== swipe.pointerId) return;
     swipe.endSwipe();
   });
 
   interactionTarget.addEventListener("pointercancel", (event) => {
     clearLongPress();
+    if (textSelectionPointerId === event.pointerId) textSelectionPointerId = null;
     if (event.pointerId !== swipe.pointerId) return;
     swipe.cancelSwipe(swipe.offset > 0);
   });
 
   interactionTarget.addEventListener("lostpointercapture", () => {
     clearLongPress();
+    textSelectionPointerId = null;
     if (swipe.tracking) {
       swipe.cancelSwipe(swipe.offset > 0);
     }

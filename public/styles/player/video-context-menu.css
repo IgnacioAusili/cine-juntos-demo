@@ -1,0 +1,181 @@
+.video-context-menu,
+.video-load-popover {
+  --video-context-layer: 12000;
+  --video-context-border: var(--glass-border-strong);
+  --video-context-surface: var(--glass-bg-elevated);
+  --video-context-shadow: var(--shadow-lg);
+  --video-context-radius: var(--radius-md);
+  --video-context-menu-width: 200px;
+  --video-context-popup-width: 260px;
+  --video-context-inset: var(--app-shell-gutter);
+  --video-context-menu-padding: 4px;
+  --video-context-item-height: 32px;
+  --video-context-item-gap: 6px;
+  --video-context-item-radius: var(--radius-sm);
+  --video-context-item-padding: 6px;
+  --video-context-item-hover: var(--teal-glow-soft);
+  --video-context-disabled-text: var(--text-faint);
+  --video-context-icon-size: 14px;
+  --video-context-popup-padding: 5px;
+  --video-context-popup-top-padding: 1px;
+  --video-context-label-gap: 2px;
+  --video-context-input-height: 30px;
+  --video-context-input-padding: 6px;
+  --video-context-border-width: 1px;
+  --video-context-blur: 18px;
+  --video-context-viewport-width: 100vw;
+  --video-context-text-size: 0.82em;
+  --video-context-label-size: 0.72em;
+  --video-context-close-size: 28px;
+  --video-context-close-icon-size: 16px;
+  --video-context-actions-gap: 5px;
+  --video-context-accept-size: var(--video-context-input-height);
+  --video-context-accept-icon-size: 13px;
+  --video-context-accept-background: var(--teal-soft);
+  --video-context-accept-hover-brightness: 1.06;
+
+  position: fixed;
+  z-index: var(--video-context-layer);
+  box-sizing: border-box;
+  border: var(--video-context-border-width) solid var(--video-context-border);
+  border-radius: var(--video-context-radius);
+  background: var(--video-context-surface);
+  box-shadow: var(--video-context-shadow);
+  color: var(--text);
+  backdrop-filter: blur(var(--video-context-blur));
+}
+
+.video-context-menu {
+  display: grid;
+  width: min(var(--video-context-menu-width), calc(var(--video-context-viewport-width) - var(--video-context-inset) - var(--video-context-inset)));
+  padding: var(--video-context-menu-padding);
+}
+
+.video-context-menu__item {
+  display: flex;
+  min-height: var(--video-context-item-height);
+  align-items: center;
+  gap: var(--video-context-item-gap);
+  border: 0;
+  border-radius: var(--video-context-item-radius);
+  background: transparent;
+  color: inherit;
+  padding: 0 var(--video-context-item-padding);
+  text-align: left;
+  font: inherit;
+  font-size: var(--video-context-text-size);
+  cursor: pointer;
+}
+
+.video-context-menu__icon {
+  width: var(--video-context-icon-size);
+  height: var(--video-context-icon-size);
+  flex: 0 0 var(--video-context-icon-size);
+}
+
+.video-context-menu__item:hover,
+.video-context-menu__item:focus-visible {
+  outline: none;
+  background: var(--video-context-item-hover);
+}
+
+.video-context-menu__item:disabled {
+  color: var(--video-context-disabled-text);
+  cursor: default;
+}
+
+.video-load-popover {
+  width: min(var(--video-context-popup-width), calc(var(--video-context-viewport-width) - var(--video-context-inset) - var(--video-context-inset)));
+  padding: var(--video-context-popup-top-padding) var(--video-context-popup-padding) var(--video-context-popup-padding);
+}
+
+.video-load-popover__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--video-context-actions-gap);
+  margin-bottom: var(--video-context-label-gap);
+}
+
+.video-load-popover__label {
+  display: block;
+  color: var(--text-soft);
+  font-size: var(--video-context-label-size);
+}
+
+.video-load-popover__close {
+  display: grid;
+  width: var(--video-context-close-size);
+  height: var(--video-context-close-size);
+  flex: 0 0 var(--video-context-close-size);
+  place-items: center;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.video-load-popover__close svg {
+  width: var(--video-context-close-icon-size);
+  height: var(--video-context-close-icon-size);
+}
+
+.video-load-popover input.video-load-popover__input {
+  box-sizing: border-box;
+  width: auto;
+  min-width: 0;
+  height: var(--video-context-input-height);
+  flex: auto;
+  min-height: var(--video-context-input-height);
+  border: var(--video-context-border-width) solid var(--video-context-border);
+  border-radius: var(--radius-sm);
+  outline: none;
+  background: var(--bg-deep);
+  color: inherit;
+  padding: 0 var(--video-context-input-padding);
+  font: inherit;
+  font-size: var(--video-context-text-size);
+}
+
+.video-load-popover__field-row {
+  display: flex;
+  align-items: center;
+  gap: var(--video-context-actions-gap);
+}
+
+.video-load-popover__accept {
+  display: grid;
+  width: var(--video-context-accept-size);
+  height: var(--video-context-accept-size);
+  min-height: var(--video-context-accept-size);
+  flex: 0 0 var(--video-context-accept-size);
+  place-items: center;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--video-context-accept-background);
+  color: var(--bg);
+  padding: 0;
+  cursor: pointer;
+}
+
+.video-load-popover__close:hover {
+  background: transparent;
+  color: var(--danger);
+}
+
+.video-load-popover input.video-load-popover__input:focus {
+  border-color: var(--teal-soft);
+  box-shadow: var(--shadow-glow-teal);
+}
+
+.video-load-popover__accept:hover,
+.video-load-popover__accept:focus-visible {
+  outline: none;
+  filter: brightness(var(--video-context-accept-hover-brightness));
+}
+
+.video-load-popover__accept svg {
+  width: var(--video-context-accept-icon-size);
+  height: var(--video-context-accept-icon-size);
+}

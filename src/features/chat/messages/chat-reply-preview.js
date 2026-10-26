@@ -1,8 +1,9 @@
 import { dom } from "../../../core/dom.js";
 import { state } from "../../../core/state.js";
-import { truncateText } from "./chat-content-parser.js";
+import { appendEmojiGraphemes, truncateText } from "./chat-content-parser.js";
+import { appendInlineFormattingPreview } from "./chat-inline-formatting.js";
 import { getParticipantAccent } from "./chat-participant-color.js";
-import { scrollToMessage } from "./chat-message-navigation.js";
+import { scrollToMessage, scrollToMessageFragment } from "./chat-message-navigation.js";
 import { createForeignDocumentIcon } from "../../foreign-lucide-icon.js";
 
 let clearReplyTargetCallback = null;
@@ -27,6 +28,7 @@ function hideReplyPreviewContainer(container) {
   container.hidden = true;
   setReplyPreviewClosing(container, false);
   container.classList.remove("reply-preview--visible");
+  container.classList.remove("reply-preview--quote");
   container.innerHTML = "";
   container.style.removeProperty("height");
   container.style.removeProperty("transition");
@@ -45,13 +47,42 @@ function createReplyPreviewContent(container) {
   const textBtn = document.createElement("button");
   textBtn.type = "button";
   textBtn.className = 'reply-preview__text';
-  const replyText = truncateText(state.chat.replyTarget.text || "", 58);
-  const replyBodyClass = replyText === "(Imagen)" ? " reply-preview__body--image" : "";
-  textBtn.innerHTML = `<span class="reply-preview__name">${state.chat.replyTarget.name}</span><span class="reply-preview__body${replyBodyClass}">${replyText}</span>`;
+  const replyName = document.createElement("span");
+  replyName.className = "reply-preview__name";
+  replyName.textContent = state.chat.replyTarget.previewName
+    || state.chat.replyTarget.name
+    || "Invitado";
+
+  const replyText = String(
+    state.chat.replyTarget.previewText ?? state.chat.replyTarget.text ?? "",
+  ).trim();
+  const replyBody = document.createElement("span");
+  replyBody.className = "reply-preview__body";
+  const quote = state.chat.replyTarget.quote;
+  if (quote?.text) {
+    replyBody.classList.add("reply-preview__body--quote");
+    replyBody.textContent = truncateText(quote.text, 100);
+  } else if (replyText === "(Imagen)") {
+    replyBody.classList.add("reply-preview__body--image");
+    replyBody.textContent = replyText;
+  } else {
+    appendInlineFormattingPreview(replyBody, replyText, appendEmojiGraphemes);
+  }
+  textBtn.append(replyName, replyBody);
   const preferredScrollContainer = container === dom.overlayReplyPreview ? dom.overlayMessages : dom.messages;
-  textBtn.addEventListener("click", () =>
-    scrollToMessage(state.chat.replyTarget.id, preferredScrollContainer),
-  );
+  textBtn.addEventListener("click", () => {
+    const currentQuote = state.chat.replyTarget?.quote;
+    if (currentQuote && Number.isFinite(currentQuote.start) && Number.isFinite(currentQuote.end)) {
+      scrollToMessageFragment(
+        state.chat.replyTarget.id,
+        currentQuote.start,
+        currentQuote.end,
+        preferredScrollContainer,
+      );
+      return;
+    }
+    scrollToMessage(state.chat.replyTarget.id, preferredScrollContainer);
+  });
 
   const close = document.createElement("button");
   close.type = "button";
@@ -129,6 +160,10 @@ export function renderReplyPreview({ animate = true, preserveHeight = false } = 
 
   [dom.replyPreview, dom.overlayReplyPreview].forEach((container) => {
     if (!container) return;
+    container.classList.toggle(
+      "reply-preview--quote",
+      Boolean(state.chat.replyTarget?.quote?.text),
+    );
     const previousHideTimer = pendingReplyPreviewHides.get(container);
     if (previousHideTimer != null) {
       window.clearTimeout(previousHideTimer);

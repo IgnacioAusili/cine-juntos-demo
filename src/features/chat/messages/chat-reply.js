@@ -3,14 +3,18 @@ import { state } from "../../../core/state.js";
 import { hideTooltip } from "../../icons-tooltips.js";
 import { focusChatInput } from "../composer/chat-input-focus.js";
 import {
+  getSystemMessageText,
+  normalizeOwnSystemBody,
+} from "../system-messages/chat-system-message-text.js";
+import {
   configureReplyPreviewOperations,
   renderReplyPreview,
 } from "./chat-reply-preview.js";
 
 export { renderReplyPreview } from "./chat-reply-preview.js";
-export { scrollToMessage } from "./chat-message-navigation.js";
+export { scrollToMessage, scrollToMessageFragment } from "./chat-message-navigation.js";
 
-export function setReplyTarget(message, focusInput = dom.messageInput) {
+export function setReplyTarget(message, focusInput = dom.messageInput, quote = null) {
   const hadReplyTarget = Boolean(state.chat.replyTarget);
   const isSameReplyTarget = state.chat.replyTarget?.id === message.id;
   state.chat.replyTarget = {
@@ -18,6 +22,8 @@ export function setReplyTarget(message, focusInput = dom.messageInput) {
     from: message.from || null,
     name: message.name || "Invitado",
     text: getReplyLabel(message),
+    ...getSystemReplyPreview(message),
+    quote: quote ? { text: quote.text, start: quote.start, end: quote.end } : null,
   };
   state.chat.replyPreviewScope = focusInput?.closest?.(".player-chat")
     ? "overlay"
@@ -37,6 +43,22 @@ function getReplyLabel(message) {
     return "(Imagen)";
   }
   return "";
+}
+
+function getSystemReplyPreview(message) {
+  if (!message?.system) return {};
+
+  const isMine = message.from === state.session.clientId;
+  const name = String(message.name || "Invitado").trim();
+  const text = getSystemMessageText(message, isMine);
+  const body = name && text.startsWith(name)
+    ? text.slice(name.length).trimStart()
+    : text;
+
+  return {
+    previewName: isMine ? "Tú" : name,
+    previewText: isMine ? normalizeOwnSystemBody(body) || body : body,
+  };
 }
 
 export function clearReplyTarget() {

@@ -1,4 +1,7 @@
 const FORMAT_MARKERS = [
+  { format: "quote", marker: "❝", closingMarker: "❞" },
+  { format: "quote", marker: "‘", closingMarker: "’" },
+  { format: "quote", marker: "“", closingMarker: "”" },
   { format: "bold", marker: "**" },
   { format: "underline", marker: "__" },
   { format: "strike", marker: "~~" },
@@ -112,7 +115,8 @@ function readOpeningMarker(text, index, closing) {
 }
 
 function getClosingLength(text, index, closing) {
-  if (!closing || !text.startsWith(closing.marker, index)) return 0;
+  const closingMarker = closing?.closingMarker || closing?.marker;
+  if (!closingMarker || !text.startsWith(closingMarker, index)) return 0;
   if (closing.marker === "*") {
     const runLength = countMarkerRun(text, index, "*");
     return runLength === 1 || runLength >= 3 ? 1 : 0;
@@ -121,7 +125,7 @@ function getClosingLength(text, index, closing) {
     const runLength = countMarkerRun(text, index, "_");
     return runLength === 1 || runLength >= 3 ? 1 : 0;
   }
-  return closing.marker.length;
+  return closingMarker.length;
 }
 
 function countMarkerRun(text, index, marker) {

@@ -4,6 +4,25 @@ export { hasInlineFormatting };
 
 const copyFeedbackTimers = new WeakMap();
 
+export function isQuoteOnlyMessage(value) {
+  const nodes = parseInlineFormatting(String(value ?? "").trim());
+  let hasQuote = false;
+
+  const hasVisibleText = (node) => {
+    if (node.type === "text") return Boolean(node.value.trim());
+    return (node.children || []).some(hasVisibleText);
+  };
+
+  const onlyQuotesAndWhitespace = nodes.every((node) => {
+    if (node.type === "text") return !node.value.trim();
+    if (node.format !== "quote") return false;
+    hasQuote ||= hasVisibleText(node);
+    return true;
+  });
+
+  return onlyQuotesAndWhitespace && hasQuote;
+}
+
 export function appendRemoteImage(container, imageUrl) {
   const link = document.createElement("a");
   link.className = "message__media-link";
@@ -31,10 +50,14 @@ export function appendInlineFormatting(container, text, appendPlainText, depth =
     appendPlainText(container, text);
     return;
   }
-  appendFormattedNodes(container, parseInlineFormatting(text), appendPlainText, depth);
+  appendFormattedNodes(container, parseInlineFormatting(text), appendPlainText, depth, true);
 }
 
-function appendFormattedNodes(container, nodes, appendPlainText, depth) {
+export function appendInlineFormattingPreview(container, text, appendPlainText) {
+  appendFormattedNodes(container, parseInlineFormatting(text), appendPlainText, 0, false);
+}
+
+function appendFormattedNodes(container, nodes, appendPlainText, depth, interactive) {
   if (depth > 8) {
     nodes.forEach((node) => appendPlainText(container, node.type === "text" ? node.value : serializeNodeText(node)));
     return;
@@ -47,35 +70,51 @@ function appendFormattedNodes(container, nodes, appendPlainText, depth) {
     }
 
     if (node.format === "link") {
-      const link = document.createElement("a");
+      const link = document.createElement(interactive ? "a" : "span");
       link.className = "message__link";
-      link.href = node.url;
-      link.target = "_blank";
-      link.rel = "noreferrer";
-      appendFormattedNodes(link, node.children, appendPlainText, depth + 1);
+      if (interactive) {
+        link.href = node.url;
+        link.target = "_blank";
+        link.rel = "noreferrer";
+        const label = getFormattedNodeText(node.children).trim();
+        if (!isSameLinkLabel(label, node.url)) {
+          link.dataset.tooltip = `Ir a ${truncateAliasTooltipUrl(node.url)}`;
+        }
+      }
+      appendFormattedNodes(link, node.children, appendPlainText, depth + 1, interactive);
       container.append(link);
       return;
     }
 
     if (node.format === "monospace") {
       const code = document.createElement("code");
-      code.className = "message__monospace message__monospace--copyable";
-      code.setAttribute("role", "button");
-      code.setAttribute("tabindex", "0");
-      code.setAttribute("aria-label", "Copiar texto monoespaciado");
-      code.dataset.tooltip = "Copiar texto";
-      appendFormattedNodes(code, node.children, appendPlainText, depth + 1);
-      appendCopyConfirmation(code);
-      code.addEventListener("click", (event) => {
-        event.preventDefault();
-        void copyMonospaceText(code);
-      });
-      code.addEventListener("keydown", (event) => {
-        if (event.key !== "Enter" && event.key !== " ") return;
-        event.preventDefault();
-        void copyMonospaceText(code);
-      });
+      code.className = `message__monospace${interactive ? " message__monospace--copyable" : ""}`;
+      appendFormattedNodes(code, node.children, appendPlainText, depth + 1, interactive);
+      if (interactive) {
+        code.setAttribute("role", "button");
+        code.setAttribute("tabindex", "0");
+        code.setAttribute("aria-label", "Copiar texto monoespaciado");
+        code.dataset.tooltip = "Copiar texto";
+        appendCopyConfirmation(code);
+        code.addEventListener("click", (event) => {
+          event.preventDefault();
+          void copyMonospaceText(code);
+        });
+        code.addEventListener("keydown", (event) => {
+          if (event.key !== "Enter" && event.key !== " ") return;
+          event.preventDefault();
+          void copyMonospaceText(code);
+        });
+      }
       container.append(code);
+      return;
+    }
+
+    if (node.format === "quote") {
+      const quote = document.createElement("span");
+      quote.className = interactive ? "message__quote" : "message__quote message__quote--preview";
+      appendFormattedNodes(quote, node.children, appendPlainText, depth + 1, interactive);
+      container.append(quote);
       return;
     }
 
@@ -85,21 +124,44 @@ function appendFormattedNodes(container, nodes, appendPlainText, depth) {
     if (node.format === "strike") element.className = "message__strike";
     if (node.format === "spoiler") {
       element.className = "message__spoiler";
-      element.setAttribute("role", "button");
-      element.setAttribute("tabindex", "0");
-      element.setAttribute("aria-label", "Revelar spoiler");
-      element.setAttribute("aria-pressed", "false");
-      element.dataset.tooltip = "Esto puede ser un spoiler. Haz clic para revelar el texto.";
-      element.addEventListener("click", () => revealSpoiler(element));
-      element.addEventListener("keydown", (event) => {
-        if (event.key !== "Enter" && event.key !== " ") return;
-        event.preventDefault();
-        revealSpoiler(element);
-      });
+      if (interactive) {
+        element.setAttribute("role", "button");
+        element.setAttribute("tabindex", "0");
+        element.setAttribute("aria-label", "Mostrar spoiler");
+        element.setAttribute("aria-pressed", "false");
+        element.dataset.tooltip = "Mostrar spoiler";
+        element.addEventListener("click", () => toggleSpoiler(element));
+        element.addEventListener("keydown", (event) => {
+          if (event.key !== "Enter" && event.key !== " ") return;
+          event.preventDefault();
+          toggleSpoiler(element);
+        });
+      }
     }
-    appendFormattedNodes(element, node.children, appendPlainText, depth + 1);
+    appendFormattedNodes(element, node.children, appendPlainText, depth + 1, interactive);
     container.append(element);
   });
+}
+
+function getFormattedNodeText(nodes) {
+  return nodes.map((node) => node.type === "text"
+    ? node.value
+    : getFormattedNodeText(node.children || [])).join("");
+}
+
+function isSameLinkLabel(label, url) {
+  if (label === url) return true;
+  try {
+    return new URL(label).href === url;
+  } catch {
+    return false;
+  }
+}
+
+function truncateAliasTooltipUrl(url) {
+  const value = String(url || "");
+  const maxLength = 64;
+  return value.length > maxLength ? `${value.slice(0, maxLength - 1)}…` : value;
 }
 
 function appendCopyConfirmation(code) {
@@ -185,8 +247,9 @@ function copyTextWithTemporaryInput(documentRef, text) {
   }
 }
 
-function revealSpoiler(element) {
-  element.classList.add("message__spoiler--revealed");
-  element.setAttribute("aria-label", "Spoiler revelado");
-  element.setAttribute("aria-pressed", "true");
+function toggleSpoiler(element) {
+  const revealed = element.classList.toggle("message__spoiler--revealed");
+  element.setAttribute("aria-label", revealed ? "Ocultar spoiler" : "Mostrar spoiler");
+  element.setAttribute("aria-pressed", String(revealed));
+  element.dataset.tooltip = revealed ? "Ocultar spoiler" : "Mostrar spoiler";
 }

@@ -40,6 +40,15 @@
   width: var(--message-highlight-width, calc(100% + 20px));
 }
 
+.message-fragment-highlight {
+  position: relative;
+  z-index: 4;
+  border-radius: 0.18em;
+  background: color-mix(in srgb, var(--participant-accent, #2fb8a4) 38%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--participant-accent, #2fb8a4) 52%, transparent);
+  animation: messageFragmentPulse 2.3s ease-out both;
+}
+
 @keyframes messageHighlightPulse {
   0% {
     opacity: 0;
@@ -60,5 +69,19 @@
 
   100% {
     opacity: 0;
+  }
+}
+
+@keyframes messageFragmentPulse {
+  0%,
+  100% {
+    background: color-mix(in srgb, var(--participant-accent, #2fb8a4) 38%, transparent);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--participant-accent, #2fb8a4) 52%, transparent);
+  }
+
+  25%,
+  70% {
+    background: color-mix(in srgb, var(--participant-accent, #2fb8a4) 18%, transparent);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--participant-accent, #2fb8a4) 25%, transparent);
   }
 }

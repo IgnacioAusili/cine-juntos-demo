@@ -70,7 +70,15 @@ export function syncSingleColumnContentCenter(screen, grid, hero, ticket, footer
     : 0;
   const viewportHeight = restingViewportHeight || visualViewport?.height || window.innerHeight;
   const viewportBottom = viewportTop + viewportHeight;
-  const availableTop = Math.max(screenRect.top, viewportTop);
+  const marquee = screen.querySelector('.lobby-screen__marquee');
+  const gridStartClearance = Math.max(
+    0,
+    Number.parseFloat(getComputedStyle(grid).marginBlockStart) || 0,
+  );
+  const visibleMarqueeBottom = marquee?.getClientRects().length
+    ? marquee.getBoundingClientRect().bottom + gridStartClearance
+    : screenRect.top;
+  const availableTop = Math.max(screenRect.top, viewportTop, visibleMarqueeBottom);
   const availableBottom = Math.min(screenRect.bottom, viewportBottom);
   const availableCenter = (availableTop + availableBottom) / 2;
   const footerLegal = footer.querySelector('.lobby-screen__disclaimer');
@@ -84,7 +92,7 @@ export function syncSingleColumnContentCenter(screen, grid, hero, ticket, footer
   const heroTicketGap = Math.max(0, ticketRect.top - heroRect.bottom);
   const declaredGridGap = Number.parseFloat(getComputedStyle(grid).rowGap) || heroTicketGap;
   const minimumHeroTicketGap = Math.min(heroTicketGap, Math.max(8, declaredGridGap - 4));
-  const minimumTop = heroRect.bottom + minimumHeroTicketGap;
+  const minimumTop = availableTop + heroRect.height + minimumHeroTicketGap;
 
   // El boleto conserva su centro vertical. El panel ocupa el hueco restante.
   const centeredTop = availableCenter - ticketRect.height / 2;

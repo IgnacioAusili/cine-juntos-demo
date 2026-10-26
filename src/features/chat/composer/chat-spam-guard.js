@@ -5,6 +5,7 @@ import { MAX_CHARS, withShortcutHint } from "../../../core/utils.js";
 import { refreshTooltipForTarget } from "../../icons-tooltips.js";
 import { setSyncStatus } from "../../session/session-ui.js";
 
+const QUOTE_EXTRA_CHARS = 60;
 const sendButtonMarkup = new WeakMap();
 
 const SAME_MESSAGE_LIMIT = 4;
@@ -241,9 +242,10 @@ export function updateCharCounter(input, isOverlay) {
   const form = isOverlay ? dom.overlayMessageForm : dom.messageForm;
   const sendBtn = isOverlay ? dom.overlayMessageSend : dom.mainMessageSend;
   const len = input.isContentEditable ? getRichEditorTextLength(input) : input.value.length;
-  const remaining = Math.max(0, MAX_CHARS - len);
-  const progress = Math.min(1, len / MAX_CHARS);
-  const isOver = len >= MAX_CHARS;
+  const limit = getMessageCharLimit(input);
+  const remaining = Math.max(0, limit - len);
+  const progress = Math.min(1, len / limit);
+  const isOver = len >= limit;
   const isNearLimit = !isOver && remaining <= 20;
   const progressColor = isOver
     ? "rgba(233, 68, 68, 1)"
@@ -258,7 +260,7 @@ export function updateCharCounter(input, isOverlay) {
   const progressVisible = len >= PROGRESS_APPEAR_THRESHOLD ? 1 : 0;
 
   if (counter) {
-    counter.textContent = `${len} / ${MAX_CHARS}`;
+    counter.textContent = `${len} / ${limit}`;
     counter.setAttribute("aria-hidden", "true");
   }
 
@@ -290,4 +292,9 @@ export function updateCharCounter(input, isOverlay) {
     sendBtn.dataset.overLimit = String(isOver);
     refreshTooltipForTarget(sendBtn);
   }
+}
+
+export function getMessageCharLimit(input) {
+  const hasQuoteStyle = Boolean(input?.querySelector?.('[data-chat-format="quote"]'));
+  return MAX_CHARS + (hasQuoteStyle ? QUOTE_EXTRA_CHARS : 0);
 }

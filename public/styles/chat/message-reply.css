@@ -37,6 +37,34 @@
   display: block;
 }
 
+.message__reply-body--quote {
+  width: fit-content;
+  box-sizing: border-box;
+  max-width: 100%;
+  align-self: flex-start;
+  padding: 3px 6px;
+  border-inline-start: 2px solid var(--reply-participant-accent, var(--participant-accent, var(--accent-2)));
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.065);
+  color: var(--text-soft);
+  font-size: 0.7rem;
+  line-height: 1.3;
+  font-style: italic;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  quotes: "❝" "❞";
+}
+
+.message__reply-body--quote::before {
+  content: open-quote;
+  color: var(--reply-participant-accent, var(--participant-accent, var(--accent-2)));
+}
+
+.message__reply-body--quote::after {
+  content: close-quote;
+  color: var(--reply-participant-accent, var(--participant-accent, var(--accent-2)));
+}
+
 /* La marca del reply permanece a la izquierda también en mensajes propios. */
 .message.message--mine .message__reply {
   border-left: 2px solid rgba(255, 255, 255, 0.28);
@@ -51,4 +79,14 @@
 
 .message.message--mine .message__reply:hover {
   border-left-color: var(--accent-2);
+}
+
+.message__reply--quote,
+.message.message--mine .message__reply--quote {
+  border-left-color: transparent;
+}
+
+.message__reply--quote:hover,
+.message.message--mine .message__reply--quote:hover {
+  border-left-color: transparent;
 }

@@ -1,4 +1,7 @@
-
+:root {
+  --chat-send-hover-duration: 180ms;
+  --chat-send-hover-filter: brightness(1.08) drop-shadow(0 0 1px color-mix(in srgb, var(--accent-2) 18%, transparent));
+}
 
 .chat-area .message-form__input-wrapper .icon-button__progress-track,
 .chat-area .message-form__input-wrapper .icon-button__progress-value {
@@ -70,6 +73,7 @@
   box-shadow: none;
   overflow: visible;
   isolation: isolate;
+  transition: filter var(--chat-send-hover-duration) ease;
 }
 
 .chat-area .message-form__input-wrapper .icon-button--send > svg.icon-button__progress-ring {
@@ -118,4 +122,15 @@
 
 .chat-area .message-form__input-wrapper .icon-button--send:disabled {
   opacity: 0.9;
+}
+
+.chat-area .message-form__input-wrapper .icon-button--send:hover:not(:disabled),
+.chat-area .message-form__input-wrapper .icon-button--send:focus-visible:not(:disabled) {
+  filter: var(--chat-send-hover-filter);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chat-area .message-form__input-wrapper .icon-button--send {
+    transition: none;
+  }
 }

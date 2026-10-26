@@ -1,6 +1,5 @@
 import { dom } from "../../core/dom.js";
 import { state, getDisplayName, logEvent } from "../../core/state.js";
-import { formatSeconds } from "../../core/utils.js";
 import { sendVideoEventMessage, scrollToVideoPosition } from "../chat/index.js";
 import { showLoadReplaceDialog } from "../session/session-ui.js";
 import { clearPlaybackRecoveryTracking, publishState } from "./player-sync-logic.js";
@@ -56,10 +55,10 @@ export function loadVideoFromUrl(source, origin) {
   }
 }
 
-export async function handleManualLoadRequest() {
+export async function handleManualLoadRequest(sourceOverride = null) {
   if (state.player.remoteStateActive || state.player.suppressVideoEvents) return;
 
-  const source = dom.videoUrlInput.value.trim();
+  const source = sourceOverride == null ? dom.videoUrlInput.value.trim() : String(sourceOverride).trim();
   if (!source) {
     // Sin un video cargado no hay nada que reemplazar ni limpiar.
     // Evita mostrar la confirmación y deja el botón sin efecto.

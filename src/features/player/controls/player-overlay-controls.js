@@ -167,6 +167,16 @@ export function wirePlayerOverlayControls({ togglePlayback } = {}) {
       return;
     }
     if (
+      event?.type === "mousemove"
+      && target === dom.videoPlayer
+      && !isMobileTouchDevice()
+      && dom.playerFrame.classList.contains('player-frame--overlay-suppressed')
+    ) {
+      // El chat usa el estado suprimido mientras el puntero está encima. Al
+      // volver al video, ese movimiento debe liberarlo para revelar los controles.
+      dom.playerFrame.classList.remove('player-frame--overlay-suppressed');
+    }
+    if (
       target === dom.videoPlayer
       && dom.playerFrame.classList.contains('player-frame--overlay-suppressed')
     ) return;

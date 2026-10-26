@@ -54,6 +54,7 @@
   align-self: flex-end;
   margin: 0 6px 1px 0;
   transform: none;
+  transition: filter var(--chat-send-hover-duration) ease;
 }
 
 .message-form.message-form--overlay .message-form__input-wrapper .icon-button--send > svg.icon-button__progress-ring {
@@ -88,10 +89,17 @@
   display: block;
 }
 
-.message-form.message-form--overlay .message-form__input-wrapper .icon-button--send:hover {
-  opacity: 0.9;
+.message-form.message-form--overlay .message-form__input-wrapper .icon-button--send:hover:not(:disabled),
+.message-form.message-form--overlay .message-form__input-wrapper .icon-button--send:focus-visible:not(:disabled) {
+  filter: var(--chat-send-hover-filter);
 }
 
 .message-form.message-form--overlay .message-form__input-wrapper .icon-button--send:disabled {
   opacity: 0.9;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .message-form.message-form--overlay .message-form__input-wrapper .icon-button--send {
+    transition: none;
+  }
 }

@@ -1,3 +1,5 @@
+import { enableHorizontalWheelScroll } from "./horizontal-wheel-scroll.js";
+
 export function getRenderableMessageImages(message, messageText = "") {
   const images = Array.isArray(message?.images)
     ? message.images.filter(Boolean)
@@ -16,6 +18,9 @@ export function isStandaloneImageText(text) {
 
 export function appendMessageMedia(container, images, isStandalone = false) {
   if (!container || !Array.isArray(images) || !images.length) return null;
+  const shell = document.createElement("div");
+  shell.className = "message__media-strip-shell";
+
   const strip = document.createElement("div");
   strip.className = 'message__media-strip';
   if (isStandalone) strip.classList.add('message__media-strip--standalone');
@@ -37,6 +42,15 @@ export function appendMessageMedia(container, images, isStandalone = false) {
     strip.append(link);
   }
 
-  container.append(strip);
+  const scrollbar = document.createElement("div");
+  scrollbar.className = "composer-scrollbar composer-scrollbar--horizontal";
+  scrollbar.setAttribute("aria-hidden", "true");
+  const thumb = document.createElement("div");
+  thumb.className = "composer-scrollbar__thumb";
+  scrollbar.append(thumb);
+
+  shell.append(strip, scrollbar);
+  container.append(shell);
+  enableHorizontalWheelScroll(strip, shell);
   return strip;
 }

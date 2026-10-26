@@ -1,5 +1,4 @@
 import { dom } from "../../../core/dom.js";
-import { hideEmojiPicker } from "./emoji-picker.js";
 import { isPinnedToBottom, queuePinnedChatScrollSync } from "../dock/chat-scroll-sync.js";
 import { wireChatScrollbar, syncChatScrollbar, syncComposerScrollbar } from "./chat-scrollbar.js";
 
@@ -18,6 +17,25 @@ export function autoResizeMessageInput(input) {
 
   const maxHeight = isOverlay ? 86 : 118;
   const wrapper = input.closest('.message-form__input-wrapper');
+  const isEmptyRichEditor = input.isContentEditable
+    && !input.textContent.replaceAll("\u200B", "");
+
+  // Chromium leaves a <br> in an emptied contenteditable after select-all +
+  // delete. It has no text, but prevents :empty from restoring the placeholder
+  // and can be measured as an extra line at narrow composer widths. The
+  // placeholder itself must not trigger the multiline state either.
+  if (isEmptyRichEditor && input.childNodes.length) {
+    const hadFocus = input.ownerDocument.activeElement === input;
+    input.replaceChildren();
+    if (hadFocus) {
+      const range = input.ownerDocument.createRange();
+      range.selectNodeContents(input);
+      range.collapse(true);
+      const selection = input.ownerDocument.getSelection();
+      selection?.removeAllRanges();
+      selection?.addRange(range);
+    }
+  }
 
   // Medir desde el estado compacto evita que un padding de la última edición
   // mantenga expandido un campo ya vacío. El mínimo se toma del CSS activo
@@ -32,12 +50,12 @@ export function autoResizeMessageInput(input) {
   input.style.height = `${minHeight}px`;
   // El padding y el interlineado cambian al expandirse, así que esta primera
   // medición decide el estado y la segunda obtiene la altura con sus métricas.
-  const shouldExpand = input.scrollHeight > minHeight + 4;
+  const shouldExpand = !isEmptyRichEditor && input.scrollHeight > minHeight + 4;
   if (wrapper) {
     wrapper.dataset.expanded = String(shouldExpand);
   }
 
-  const contentHeight = input.scrollHeight;
+  const contentHeight = isEmptyRichEditor ? minHeight : input.scrollHeight;
   input.style.height = `${Math.min(Math.max(contentHeight, minHeight), maxHeight)}px`;
   input.scrollTop = shouldExpand ? input.scrollHeight : 0;
   syncComposerScrollbar(input);

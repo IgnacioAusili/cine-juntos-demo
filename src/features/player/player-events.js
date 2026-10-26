@@ -3,15 +3,20 @@ import { state, logEvent } from "../../core/state.js";
 import { formatSeconds } from "../../core/utils.js";
 import { shouldToggleMuteFromVolumeButton } from "./controls/player-volume-layout.js";
 import { configurePlayerMedia, handleManualLoadRequest, setVideoStatus, announceVideoActivity, announceVideoLoadCompletion } from "./player-video-source.js";
-import { hasLoadedMediaSource, getFiniteDuration, rememberPlaybackPosition, updateLoadButtonState, clearSlowLoadPromptTracking, schedulePlaybackErrorConfirmation, clearPlaybackErrorTracking, persistPlaybackPosition, prepareVideoFingerprintAndPrompt } from "./player-media.js";
+import { hasLoadedMediaSource, getFiniteDuration, rememberPlaybackPosition, clearSlowLoadPromptTracking, schedulePlaybackErrorConfirmation, clearPlaybackErrorTracking, persistPlaybackPosition, prepareVideoFingerprintAndPrompt } from "./player-media.js";
 import { attemptPlaybackRecovery, cancelPendingPlaybackIssueDetection, clearPlaybackRecoveryTracking, pauseRoomForPlaybackIssue, publishState } from "./player-sync-logic.js";
 import { wireSeekTooltipEvents } from "./controls/player-seek-tooltip-events.js";
 import { playerRuntimeState } from "./player-runtime-state.js";
 import { wireMobilePlayerControlPlacement } from "./player.js";
 import { handleGlobalPlayerKeydown, togglePlaybackFromControls, seekVideoBy, previewSeekPosition, commitSeekPosition, isSyncControlCoolingDown, registerSyncControlPress, syncPlayerControls, persistVolume } from "./controls/player-control-actions.js";
+import { wireVideoContextMenu } from "./video-context-menu.js";
 
 export function wirePlayerCoreEvents() {
   configurePlayerMedia({ syncPlayerControls });
+  wireVideoContextMenu({
+    loadVideo: (source) => handleManualLoadRequest(source),
+    removeVideo: () => handleManualLoadRequest(""),
+  });
   wireMobilePlayerControlPlacement();
   document.addEventListener("keydown", handleGlobalPlayerKeydown, true);
 

@@ -1,6 +1,6 @@
 import { dom } from "../../../core/dom.js";
 import { state, getDisplayName, getTransportNow, logEvent } from "../../../core/state.js";
-import { MAX_CHARS, replaceEmojiShortcodes } from "../../../core/utils.js";
+import { replaceEmojiShortcodes } from "../../../core/utils.js";
 import { createRandomId } from "../../../core/random-id.js";
 import { setSyncStatus } from "../../session/session-ui.js";
 import { markParticipantActive } from "../../presence/index.js";
@@ -11,9 +11,10 @@ import { focusChatInput } from "./chat-input-focus.js";
 import { addPendingImageDataUrl, clearPendingImage, compressImageBase64, getImageSourceFingerprint } from "../messages/image-compress.js";
 import { isMobileLayout, logMobileInteraction } from "./chat-input-debug.js";
 import { normalizeEmojiShortcodesInput } from "./emoji-picker.js";
-import { getSpamCooldownRemaining, registerMessageForSpamCheck, updateCharCounter, updateSpamCooldownButtons } from "./chat-spam-guard.js";
+import { getMessageCharLimit, getSpamCooldownRemaining, registerMessageForSpamCheck, updateCharCounter, updateSpamCooldownButtons } from "./chat-spam-guard.js";
 import { autoResizeMessageInput } from "./chat-input-layout.js";
 import { getRichEditorTextLength } from "./chat-rich-editor.js";
+import { getLeadingTimecodeSeconds } from "../messages/chat-timecode-links.js";
 
 export function sendMessage(text, attachedImage) {
   if (!state.session.activeRoom || !state.session.transport) {
@@ -43,12 +44,15 @@ export function sendMessage(text, attachedImage) {
           from: state.chat.replyTarget.from || null,
           name: state.chat.replyTarget.name,
           text: state.chat.replyTarget.text,
+          quote: state.chat.replyTarget.quote
+            ? { ...state.chat.replyTarget.quote }
+            : null,
         }
       : null,
     createdAt: getTransportNow(),
   };
 
-  if (isPlaying) {
+  if (isPlaying && getLeadingTimecodeSeconds(message.text) == null) {
     message.videoTimestamp = videoEl.currentTime;
   }
 
@@ -79,7 +83,7 @@ export function submitMessageFrom(input) {
   }
 
   const messageLength = input.isContentEditable ? getRichEditorTextLength(input) : input.value.length;
-  if (messageLength >= MAX_CHARS) {
+  if (messageLength >= getMessageCharLimit(input)) {
     const counter = isOverlay ? dom.overlayCharCounter : dom.mainCharCounter;
     if (counter) {
       counter.classList.add("char-counter--shake");

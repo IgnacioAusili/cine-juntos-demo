@@ -4,6 +4,7 @@ import {
   REMOTE_VIDEO_EXTENSIONS,
 } from "../../../core/utils.js";
 import { appendInlineFormatting, appendRemoteImage, hasInlineFormatting } from "./chat-inline-formatting.js";
+import { appendTextWithTimecodes } from "./chat-timecode-links.js";
 
 export function appendMessageContent(container, text) {
   const trimmedText = String(text || "").trim();
@@ -177,9 +178,13 @@ function isEmojiOnlyText(text) {
 }
 
 function appendEmojiAwareText(container, text) {
+  appendTextWithTimecodes(container, text, appendEmojiGraphemes);
+}
+
+export function appendEmojiGraphemes(container, text) {
   const value = String(text || "");
   if (typeof Intl.Segmenter !== "function") {
-    container.textContent = value;
+    container.append(document.createTextNode(value));
     return;
   }
 

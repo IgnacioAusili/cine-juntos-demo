@@ -20,9 +20,14 @@ export function buildTextModel(editor) {
     children.forEach((child, index) => {
       rememberBoundary(parent, index);
       if (child.nodeType === Node.TEXT_NODE) {
+        const isPlainBoundary = parent.dataset?.richEditorPlainBoundary === "true";
         for (let offset = 0; offset <= child.nodeValue.length; offset += 1) {
           rememberBoundary(child, offset);
           if (offset < child.nodeValue.length) {
+            if (isPlainBoundary && child.nodeValue[offset] === "\u200B") {
+              points[text.length] = { node: child, offset: offset + 1 };
+              continue;
+            }
             text += child.nodeValue[offset];
             points.push({ node: child, offset: offset + 1 });
           }

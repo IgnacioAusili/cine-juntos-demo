@@ -6,8 +6,9 @@ import { getSystemMessageText, normalizeOwnSystemBody, isEmojiOnlyText, countEmo
 import { getRenderableMessageImages, isStandaloneImageText, appendMessageMedia } from "./chat-message-media.js";
 import { extendMessageHitArea, wireMessageInteractions } from "./chat-message-interactions.js";
 import { appendMessageContent, truncateText } from "./chat-content-parser.js";
+import { isQuoteOnlyMessage } from "./chat-inline-formatting.js";
 import { getParticipantAccent } from "./chat-participant-color.js";
-import { setReplyTarget, scrollToMessage } from "./chat-reply.js";
+import { setReplyTarget, scrollToMessage, scrollToMessageFragment } from "./chat-reply.js";
 import { watchSystemMessageLayout, fitSystemMessageBubble } from "../system-messages/chat-system-message-layout.js";
 import { incrementScrollIndicator } from "./unread-counters.js";
 import { scheduleSystemMessageCollapse } from "../system-messages/system-message-groups.js";
@@ -91,6 +92,16 @@ export function appendMessageNow(container, message, { animateSystemGroups = tru
     bubble.classList.add('message__bubble--emoji-only');
     if (emojiOnlyCount > 4) bubble.classList.add('message__bubble--emoji-only-compact');
   }
+  if (
+    !message.system &&
+    !messageImages.length &&
+    !hasReply &&
+    hasRenderableText &&
+    isQuoteOnlyMessage(messageText)
+  ) {
+    bubble.classList.add('message__bubble--quote-only');
+  }
+  const isQuoteOnly = bubble.classList.contains('message__bubble--quote-only');
   const replyTextRow = hasReply && !message.system ? document.createElement("div") : null;
   if (hasReply) {
     bubble.classList.add('message__bubble--with-reply');
@@ -106,8 +117,27 @@ export function appendMessageNow(container, message, { animateSystemGroups = tru
       rawReplyLabel && !(rawReplyLabel.startsWith("data:image/") && rawReplyLabel.includes("base64,"))
         ? rawReplyLabel
         : "(Imagen)";
-    reply.innerHTML = `<span class="message__reply-name">${message.replyTo.name || "Invitado"}</span><span class="message__reply-body">${truncateText(replyLabel, 90)}</span>`;
-    reply.addEventListener("click", () => scrollToMessage(message.replyTo.id, container));
+    const replyName = document.createElement("span");
+    replyName.className = "message__reply-name";
+    replyName.textContent = message.replyTo.name || "Invitado";
+    const replyBody = document.createElement("span");
+    replyBody.className = "message__reply-body";
+    if (message.replyTo.quote?.text) {
+      reply.classList.add("message__reply--quote");
+      replyBody.classList.add("message__reply-body--quote");
+      replyBody.textContent = truncateText(message.replyTo.quote.text, 100);
+    } else {
+      replyBody.textContent = truncateText(replyLabel, 90);
+    }
+    reply.append(replyName, replyBody);
+    reply.addEventListener("click", () => {
+      const quote = message.replyTo.quote;
+      if (quote && Number.isFinite(quote.start) && Number.isFinite(quote.end)) {
+        scrollToMessageFragment(message.replyTo.id, quote.start, quote.end, container);
+      } else {
+        scrollToMessage(message.replyTo.id, container);
+      }
+    });
     content.append(reply);
   }
 
@@ -230,12 +260,12 @@ export function appendMessageNow(container, message, { animateSystemGroups = tru
 
     if (replyTextRow) {
       replyTextRow.prepend(timeAnchor);
-    } else {
+    } else if (!isQuoteOnly) {
       bubble.insertBefore(timeAnchor, content);
     }
 
     const bubbleRow = document.createElement("div");
-    bubbleRow.className = 'message__bubble-row';
+    bubbleRow.className = `message__bubble-row${isQuoteOnly ? ' message__bubble-row--quote-only' : ''}`;
 
     const hintWrapper = document.createElement("div");
     hintWrapper.className = 'message__swipe-reply-hint-wrapper';
@@ -245,7 +275,12 @@ export function appendMessageNow(container, message, { animateSystemGroups = tru
       "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><polyline points='9 17 4 12 9 7'/><path d='M20 18v-2a4 4 0 0 0-4-4H4'/></svg>";
     hintWrapper.append(hint);
 
-    bubbleRow.append(bubble, hintWrapper);
+    if (isQuoteOnly) {
+      timeAnchor.classList.add('message__time-anchor--quote-only');
+      bubbleRow.append(bubble, timeAnchor, hintWrapper);
+    } else {
+      bubbleRow.append(bubble, hintWrapper);
+    }
     if (shouldRenderAuthorName || tsBtn) item.append(meta);
     item.append(bubbleRow);
 

@@ -1,6 +1,7 @@
 import { dom } from "../../../core/dom.js";
 
 const scrollbarDragState = new WeakMap();
+const COMPOSER_SCROLLBAR_OVERFLOW_TOLERANCE = 4;
 
 export function wireComposerScrollbar(input) {
   if (!input || input.dataset.composerScrollbarBound === "true") return;
@@ -152,7 +153,9 @@ export function syncComposerScrollbar(input) {
   if (!shell || !thumb) return;
 
   const overflow = input.scrollHeight - input.clientHeight;
-  if (overflow <= 1) {
+  // Fuentes inline como monospace pueden dejar unos píxeles extra en la caja
+  // de una sola línea. Ese exceso no justifica mostrar la barra del composer.
+  if (overflow <= COMPOSER_SCROLLBAR_OVERFLOW_TOLERANCE) {
     shell.removeAttribute("data-scrollbar-visible");
     thumb.style.height = "";
     thumb.style.transform = "";

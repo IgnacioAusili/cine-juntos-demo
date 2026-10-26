@@ -1,4 +1,5 @@
 @import url("./chat/messages.css");
+@import url("./chat/message-timecode.css");
 @import url("./chat/message-media.css");
 @import url("./chat/composer.css");
 @import url("./chat/message-menu.css");

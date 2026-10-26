@@ -1,19 +1,19 @@
 /* Los mensajes con texto e imagen deben crecer con todo su contenido. */
-.message__bubble:has(> .message__content > .message__media-strip),
+.message__bubble:has(> .message__content > .message__media-strip-shell),
 .message__bubble:has(> .message__content > .message__media-link > .message__media) {
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
 }
 
-.message__content:has(> .message__media-strip),
+.message__content:has(> .message__media-strip-shell),
 .message__content:has(> .message__media-link > .message__media) {
   display: flex;
   width: 100%;
   flex-direction: column;
 }
 
-.message__bubble:has(> .message__content > .message__media-strip) > .message__time-anchor,
+.message__bubble:has(> .message__content > .message__media-strip-shell) > .message__time-anchor,
 .message__bubble:has(> .message__content > .message__media-link > .message__media) > .message__time-anchor {
   order: 2;
   float: none;
@@ -25,7 +25,7 @@
   shape-outside: none;
 }
 
-.message__content:has(> .message__media-strip) > .message__media-strip,
+.message__content:has(> .message__media-strip-shell) > .message__media-strip-shell,
 .message__content:has(> .message__media-link > .message__media) > .message__media-link {
   order: -1;
   min-width: 0;
@@ -40,7 +40,7 @@
   max-width: 100%;
 }
 
-.message__content:has(> .message__media-strip) > .message__text,
+.message__content:has(> .message__media-strip-shell) > .message__text,
 .message__content:has(> .message__media-link > .message__media) > .message__text {
   order: 1;
 }

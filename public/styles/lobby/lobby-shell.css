@@ -23,7 +23,6 @@ body.page-context--lobby[data-lobby-flow="columns"] .app-shell > .site-header {
    ============================================================ */
 
 .lobby-screen {
-  --lobby-marquee-content-clearance: clamp(10px, 1.5vh, 18px);
   display: grid;
   min-height: calc(var(--app-viewport-height) - 64px);
   grid-template-rows: auto minmax(0, 1fr) auto;

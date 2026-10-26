@@ -2,13 +2,19 @@ import { focusChatInput } from "./chat-input-focus.js";
 import {
   applyRichEditorFormat,
   getRichEditorRange,
+  getRichEditorRangeAtPoint,
+  getRichEditorLinkForRange,
   getRichEditorSelection,
+  getRichEditorTextLength,
   insertRichEditorText,
+  replaceRichEditorRangeText,
   setRichEditorRange,
+  setRichEditorSelection,
 } from "./chat-rich-editor.js";
 import { openChatLinkInNewWindow } from "../messages/chat-link-confirmation.js";
 
 const FORMATS = {
+  quote: { label: "Cita", symbol: "❝ ❞" },
   bold: { label: "Negrita", symbol: "**" },
   italic: { label: "Cursiva", symbol: "*" },
   monospace: { label: "Monoespaciado", symbol: "`" },
@@ -24,14 +30,22 @@ let formatActions;
 let stylesGroup;
 let stylesButton;
 let stylesSubmenu;
+let selectAllButton;
+let copyButton;
+let selectAllLinkButton;
 let clipboardStatus;
 let linkForm;
 let linkInput;
+let linkAliasLabel;
+let linkAliasInput;
 let linkError;
 let linkActions;
+let linkFormatLabel;
 let currentLinkHref;
+let currentSelectionLink;
 let currentSelection;
 let menuAnchor;
+let stylesSubmenuCloseTimer = 0;
 
 export function wireChatFormatMenu(inputs) {
   const formatMenu = getFormatMenu();
@@ -40,21 +54,38 @@ export function wireChatFormatMenu(inputs) {
     if (input.dataset.formatMenuBound === "true") return;
     input.dataset.formatMenuBound = "true";
     input.addEventListener("contextmenu", (event) => {
-      const link = event.target.closest?.("a[data-chat-format='link']");
-      if (link && input.contains(link)) {
+      if (!formatMenu.hidden) {
         event.preventDefault();
-        currentSelection = null;
-        currentLinkHref = link.href;
-        openMenu(formatMenu, event.clientX, event.clientY, "link");
+        closeMenu();
         return;
       }
 
-      const range = getRichEditorRange(input);
-      if (!range || range.collapsed || !range.toString()) return;
+      const link = event.target.closest?.("a[data-chat-format='link']");
+      if (link && input.contains(link)) {
+        event.preventDefault();
+        const range = getRichEditorRange(input)
+          || getRichEditorRangeAtPoint(input, event.clientX, event.clientY);
+        currentSelection = range ? { input, range } : null;
+        currentLinkHref = link.href;
+        currentSelectionLink = getRichEditorLinkForRange(input, range) === link ? link : null;
+        openMenu(formatMenu, event.clientX, event.clientY, currentSelectionLink ? "format" : "link");
+        return;
+      }
+
+      let range = getRichEditorRange(input);
+      if (!range || range.collapsed || !range.toString()) {
+        const caretRange = getRichEditorRangeAtPoint(input, event.clientX, event.clientY);
+        if (caretRange) {
+          range = caretRange;
+          setRichEditorRange(input, range);
+        }
+      }
+      if (!range) return;
 
       event.preventDefault();
       currentLinkHref = "";
       currentSelection = { input, range };
+      currentSelectionLink = getRichEditorLinkForRange(input, range);
       openMenu(formatMenu, event.clientX, event.clientY);
     });
   });
@@ -62,6 +93,11 @@ export function wireChatFormatMenu(inputs) {
   if (formatMenu.dataset.eventsBound === "true") return;
   formatMenu.dataset.eventsBound = "true";
   formatMenu.addEventListener("mousedown", (event) => event.preventDefault());
+  formatMenu.addEventListener("contextmenu", (event) => {
+    if (formatMenu.hidden) return;
+    event.preventDefault();
+    closeMenu();
+  });
   formatMenu.addEventListener("pointermove", (event) => {
     if (!menuAnchor) return;
     const pointerMoved = Math.abs(event.clientX - menuAnchor.x) + Math.abs(event.clientY - menuAnchor.y) >= 2;
@@ -69,10 +105,14 @@ export function wireChatFormatMenu(inputs) {
   });
   stylesGroup.addEventListener("pointerenter", openStylesSubmenu);
   stylesGroup.addEventListener("pointerleave", (event) => {
-    if (!stylesGroup.contains(event.relatedTarget)) closeStylesSubmenu();
+    if (!stylesGroup.contains(event.relatedTarget)) scheduleStylesSubmenuClose();
   });
   formatMenu.addEventListener("click", (event) => {
     const action = event.target.closest("button")?.dataset.formatAction;
+    if (action === "select-all") {
+      selectAllInputText();
+      return;
+    }
     if (action === "copy") {
       copySelection();
       return;
@@ -107,10 +147,12 @@ export function wireChatFormatMenu(inputs) {
     applyLinkFormat();
   });
   linkInput.addEventListener("input", clearLinkError);
+  linkAliasInput.addEventListener("input", clearLinkError);
   linkForm.querySelector("[data-format-cancel]").addEventListener("click", () => closeMenu(true));
   document.addEventListener("pointerdown", (event) => {
+    if (event.button === 2 && inputs.some((input) => input?.contains(event.target))) return;
     if (!formatMenu.hidden && !formatMenu.contains(event.target)) closeMenu();
-  });
+  }, true);
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && !formatMenu.hidden) {
       event.preventDefault();
@@ -126,7 +168,7 @@ function getFormatMenu() {
   menu = document.createElement("div");
   menu.className = "chat-format-menu";
   menu.setAttribute("role", "menu");
-  menu.setAttribute("aria-label", "Formato del texto seleccionado");
+  menu.setAttribute("aria-label", "Acciones del campo de mensaje");
   menu.hidden = true;
   menuActions = document.createElement("div");
   menuActions.className = "chat-format-menu__actions";
@@ -144,13 +186,15 @@ function getFormatMenu() {
     const label = document.createElement("span");
     label.className = "chat-format-menu__label";
     label.textContent = format.label;
+    if (action === "link") linkFormatLabel = label;
     const symbol = document.createElement("span");
     symbol.className = "chat-format-menu__symbol";
     symbol.textContent = format.symbol;
     button.append(label, symbol);
     formatActions.append(button);
   });
-  const copyButton = createMenuButton("copy", "Copiar");
+  selectAllButton = createMenuButton("select-all", "Seleccionar todo");
+  copyButton = createMenuButton("copy", "Copiar");
   const pasteButton = createMenuButton("paste", "Pegar");
   stylesGroup = document.createElement("div");
   stylesGroup.className = "chat-format-menu__styles-group";
@@ -167,7 +211,7 @@ function getFormatMenu() {
   stylesSubmenu.hidden = true;
   stylesSubmenu.append(formatActions);
   stylesGroup.append(stylesButton, stylesSubmenu);
-  menuActions.append(copyButton, pasteButton, stylesGroup);
+  menuActions.append(selectAllButton, copyButton, pasteButton, stylesGroup);
   clipboardStatus = document.createElement("div");
   clipboardStatus.className = "chat-format-menu__clipboard-status";
   clipboardStatus.setAttribute("role", "status");
@@ -180,7 +224,8 @@ function getFormatMenu() {
   openLinkButton.dataset.formatAction = "open-link";
   openLinkButton.setAttribute("role", "menuitem");
   openLinkButton.textContent = "Abrir en ventana nueva";
-  linkActions.append(openLinkButton);
+  selectAllLinkButton = createMenuButton("select-all", "Seleccionar todo");
+  linkActions.append(selectAllLinkButton, openLinkButton);
   linkForm = document.createElement("form");
   linkForm.className = "chat-format-menu__link-form";
   linkForm.hidden = true;
@@ -196,6 +241,16 @@ function getFormatMenu() {
   linkInput.setAttribute("aria-label", "Dirección del enlace");
   linkInput.setAttribute("spellcheck", "false");
   label.append(linkInput);
+  linkAliasLabel = document.createElement("label");
+  linkAliasLabel.className = "chat-format-menu__link-label";
+  linkAliasLabel.textContent = "Texto del alias";
+  linkAliasLabel.hidden = true;
+  linkAliasInput = document.createElement("input");
+  linkAliasInput.className = "chat-format-menu__url";
+  linkAliasInput.type = "text";
+  linkAliasInput.autocomplete = "off";
+  linkAliasInput.setAttribute("aria-label", "Texto del alias");
+  linkAliasLabel.append(linkAliasInput);
   linkError = document.createElement("span");
   linkError.className = "chat-format-menu__link-error";
   linkError.setAttribute("role", "alert");
@@ -211,7 +266,7 @@ function getFormatMenu() {
   applyButton.type = "submit";
   applyButton.textContent = "Aplicar";
   actions.append(cancelButton, applyButton);
-  linkForm.append(label, linkError, actions);
+  linkForm.append(label, linkAliasLabel, linkError, actions);
   menu.append(menuActions, linkActions, linkForm, clipboardStatus);
   document.body.append(menu);
   return menu;
@@ -220,14 +275,23 @@ function getFormatMenu() {
 function openMenu(formatMenu, x, y, mode = "format") {
   if (mode === "link") showLinkActions();
   else showActions();
+  const hasText = Boolean(currentSelection?.input?.textContent?.replaceAll("\u200B", "").trim());
+  setTextActionsVisible(hasText);
   formatMenu.dataset.hoverEnabled = "false";
   formatMenu.dataset.keyboardNavigation = "false";
   formatMenu.hidden = false;
   menuAnchor = { x, y };
   positionMenu(formatMenu, x, y);
-  if (mode !== "link") {
+  if (mode !== "link" && hasText) {
     setStylesSubmenuSide(measureStylesSubmenuWidth());
   }
+}
+
+function setTextActionsVisible(visible) {
+  if (selectAllButton) selectAllButton.hidden = !visible;
+  if (copyButton) copyButton.hidden = !visible;
+  if (selectAllLinkButton) selectAllLinkButton.hidden = !visible;
+  if (stylesGroup) stylesGroup.hidden = !visible;
 }
 
 function createMenuButton(action, labelText) {
@@ -244,13 +308,25 @@ function createMenuButton(action, labelText) {
 
 function openStylesSubmenu() {
   if (!menu || menu.hidden || !currentSelection || !stylesSubmenu) return;
+  window.clearTimeout(stylesSubmenuCloseTimer);
+  stylesSubmenuCloseTimer = 0;
   stylesSubmenu.hidden = false;
   formatActions.hidden = false;
   stylesButton.setAttribute("aria-expanded", "true");
   positionStylesSubmenu();
 }
 
+function scheduleStylesSubmenuClose() {
+  window.clearTimeout(stylesSubmenuCloseTimer);
+  stylesSubmenuCloseTimer = window.setTimeout(() => {
+    stylesSubmenuCloseTimer = 0;
+    closeStylesSubmenu();
+  }, 100);
+}
+
 function closeStylesSubmenu() {
+  window.clearTimeout(stylesSubmenuCloseTimer);
+  stylesSubmenuCloseTimer = 0;
   if (!stylesSubmenu) return;
   stylesSubmenu.hidden = true;
   formatActions.hidden = true;
@@ -309,19 +385,55 @@ function applyFormat(action) {
   focusChatInput(input);
 }
 
+function selectAllInputText() {
+  const selection = currentSelection;
+  if (!selection) return;
+  const { input } = selection;
+  closeMenu();
+  focusChatInput(input);
+  setRichEditorSelection(input, 0, getRichEditorTextLength(input));
+}
+
 function showLinkEditor() {
   menu.setAttribute("role", "dialog");
-  menu.setAttribute("aria-label", "Crear enlace para el texto seleccionado");
+  const isAlias = Boolean(currentSelectionLink);
+  menu.setAttribute("aria-label", isAlias ? "Crear alias para el enlace" : "Crear enlace para el texto seleccionado");
   menuActions.hidden = true;
   linkForm.hidden = false;
   clearLinkError();
-  linkInput.value = "";
+  linkAliasLabel.hidden = !isAlias;
+  linkInput.closest("label").hidden = isAlias;
+  linkFormatLabel.textContent = isAlias ? "Crear alias" : "Crear enlace";
+  if (isAlias) {
+    linkAliasInput.value = currentSelection.range.toString();
+    linkInput.value = currentSelectionLink.href;
+  } else {
+    linkAliasInput.value = "";
+    linkInput.value = "";
+  }
   positionMenu(menu, menuAnchor.x, menuAnchor.y);
-  linkInput.focus({ preventScroll: true });
+  (isAlias ? linkAliasInput : linkInput).focus({ preventScroll: true });
 }
 
 function applyLinkFormat() {
   const selection = currentSelection;
+  if (currentSelectionLink) {
+    const alias = linkAliasInput.value.trim();
+    if (!selection || !alias || !currentSelectionLink.isConnected) {
+      linkError.textContent = "Ingresá un texto para el alias.";
+      linkError.hidden = false;
+      linkAliasInput.setAttribute("aria-invalid", "true");
+      linkAliasInput.focus({ preventScroll: true });
+      return;
+    }
+
+    currentSelectionLink.removeAttribute("data-chat-autolink");
+    replaceRichEditorRangeText(selection.input, alias, selection.range);
+    closeMenu();
+    focusChatInput(selection.input);
+    return;
+  }
+
   const url = normalizeLinkUrl(linkInput.value);
   if (!selection || !url) {
     linkError.hidden = false;
@@ -339,7 +451,7 @@ function applyLinkFormat() {
 function showActions() {
   if (!menuActions) return;
   menu.setAttribute("role", "menu");
-  menu.setAttribute("aria-label", "Formato del texto seleccionado");
+  menu.setAttribute("aria-label", "Acciones del campo de mensaje");
   menuActions.hidden = false;
   linkActions.hidden = true;
   linkForm.hidden = true;
@@ -347,6 +459,10 @@ function showActions() {
   clipboardStatus.hidden = true;
   clipboardStatus.textContent = "";
   linkInput.value = "";
+  linkAliasInput.value = "";
+  linkAliasLabel.hidden = true;
+  linkInput.closest("label").hidden = false;
+  if (linkFormatLabel) linkFormatLabel.textContent = currentSelectionLink ? "Crear alias" : "Crear enlace";
   clearLinkError();
 }
 
@@ -418,7 +534,9 @@ function showClipboardError(message) {
 function clearLinkError() {
   if (!linkError || !linkInput) return;
   linkError.hidden = true;
+  linkError.textContent = "Ingresá una dirección http o https válida.";
   linkInput.removeAttribute("aria-invalid");
+  linkAliasInput?.removeAttribute("aria-invalid");
 }
 
 function normalizeLinkUrl(value) {
@@ -439,6 +557,7 @@ function closeMenu(restoreFocus = false) {
   menu.style.removeProperty("top");
   menuAnchor = null;
   currentLinkHref = "";
+  currentSelectionLink = null;
   showActions();
   const selection = currentSelection;
   currentSelection = null;

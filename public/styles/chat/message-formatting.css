@@ -28,6 +28,44 @@
   font-size: var(--message-monospace-size);
 }
 
+.message__quote,
+.message-form__rich-editor .chat-rich-editor__quote {
+  display: inline-block;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0 0.55em;
+  border-inline-start: 2px solid var(--participant-accent, var(--accent-2));
+  border-radius: 0.2em;
+  background: color-mix(in srgb, var(--participant-accent, var(--accent-2)) 12%, rgba(255, 255, 255, 0.06));
+  font-size: 0.86em;
+  line-height: 1.2;
+  font-style: italic;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  vertical-align: middle;
+  transform: translateY(-0.17em);
+  quotes: "❝" "❞";
+}
+
+.message__quote::before,
+.message-form__rich-editor .chat-rich-editor__quote::before {
+  content: open-quote;
+  color: var(--participant-accent, var(--accent-2));
+  opacity: 0.82;
+  font-size: 0.78em;
+  line-height: 1;
+}
+
+.message__quote::after,
+.message-form__rich-editor .chat-rich-editor__quote::after {
+  content: close-quote;
+  color: var(--participant-accent, var(--accent-2));
+  opacity: 0.82;
+  font-size: 0.78em;
+  line-height: 1;
+}
+
 .message__monospace--copyable {
   cursor: pointer;
 }
@@ -116,4 +154,22 @@
   color: var(--accent-2);
   text-decoration: underline;
   text-underline-offset: var(--chat-rich-link-underline-offset);
+}
+
+.message-form__rich-editor .chat-rich-editor__timecode {
+  display: inline-flex;
+  align-items: center;
+  color: var(--brand-active, var(--accent-2));
+  cursor: text;
+  user-select: text;
+  vertical-align: middle;
+}
+
+.message-form__rich-editor .chat-rich-editor__timecode .message-video-ts__visual {
+  height: 16px;
+  pointer-events: auto !important;
+}
+
+.message-form__rich-editor .chat-rich-editor__timecode svg {
+  pointer-events: none;
 }

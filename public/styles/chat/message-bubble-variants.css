@@ -171,6 +171,39 @@
   background: rgba(240, 140, 58, 0.12);
 }
 
+.message.message--mine .message__bubble--quote-only,
+.message:not(.message--mine) .message__bubble--quote-only {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+}
+
+.message__bubble--quote-only > .message__content,
+.message__bubble--quote-only .message__text {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.message__bubble-row--quote-only {
+  align-items: center;
+}
+
+.message__bubble-row--quote-only > .message__bubble--quote-only {
+  max-width: calc(100% - 42px);
+}
+
+.message__bubble-row--quote-only > .message__time-anchor--quote-only {
+  float: none;
+  display: flex;
+  flex: 0 0 auto;
+  align-self: center;
+  height: auto;
+  margin: 0 0 0 5px;
+  shape-outside: none;
+}
+
 .message.message--system {
   align-items: center;
   -webkit-tap-highlight-color: transparent;

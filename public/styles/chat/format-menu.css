@@ -22,6 +22,10 @@
   --chat-format-menu-symbol-size: 0.78em;
   --chat-format-menu-submenu-offset: 1px;
   --chat-format-menu-submenu-layer: 1;
+  --chat-format-menu-submenu-enter-duration: 150ms;
+  --chat-format-menu-submenu-enter-scale: 0.97;
+  --chat-format-menu-submenu-enter-visible-scale: 1;
+  --chat-format-menu-submenu-visible-opacity: 1;
   --chat-format-menu-viewport-margin: 8px;
   --chat-format-menu-submenu-viewport-width: calc(100vw - 2 * var(--chat-format-menu-viewport-margin));
   --chat-format-menu-submenu-max-height: calc(100vh - 16px);
@@ -96,6 +100,10 @@
 }
 
 .chat-format-menu__submenu-arrow {
+  display: inline-flex;
+  align-self: stretch;
+  align-items: center;
+  justify-content: center;
   color: var(--muted-2);
   font-size: var(--chat-format-menu-submenu-arrow-size);
   line-height: var(--chat-format-menu-submenu-arrow-line-height);
@@ -117,6 +125,19 @@
   background: var(--bg-soft);
   box-shadow: var(--shadow-lg);
   padding: var(--chat-format-menu-padding);
+  animation: chatFormatSubmenuEnter var(--chat-format-menu-submenu-enter-duration) ease-out both;
+}
+
+@keyframes chatFormatSubmenuEnter {
+  from {
+    opacity: 0;
+    transform: scale(var(--chat-format-menu-submenu-enter-scale));
+  }
+
+  to {
+    opacity: var(--chat-format-menu-submenu-visible-opacity);
+    transform: scale(var(--chat-format-menu-submenu-enter-visible-scale));
+  }
 }
 
 .chat-format-menu__styles-group[data-submenu-side="left"] .chat-format-menu__styles-submenu-wrap {
@@ -167,6 +188,10 @@
   gap: var(--chat-format-menu-editor-gap);
   color: var(--muted);
   font-size: var(--chat-format-menu-font-size);
+}
+
+.chat-format-menu__link-label[hidden] {
+  display: none;
 }
 
 .chat-format-menu__url {

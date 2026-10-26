@@ -1,4 +1,5 @@
 import { createImageLightboxPanController } from "./image-lightbox-pan.js";
+import { isGifImage, toggleGifPlayback } from "./gif-playback.js";
 
 const LIGHTBOX_ID = "imageLightbox";
 const MIN_SCALE = 0.5;
@@ -223,5 +224,19 @@ document.addEventListener("click", (event) => {
   if (!image) return;
   event.preventDefault();
   event.stopPropagation();
+  if (isGifImage(image)) {
+    toggleGifPlayback(image);
+    return;
+  }
   openLightbox(image);
+}, true);
+
+document.addEventListener("keydown", (event) => {
+  if (event.key !== " " || event.repeat) return;
+  const link = event.target.closest?.('.message__media-link');
+  const image = link?.querySelector(':scope > .message__media');
+  if (!image || !isGifImage(image)) return;
+  event.preventDefault();
+  event.stopPropagation();
+  toggleGifPlayback(image);
 }, true);
