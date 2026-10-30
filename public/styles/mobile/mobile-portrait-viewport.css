@@ -67,7 +67,7 @@
   body:not(.page-context--lobby) .session-view.session-view--chat-collapsed[data-chat-dock="bottom"] .chat-area__collapse-hover-zone {
     top: var(--chat-bottom-dock-collapsed-handle-top);
     height: 30px;
-    transform: translate(-50%, -100%);
+    transform: translate(-50%, -50%);
   }
 
   /* El dock lateral vertical es una capa sobre el reproductor, no una

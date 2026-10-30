@@ -3,6 +3,7 @@
 .session-view[data-chat-dock="bottom"] {
   --chat-bottom-dock-gap: 0px;
   --chat-bottom-header-arrow-offset: 8px;
+  --chat-bottom-collapsed-handle-control-gap: 48px;
 }
 
 .session-view[data-chat-dock="bottom"] {

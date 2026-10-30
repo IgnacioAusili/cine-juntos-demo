@@ -95,6 +95,9 @@ body.page-context--fullscreen .app-shell:fullscreen .session-view.session-view--
 }
 
 body.page-context--fullscreen .session-view[data-chat-dock="right"] .o-video-area {
+  /* El workspace es el containing block del toolbar, así puede cubrir las
+     dos columnas sin cambiar el layout interno del reproductor. */
+  position: static;
   display: flex;
 }
 
@@ -142,6 +145,15 @@ body.page-context--fullscreen .session-view[data-chat-dock="right"] .chat-area__
   transform: translateY(-50%);
 }
 
+/* Con el chat cerrado, el área del panel mide cero. Anclar la flecha al borde
+   derecho de esa área evita que el ancho reservado del chat la desplace. */
+body.page-context--fullscreen
+  .session-view.session-view--chat-collapsed[data-chat-dock="right"]
+  .chat-area__collapse-hover-zone {
+  right: var(--chat-handle-gap-collapsed, 4px);
+  left: auto;
+}
+
 @media (min-width: 981px) {
   /* En PC fullscreen la grilla debe interpolar el ancho del panel. El layout
      lateral normal deja transition en none porque usa flex; acá se restaura
@@ -161,6 +173,12 @@ body.page-context--fullscreen .session-view[data-chat-dock="right"] .chat-area__
     min-width: 0;
   }
 
+}
+
+/* El toolbar se ancla al workspace para extenderse sobre video y chat. */
+body.page-context--fullscreen .session-view[data-chat-dock="right"] .session-toolbar {
+  left: 0;
+  width: 100%;
 }
 
 body.page-context--fullscreen .session-view[data-chat-dock="right"] .chat-message-list {

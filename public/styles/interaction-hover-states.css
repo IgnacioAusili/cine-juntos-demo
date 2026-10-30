@@ -110,6 +110,13 @@ body.page-context--fullscreen .session-view.session-view--chat-collapsed[data-ch
     margin-inline: 0;
   }
 
+  /* En la composición overlay, el área de video vuelve a ser un containing
+     block más angosto que el workspace y recorta el toolbar sobre el chat. */
+  body.page-context--fullscreen:not(.page-context--lobby)
+    .session-view--chat-overlay[data-chat-dock="right"] .o-video-area {
+    position: static;
+  }
+
   body.page-context--fullscreen .session-view.session-view--chat-collapsed[data-chat-dock="bottom"] .o-workspace {
     grid-template-rows: minmax(0, 1fr) 0;
   }

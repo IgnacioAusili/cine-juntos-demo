@@ -1,10 +1,18 @@
 const systemMessageLayoutObservers = new WeakMap();
 const systemMessageLayoutFrames = new WeakMap();
+const systemMessageLayoutWidths = new WeakMap();
 
 export function watchSystemMessageLayout(container) {
   if (!container || systemMessageLayoutObservers.has(container) || !window.ResizeObserver) return;
 
-  const observer = new ResizeObserver(() => {
+  const observer = new ResizeObserver(([entry]) => {
+    const width = entry?.contentRect?.width;
+    if (!Number.isFinite(width)) return;
+
+    const previousWidth = systemMessageLayoutWidths.get(container);
+    systemMessageLayoutWidths.set(container, width);
+    if (previousWidth != null && Math.abs(width - previousWidth) < 0.5) return;
+
     if (systemMessageLayoutFrames.has(container)) return;
 
     const frame = window.requestAnimationFrame(() => {

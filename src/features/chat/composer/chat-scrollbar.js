@@ -199,6 +199,14 @@ export function syncComposerScrollbar(input) {
   const thumb = shell?.querySelector('.composer-scrollbar__thumb');
   if (!shell || !thumb) return;
 
+  const wrapper = input.closest('.message-form__input-wrapper');
+  if (wrapper?.dataset.expanded !== "true") {
+    shell.removeAttribute("data-scrollbar-visible");
+    thumb.style.height = "";
+    thumb.style.transform = "";
+    return;
+  }
+
   const overflow = input.scrollHeight - input.clientHeight;
   // Fuentes inline como monospace pueden dejar unos píxeles extra en la caja
   // de una sola línea. Ese exceso no justifica mostrar la barra del composer.

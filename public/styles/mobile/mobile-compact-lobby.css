@@ -119,6 +119,12 @@
     padding-block: 5px;
   }
 
+  /* composer-fields.css usa #messageInput para la caja móvil de 36px; en
+     este modo compacto la línea de 20px necesita 5px por lado en 30px. */
+  body:not(.page-context--lobby) .message-form .message-form__input-wrapper:not([data-expanded="true"]) #messageInput {
+    padding-block: 5px;
+  }
+
   body:not(.page-context--lobby) .message-form .message-form__input-wrapper .icon-button--emoji-trigger,
   body:not(.page-context--lobby) .message-form .message-form__input-wrapper .icon-button--send {
     min-height: 30px !important;

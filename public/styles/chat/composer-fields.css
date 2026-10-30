@@ -157,6 +157,10 @@
   -ms-overflow-style: none;
 }
 
+.message-form .message-form__input-wrapper:not([data-expanded="true"]) .message-form__rich-editor {
+  overflow-y: hidden;
+}
+
 .message-form .message-form__input-wrapper .message-form__rich-editor::-webkit-scrollbar {
   width: 0;
   height: 0;
