@@ -44,8 +44,15 @@
 }
 
 /* El overlay inline vive dentro del frame, mientras que la flecha es su
-   hermano en el layout. Elevar el frame completo conserva la flecha visible
-   y hace que el overlay la pinte por delante cuando ambos se superponen. */
+   hermano en el layout. Al abrir el diálogo, ocultar el control de contraer
+   evita que siga visible mientras la barra del reproductor está bloqueada. */
+.session-view:has(.player-inline-dialog:not([hidden])) .chat-area__collapse-hover-zone {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Elevar el frame mantiene el diálogo inline en la capa superior del layout. */
 .session-view:has(.player-inline-dialog:not([hidden])) .player-frame {
   z-index: 13;
 }

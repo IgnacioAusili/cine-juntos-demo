@@ -131,7 +131,7 @@ export function scheduleTooltip(context) {
     tooltipState.tooltipShowContext = null;
     if (!pendingContext?.anchor?.isConnected) return;
     if (state.ui.seekDragActive) return;
-    showTooltip(pendingContext);
+    showTooltip(pendingContext, "pointerover-delay");
   }, showDelay);
 }
 
@@ -141,10 +141,19 @@ export function cancelScheduledTooltip() {
   tooltipState.tooltipShowContext = null;
 }
 
-export function showTooltip(context) {
+export function showTooltip(context, reason = "unspecified") {
   if (state.ui.seekDragActive) return;
   const text = context?.source?.dataset?.tooltip;
   if (!text) return;
+  console.log("[tooltip-pointer-guard]", "tooltip-show", {
+    timeMs: Math.round(performance.now()),
+    reason,
+    pageHidden: document.hidden,
+    pointeroverSuppressed: tooltipState.suppressRestoredPointerover,
+    anchorId: context.anchor.id || "",
+    anchorClass: context.anchor.getAttribute("class") || "",
+    tooltipText: text,
+  });
   cancelScheduledTooltip();
   window.clearTimeout(tooltipState.tooltipHideTimer);
   tooltipState.tooltipHideTimer = null;

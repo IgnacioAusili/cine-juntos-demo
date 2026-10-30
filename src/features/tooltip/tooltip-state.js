@@ -4,6 +4,7 @@ export const tooltipState = {
   tooltipShowContext: null,
   tooltipHideTimer: 0,
   suppressFocusTooltipUntil: null,
+  suppressRestoredPointerover: false,
   touchTooltipPress: null,
   touchTooltipTimer: 0,
   suppressedTouchTooltipClickTargets: new Set(),

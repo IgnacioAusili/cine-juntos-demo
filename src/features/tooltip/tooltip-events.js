@@ -5,18 +5,38 @@ import { isTouchPointer, TOUCH_LONG_PRESS_DELAY_MS } from "../../core/touch-inte
 import { TOOLTIP_SHOW_DELAY_MS, TOUCH_FOCUS_SUPPRESSION_MS, TOUCH_TOOLTIP_MOVE_TOLERANCE_PX, TOUCH_HELP_TOOLTIP_MAX_VISIBLE_MS } from "./tooltip-constants.js";
 import { hideTooltip, showTooltip, getTooltipContext, isPointInsideElement, isButtonTooltipContext, isSelectTooltipContext, isPresenceTooltipContext, isStatusTooltipContext, scheduleTooltip, cancelScheduledTooltip, clearTouchTooltipPress, setTooltipTouchHover, suppressTouchTooltipClick } from "./tooltip-behavior.js";
 
+function logTooltipPointerEvent(action, event, context) {
+  console.log("[tooltip-pointer-guard]", action, {
+    timeMs: Math.round(performance.now()),
+    pointerType: event.pointerType || null,
+    isTrusted: event.isTrusted,
+    pageHidden: document.hidden,
+    pointeroverSuppressed: tooltipState.suppressRestoredPointerover,
+    anchorId: context.anchor.id || "",
+    anchorClass: context.anchor.getAttribute("class") || "",
+    tooltipText: context.source.dataset.tooltip || "",
+  });
+}
+
 export function wireTooltipEvents() {
   if (!dom.tooltipLayer) return;
 
   document.addEventListener("pointerover", (event) => {
     if (event.pointerType !== "mouse") return;
+    const context = getTooltipContext(event.target);
+    if (tooltipState.suppressRestoredPointerover) {
+      if (context) logTooltipPointerEvent("pointerover-ignored", event, context);
+      return;
+    }
     if (event.target.closest?.('.player-rate-select__menu')) {
       cancelScheduledTooltip();
       hideTooltip();
       return;
     }
-    const context = getTooltipContext(event.target);
-    if (context) scheduleTooltip(context);
+    if (context) {
+      logTooltipPointerEvent("pointerover-accepted", event, context);
+      scheduleTooltip(context);
+    }
   });
 
   document.addEventListener("pointerout", (event) => {
@@ -95,7 +115,7 @@ export function wireTooltipEvents() {
       ) return;
 
       tooltipState.touchTooltipPress.longPress = true;
-      showTooltip(tooltipState.touchTooltipPress.context);
+      showTooltip(tooltipState.touchTooltipPress.context, "touch-long-press");
     }, TOUCH_LONG_PRESS_DELAY_MS);
   });
 
@@ -163,7 +183,7 @@ export function wireTooltipEvents() {
         }
         hideTooltip();
       } else {
-        showTooltip(context);
+        showTooltip(context, "mobile-tooltip-click");
         state.ui.tooltipPressTimer = window.setTimeout(
           hideTooltip,
           TOUCH_HELP_TOOLTIP_MAX_VISIBLE_MS,
@@ -172,7 +192,7 @@ export function wireTooltipEvents() {
       return;
     }
     if (state.ui.tooltipTarget === context.anchor && !dom.tooltipLayer.hidden) return;
-    showTooltip(context);
+    showTooltip(context, "tooltip-button-click");
   });
 
   document.addEventListener("pointercancel", (event) => {
@@ -183,10 +203,18 @@ export function wireTooltipEvents() {
   });
 
   document.addEventListener("focusin", (event) => {
-    if (event.__skipTooltipForRestoredFocus) return;
-    if (performance.now() < tooltipState.suppressFocusTooltipUntil) return;
     const context = getTooltipContext(event.target);
-    if (context) showTooltip(context);
+    if (!context) return;
+    if (event.__skipTooltipForRestoredFocus) {
+      logTooltipPointerEvent("focusin-ignored-restored", event, context);
+      return;
+    }
+    if (performance.now() < tooltipState.suppressFocusTooltipUntil) {
+      logTooltipPointerEvent("focusin-ignored-timed", event, context);
+      return;
+    }
+    logTooltipPointerEvent("focusin-accepted", event, context);
+    showTooltip(context, "focusin");
   });
 
   document.addEventListener("keydown", (event) => {
