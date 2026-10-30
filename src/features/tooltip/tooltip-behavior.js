@@ -230,7 +230,8 @@ export function positionTooltip(anchor, quoteVariant = anchor?.classList?.contai
   const fitsBelow = candidateBelow + tooltipRect.height <= window.innerHeight - TOOLTIP_VIEWPORT_PADDING;
   const fitsAbove = candidateAbove >= TOOLTIP_VIEWPORT_PADDING;
   const showBelow = fitsBelow || (!fitsAbove && window.innerHeight - rect.bottom >= rect.top);
-  const desiredTop = showBelow ? candidateBelow : candidateAbove;
+  const tooltipOffsetY = Number.parseFloat(anchor.dataset.tooltipOffsetY) || 0;
+  const desiredTop = (showBelow ? candidateBelow : candidateAbove) + tooltipOffsetY;
   const top = Math.min(Math.max(desiredTop, TOOLTIP_VIEWPORT_PADDING), maxTop);
   const pathWidth = Math.max(0, tooltipRect.width - TOOLTIP_BORDER_WIDTH_PX);
   const arrowPadding = TOOLTIP_RADIUS_PX + TOOLTIP_TAIL_WIDTH_PX / 2;

@@ -68,42 +68,54 @@ body.page-context--fullscreen .session-view.session-view--chat-collapsed[data-ch
   grid-template-rows: var(--app-viewport-height) 0;
 }
 
-/* En PC, el dock inferior fullscreen muestra primero el reproductor a sangre:
-   el header de la página y el gutter del shell no deben restarle viewport.
-   El chat permanece como la sección siguiente del scroll del shell. */
+/* En PC, fullscreen conserva el mismo espaciado superior y deja el chip de URL
+   a ancho completo, sin depender de la ubicación del chat. */
 @media (hover: hover) and (pointer: fine) {
-  body.page-context--fullscreen .app-shell:has(.session-view[data-chat-dock="bottom"]) {
+  body.page-context--fullscreen .app-shell:has(.session-view[data-chat-dock]) {
     width: 100%;
     max-width: none;
     height: var(--app-viewport-height);
     min-height: var(--app-viewport-height);
     margin: 0;
     padding: 0;
-    gap: 0;
-    grid-template-rows: minmax(0, 1fr);
+    gap: var(--session-header-gap) 0;
+    grid-template-rows: auto minmax(0, 1fr);
     overflow-x: hidden;
     overflow-y: auto;
   }
 
-  body.page-context--fullscreen .app-shell:has(.session-view[data-chat-dock="bottom"]) .site-header {
-    display: none;
+  body.page-context--fullscreen .app-shell:has(.session-view[data-chat-dock]) .site-header {
+    margin-bottom: 0;
+    padding: var(--session-header-gap) var(--app-shell-gutter) 0;
+    scroll-snap-align: start;
   }
 
-  body.page-context--fullscreen .session-view[data-chat-dock="bottom"] {
+  body.page-context--fullscreen .session-view[data-chat-dock] {
     width: 100%;
     margin-inline: 0;
   }
 
-  body.page-context--fullscreen .session-view[data-chat-dock="bottom"] .o-workspace {
-    margin-top: 0;
+  body.page-context--fullscreen .session-view[data-chat-dock] .o-workspace {
+    margin-top: var(--session-toolbar-height);
+  }
+
+  body.page-context--fullscreen .app-shell:fullscreen .session-view[data-chat-dock] .o-workspace {
+    margin-top: var(--session-toolbar-height);
+  }
+
+  /* El chip de URL ocupa todo el ancho de la franja superior, sin márgenes laterales. */
+  body.page-context--fullscreen .session-view[data-chat-dock] .session-toolbar {
+    left: 0;
+    width: 100%;
+    margin-inline: 0;
   }
 
   body.page-context--fullscreen .session-view.session-view--chat-collapsed[data-chat-dock="bottom"] .o-workspace {
     grid-template-rows: minmax(0, 1fr) 0;
   }
 
-  /* La barra queda fuera de la superficie de video; no debe ganar el snap
-     del viewport cuando el panel inferior está en fullscreen. */
+  /* El bloque superior completo de sala queda antes del video y es el primer
+     destino de scroll del dock inferior en fullscreen. */
   body.page-context--fullscreen .session-view.session-view--chat-bottom-snap-enabled[data-chat-dock="bottom"] .session-toolbar {
     scroll-snap-align: none;
   }

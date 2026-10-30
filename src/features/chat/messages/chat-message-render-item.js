@@ -122,6 +122,7 @@ export function appendMessageNow(container, message, { animateSystemGroups = tru
     replyBody.className = "message__reply-body";
     if (message.replyTo.quote?.text) {
       replyBody.classList.add("message__reply-body--quote");
+      replyBody.dataset.tooltip = "Fragmento citado";
       appendQuotePreview(replyBody, truncateText(message.replyTo.quote.text, 100));
     } else {
       replyBody.textContent = truncateText(replyLabel, 90);

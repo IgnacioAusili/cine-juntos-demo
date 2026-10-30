@@ -153,6 +153,15 @@ function getFullscreenSnapPoints() {
   ) || 0;
   const points = [getDocumentTop(dom.workspace)];
 
+  if (dock === "bottom" && isPageFullscreenActive()) {
+    const appShell = dom.sessionView?.closest(".app-shell");
+    const roomHeader = appShell?.querySelector(".site-header");
+    if (roomHeader && appShell) {
+      const shellTopPadding = Number.parseFloat(getComputedStyle(appShell).paddingTop) || 0;
+      points.push(Math.max(0, getDocumentTop(roomHeader) - shellTopPadding));
+    }
+  }
+
   if (dock === "bottom" && dom.videoArea) {
     const videoTop = getDocumentTop(dom.videoArea);
     const videoHeight = dom.videoArea.getBoundingClientRect().height;

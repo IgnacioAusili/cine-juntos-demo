@@ -3,7 +3,7 @@ import { state } from "../../core/state.js";
 import { tooltipState } from "./tooltip-state.js";
 import { isTouchPointer, TOUCH_LONG_PRESS_DELAY_MS } from "../../core/touch-interactions.js";
 import { TOOLTIP_SHOW_DELAY_MS, TOUCH_FOCUS_SUPPRESSION_MS, TOUCH_TOOLTIP_MOVE_TOLERANCE_PX, TOUCH_HELP_TOOLTIP_MAX_VISIBLE_MS } from "./tooltip-constants.js";
-import { hideTooltip, showTooltip, refreshTooltipForTarget, getTooltipContext, isPointInsideElement, isButtonTooltipContext, isSelectTooltipContext, isPresenceTooltipContext, isStatusTooltipContext, scheduleTooltip, cancelScheduledTooltip, clearTouchTooltipPress, setTooltipTouchHover, suppressTouchTooltipClick } from "./tooltip-behavior.js";
+import { hideTooltip, showTooltip, getTooltipContext, isPointInsideElement, isButtonTooltipContext, isSelectTooltipContext, isPresenceTooltipContext, isStatusTooltipContext, scheduleTooltip, cancelScheduledTooltip, clearTouchTooltipPress, setTooltipTouchHover, suppressTouchTooltipClick } from "./tooltip-behavior.js";
 
 export function wireTooltipEvents() {
   if (!dom.tooltipLayer) return;
