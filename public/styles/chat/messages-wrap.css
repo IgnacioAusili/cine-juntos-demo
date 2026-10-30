@@ -13,6 +13,14 @@
   );
 }
 
+@media (hover: hover) and (pointer: fine) {
+  body:not(.page-context--fullscreen)
+    .session-view[data-chat-dock="bottom"]
+    .chat-area > .chat-message-list-shell[data-chat-scrollable="true"] {
+    overscroll-behavior-y: contain;
+  }
+}
+
 .chat-message-list-shell {
   position: relative;
   flex: 1 1 auto;
@@ -55,12 +63,6 @@
 .chat-message-list-shell::-webkit-scrollbar {
   width: 0;
   height: 0;
-}
-
-/* El historial sigue desplazándose con rueda y gesto, pero nunca muestra una
-   pista lateral personalizada dentro del chat. */
-.chat-message-list-shell > .chat-scrollbar {
-  display: none;
 }
 
 .chat-message-list-shell[data-scrollbar-visible="true"] .chat-scrollbar {

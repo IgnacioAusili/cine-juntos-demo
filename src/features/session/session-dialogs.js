@@ -4,9 +4,12 @@ let errorDialogInitialized = false;
 let confirmLoadDialogInitialized = false;
 let slowLoadDialogInitialized = false;
 let resumeVideoDialogInitialized = false;
+let videoDownloadDialogInitialized = false;
 let pendingLoadDialogResolver = null;
 let pendingSlowLoadDialogResolver = null;
 let pendingResumeVideoDialogResolver = null;
+let pendingVideoDownloadDialogResolver = null;
+let pendingVideoDownloadFilename = "video";
 
 export function showErrorDialog(message) {
   if (!dom.errorDialog) return;
@@ -15,6 +18,8 @@ export function showErrorDialog(message) {
     const msgEl = dom.errorDialog.querySelector("#dialogMessage");
     if (msgEl) msgEl.textContent = message;
   }
+
+  if (dom.errorDialog.open) return;
 
   if (!errorDialogInitialized) {
     const closeErrorDialog = () => dom.errorDialog.close();
@@ -118,6 +123,24 @@ export function showResumeVideoDialog(message) {
   });
 }
 
+export function showVideoDownloadDialog(filename) {
+  if (!dom.videoDownloadDialog) {
+    return Promise.resolve({ confirmed: true, saveFileHandlePromise: null });
+  }
+
+  initializeVideoDownloadDialog();
+  if (pendingVideoDownloadDialogResolver) {
+    resolveVideoDownloadDialog({ confirmed: false, saveFileHandlePromise: null });
+  }
+  pendingVideoDownloadFilename = filename || "video";
+
+  return new Promise((resolve) => {
+    pendingVideoDownloadDialogResolver = resolve;
+    dom.videoDownloadDialog.showModal();
+    dom.cancelVideoDownloadButton?.focus();
+  });
+}
+
 function initializeConfirmLoadDialog() {
   if (confirmLoadDialogInitialized || !dom.confirmLoadDialog) return;
 
@@ -205,6 +228,46 @@ function initializeResumeVideoDialog() {
   window.addEventListener("keydown", handleResumePopupKeydown);
 
   resumeVideoDialogInitialized = true;
+}
+
+function initializeVideoDownloadDialog() {
+  if (videoDownloadDialogInitialized || !dom.videoDownloadDialog) return;
+
+  dom.confirmVideoDownloadButton?.addEventListener("click", () => {
+    let saveFileHandlePromise = null;
+    if (typeof window.showSaveFilePicker === "function") {
+      try {
+        saveFileHandlePromise = window.showSaveFilePicker({ suggestedName: pendingVideoDownloadFilename });
+      } catch {
+        // Los navegadores sin selector de archivos utilizable descargan mediante Blob.
+      }
+    }
+    resolveVideoDownloadDialog({ confirmed: true, saveFileHandlePromise });
+  });
+
+  dom.cancelVideoDownloadButton?.addEventListener("click", () => {
+    resolveVideoDownloadDialog({ confirmed: false, saveFileHandlePromise: null });
+  });
+
+  dom.closeVideoDownloadDialogButton?.addEventListener("click", () => {
+    resolveVideoDownloadDialog({ confirmed: false, saveFileHandlePromise: null });
+  });
+
+  dom.videoDownloadDialog.addEventListener("cancel", (event) => {
+    event.preventDefault();
+    resolveVideoDownloadDialog({ confirmed: false, saveFileHandlePromise: null });
+  });
+
+  videoDownloadDialogInitialized = true;
+}
+
+function resolveVideoDownloadDialog(result) {
+  if (dom.videoDownloadDialog?.open) {
+    dom.videoDownloadDialog.close();
+  }
+  const resolver = pendingVideoDownloadDialogResolver;
+  pendingVideoDownloadDialogResolver = null;
+  resolver?.(result);
 }
 
 function resolveResumeVideoDialog(confirmed) {

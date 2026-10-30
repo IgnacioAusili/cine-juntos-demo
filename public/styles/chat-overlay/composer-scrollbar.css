@@ -31,6 +31,10 @@
     padding-bottom: 6px;
   }
 
+  .message-form.message-form--overlay .message-form__input-wrapper[data-expanded="true"] .message-form__rich-editor {
+    padding-block: 5px;
+  }
+
   #overlayMessageInput {
     max-height: calc(3lh + 10px);
   }
@@ -40,12 +44,11 @@
   }
 }
 
-/* En multilinea el overlay usa el mismo padding que el chat externo; el
-   ajuste compacto de 4/6 px se conserva para la fila de una sola línea. */
+/* En multilinea el overlay equilibra el espacio vertical entre el primer y
+   el último renglón; el ajuste compacto se conserva para una sola línea. */
 @media (min-width: 681px) {
   .message-form.message-form--overlay .message-form__input-wrapper[data-expanded="true"] .message-form__rich-editor {
-    padding-top: 1px;
-    padding-bottom: 5px;
+    padding-block: 3px;
   }
 }
 

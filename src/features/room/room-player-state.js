@@ -1,6 +1,23 @@
 import { state } from "../../core/state.js";
+import { playerRuntimeState } from "../player/player-runtime-state.js";
 
 export function resetRoomPlayerState() {
+  const pendingSourceReplacement = playerRuntimeState.pendingSourceReplacement;
+  if (pendingSourceReplacement?.cancel) {
+    pendingSourceReplacement.cancel();
+  } else {
+    window.clearTimeout(pendingSourceReplacement?.acceptanceTimeoutId);
+    const candidate = pendingSourceReplacement?.candidateVideo;
+    if (candidate) {
+      candidate.removeEventListener("error", pendingSourceReplacement.errorHandler);
+      candidate.pause();
+      candidate.removeAttribute("src");
+      candidate.load();
+      candidate.remove();
+    }
+    pendingSourceReplacement?.resolveReady?.({ cancelled: true });
+    playerRuntimeState.pendingSourceReplacement = null;
+  }
   state.player.lastRemoteState = null;
   state.player.lastStateSentAt = 0;
   state.player.lastActionAt = 0;

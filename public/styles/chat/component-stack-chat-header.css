@@ -16,7 +16,7 @@
     .session-view[data-chat-dock="bottom"] .chat-area,
   :root body.page-context--fullscreen .app-shell
     .session-view[data-chat-dock="bottom"] .chat-area {
-    --component-stack-chat-header-height: 34px;
+    --component-stack-chat-header-height: 46px;
   }
 
   :root body:not(.page-context--lobby) .app-shell:fullscreen

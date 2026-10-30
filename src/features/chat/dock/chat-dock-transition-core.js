@@ -129,11 +129,164 @@ export function cancelBottomChatTransition() {
     const transition = chatDockTransitionState.bottomChatTransition;
     window.cancelAnimationFrame(transition.frameId);
     window.clearTimeout(transition.timeoutId);
+    if (transition.scrollEndListener && transition.scrollContainer) {
+      transition.scrollContainer.removeEventListener("scrollend", transition.scrollEndListener);
+    }
+    if (transition.nativeScrollInProgress) {
+      transition.nativeScrollInProgress = false;
+      scrollPageTo(getPageScrollTop(), "auto");
+    }
     for (const animation of transition.controlsAnimations || []) animation.cancel();
+    restoreFullscreenBottomChatScrollSpace(transition);
     restoreBottomChatScrollAnchoring(transition);
     chatDockTransitionState.bottomChatTransition = null;
+    transition.cancelled = true;
+    transition.resolveFinished?.(false);
   }
   clearBottomChatTransitionVisuals();
+}
+
+function isFullscreenBottomDock() {
+  return isFullscreenPageActive() && dom.sessionView?.dataset.chatDock === "bottom";
+}
+
+function restoreFullscreenBottomChatScrollSpace(transition) {
+  transition?.scrollSpacer?.remove();
+  if (transition) transition.scrollSpacer = null;
+}
+
+function createFullscreenBottomChatTransition(collapsed) {
+  let resolveFinished;
+  const finished = new Promise((resolve) => {
+    resolveFinished = resolve;
+  });
+  return {
+    collapsed,
+    frameId: 0,
+    timeoutId: 0,
+    nativeScrollInProgress: false,
+    finished,
+    resolveFinished,
+    cancelled: false,
+  };
+}
+
+function finishFullscreenBottomChatScroll(transition, onFinish) {
+  if (chatDockTransitionState.bottomChatTransition !== transition) return;
+
+  const container = transition.scrollContainer;
+  if (transition.scrollEndListener && container) {
+    container.removeEventListener("scrollend", transition.scrollEndListener);
+  }
+  window.clearTimeout(transition.timeoutId);
+  transition.nativeScrollInProgress = false;
+  onFinish();
+  chatDockTransitionState.bottomChatTransition = null;
+  getChatDockOperations().setCollapseHandleTransitioning(false);
+  getChatDockOperations().scheduleExternalChatCollapseHandleOffset();
+  getChatDockOperations().scheduleMessageTimeAdjustmentAfterLayout();
+  transition.resolveFinished?.(true);
+}
+
+function scrollFullscreenBottomChat(transition, targetScrollTop, onFinish) {
+  const container = getPageScrollContainer();
+  if (!container) {
+    onFinish();
+    chatDockTransitionState.bottomChatTransition = null;
+    transition.resolveFinished?.(true);
+    return;
+  }
+
+  transition.scrollContainer = container;
+  transition.targetScrollTop = targetScrollTop;
+  transition.nativeScrollInProgress = true;
+  transition.scrollEndListener = () => {
+    if (Math.abs(getPageScrollTop() - targetScrollTop) > 1) {
+      scrollPageTo(targetScrollTop, "auto");
+    }
+    finishFullscreenBottomChatScroll(transition, onFinish);
+  };
+  container.addEventListener("scrollend", transition.scrollEndListener, { once: true });
+  transition.timeoutId = window.setTimeout(() => {
+    if (Math.abs(getPageScrollTop() - targetScrollTop) > 1) {
+      scrollPageTo(targetScrollTop, "auto");
+    }
+    finishFullscreenBottomChatScroll(transition, onFinish);
+  }, BOTTOM_CHAT_SCROLL_TIMEOUT_MS);
+
+  if (Math.abs(getPageScrollTop() - targetScrollTop) <= 1) {
+    finishFullscreenBottomChatScroll(transition, onFinish);
+    return;
+  }
+
+  getChatDockOperations().lockChatScrollSnapDuringProgrammaticScroll(
+    BOTTOM_CHAT_SCROLL_TIMEOUT_MS + 80,
+  );
+  scrollPageTo(targetScrollTop, "smooth");
+}
+
+function animateFullscreenBottomChatCollapse(targetScrollTop) {
+  const sessionView = dom.sessionView;
+  const startRows = getWorkspaceRowHeights();
+  const startScrollTop = getPageScrollTop();
+  const scrollContainer = getPageScrollContainer();
+  const transition = {
+    ...createFullscreenBottomChatTransition(true),
+    animateRows: true,
+    startRows,
+    targetRows: [startRows[0], 0],
+    startScrollTop,
+    targetScrollTop,
+    finalScrollTop: targetScrollTop,
+    fullscreenCollapseAfterRows: true,
+    startedAt: performance.now(),
+    scrollSpacer: null,
+  };
+  chatDockTransitionState.bottomChatTransition = transition;
+  lockBottomChatScrollAnchoring(transition);
+  if (scrollContainer && startRows[1] > 0) {
+    const spacer = document.createElement("div");
+    spacer.setAttribute("aria-hidden", "true");
+    Object.assign(spacer.style, {
+      position: "absolute",
+      left: "0",
+      top: "100%",
+      width: "1px",
+      height: `${startRows[1]}px`,
+      overflow: "hidden",
+      pointerEvents: "none",
+      visibility: "hidden",
+    });
+    scrollContainer.append(spacer);
+    transition.scrollSpacer = spacer;
+  }
+  if (sessionView) {
+    sessionView.classList.add("session-view--chat-bottom-pc-collapse-visual");
+    dom.workspace.style.setProperty(
+      "grid-template-rows",
+      `${startRows[0]}px ${startRows[1]}px`,
+    );
+  }
+  setDesktopBottomChatCurtainProgress(0);
+  getChatDockOperations().setCollapseHandleTransitioning(true, BOTTOM_CHAT_SCROLL_TIMEOUT_MS + 80);
+  void dom.chatArea?.offsetWidth;
+  transition.frameId = window.requestAnimationFrame(() => {
+    stepDesktopBottomChatTransition(transition);
+  });
+  transition.timeoutId = window.setTimeout(() => {
+    stepDesktopBottomChatTransition(transition, true);
+  }, BOTTOM_CHAT_CURTAIN_MS + 80);
+}
+
+function animateFullscreenBottomChatExpand() {
+  const transition = createFullscreenBottomChatTransition(false);
+  chatDockTransitionState.bottomChatTransition = transition;
+  getChatDockOperations().applyExternalChatCollapsed(false);
+  const targetScrollTop = getPageScrollMax();
+  getChatDockOperations().setCollapseHandleTransitioning(true, BOTTOM_CHAT_SCROLL_TIMEOUT_MS + 80);
+  scrollFullscreenBottomChat(transition, targetScrollTop, () => {
+    scrollPageTo(targetScrollTop, "auto");
+  });
 }
 
 export function completeDesktopBottomChatTransition(transition) {
@@ -253,6 +406,18 @@ export function stepDesktopBottomChatTransition(transition, force = false) {
     return;
   }
 
+  if (transition.fullscreenCollapseAfterRows) {
+    window.clearTimeout(transition.timeoutId);
+    getChatDockOperations().applyExternalChatCollapsed(true);
+    scrollFullscreenBottomChat(transition, transition.finalScrollTop, () => {
+      restoreFullscreenBottomChatScrollSpace(transition);
+      settleBottomControlsLayout(transition);
+      restoreBottomChatScrollAnchoring(transition);
+      clearBottomChatTransitionVisuals();
+    });
+    return;
+  }
+
   if (transition.collapsed) {
     // El último frame ya dejó el panel cerrado y el scroll en el destino; al
     // reducir ahora la fila no se produce un salto ni se pierde la cortina.
@@ -269,6 +434,11 @@ export function stepDesktopBottomChatTransition(transition, force = false) {
 export function animateDesktopBottomChatCollapse(targetScrollTop) {
   if (!dom.sessionView || !dom.chatArea) {
     getChatDockOperations().applyExternalChatCollapsed(true);
+    return;
+  }
+
+  if (isFullscreenBottomDock()) {
+    animateFullscreenBottomChatCollapse(targetScrollTop);
     return;
   }
 
@@ -317,6 +487,11 @@ export function animateDesktopBottomChatCollapse(targetScrollTop) {
 export function animateDesktopBottomChatExpand() {
   if (!dom.sessionView || !dom.chatArea) {
     getChatDockOperations().applyExternalChatCollapsed(false);
+    return;
+  }
+
+  if (isFullscreenBottomDock()) {
+    animateFullscreenBottomChatExpand();
     return;
   }
 

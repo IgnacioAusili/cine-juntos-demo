@@ -137,7 +137,7 @@ export async function createFirebaseTransport(roomCode, config) {
         dbModule.limitToLast(INITIAL_CHAT_HISTORY_PAGE_SIZE),
       );
       const deliverMessage = (snapshot, { animateSystemGroups = false, isHistory = false } = {}) => {
-        const message = { id: snapshot.key, ...snapshot.val() };
+        const message = { id: snapshot.key, ...snapshot.val(), databaseKey: snapshot.key };
         return handlers.onMessage?.(message, { animateSystemGroups, isHistory });
       };
       const receiveAddedMessage = (snapshot) => {
@@ -150,7 +150,7 @@ export async function createFirebaseTransport(roomCode, config) {
           animateSystemGroups: document.visibilityState === "visible",
         });
       };
-      let messageHistoryReady = Promise.resolve();
+      let messageHistoryReady;
       try {
         const serverTimeOffsetSnapshot = await dbModule.get(serverTimeOffsetRef).catch(() => null);
         serverTimeOffset = Number(serverTimeOffsetSnapshot?.val()) || 0;
@@ -160,6 +160,15 @@ export async function createFirebaseTransport(roomCode, config) {
         // mensajes de una sesión anterior lleguen a pintarse en el reingreso.
         // Se registra antes de esperar la transacción de presencia.
         unsubscribers.push(dbModule.onChildAdded(latestMessagesQuery, receiveAddedMessage));
+        unsubscribers.push(dbModule.onChildChanged(messagesRef, (snapshot) => {
+          const message = snapshot.val() || {};
+          handlers.onMessageUpdated?.({
+            id: snapshot.key,
+            ...message,
+            databaseKey: snapshot.key,
+            reactions: message.reactions || {},
+          });
+        }));
         messageHistoryReady = dbModule.get(latestMessagesQuery)
           .then(async (snapshot) => {
             const initialMessages = [];
@@ -242,7 +251,7 @@ export async function createFirebaseTransport(roomCode, config) {
           const activeMembers = getActiveMembers(val);
           const staleMemberIds = [];
 
-          Object.entries(val).forEach(([memberId, member]) => {
+          Object.keys(val).forEach((memberId) => {
             if (!activeMembers[memberId]) {
               staleMemberIds.push(memberId);
             }
@@ -282,7 +291,7 @@ export async function createFirebaseTransport(roomCode, config) {
       let nextHistoryCursor = null;
       snapshot.forEach((child) => {
         if (nextHistoryCursor === null) nextHistoryCursor = child.key;
-        messages.push({ id: child.key, ...child.val() });
+        messages.push({ id: child.key, ...child.val(), databaseKey: child.key });
       });
       if (nextHistoryCursor !== null) historyCursor = nextHistoryCursor;
       return {
@@ -303,6 +312,25 @@ export async function createFirebaseTransport(roomCode, config) {
         serverTime: dbModule.serverTimestamp(),
       });
       logEvent("firebase", "Mensaje enviado.");
+    },
+    async updateMessageReaction(message, emoji) {
+      const messageId = message?.id;
+      if (!messageId || typeof emoji !== "string" || !emoji) return;
+      const userId = state.session.clientId;
+      const reactionsRef = dbModule.ref(
+        db,
+        `${roomPath}/messages/${message.databaseKey || messageId}/reactions`,
+      );
+      await dbModule.runTransaction(reactionsRef, (current) => {
+        const reactions = current && typeof current === "object" ? { ...current } : {};
+        if (reactions[userId] === emoji) {
+          delete reactions[userId];
+        } else {
+          reactions[userId] = emoji;
+        }
+        return Object.keys(reactions).length ? reactions : null;
+      }, { applyLocally: false });
+      logEvent("firebase", "Reacción de mensaje actualizada.");
     },
     now() {
       return Date.now() + serverTimeOffset;

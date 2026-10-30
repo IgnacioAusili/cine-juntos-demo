@@ -10,6 +10,7 @@ import {
 } from "./unread-counters.js";
 import { setExternalChatCollapsed, setInsideChatVisible } from "../chat-layout.js";
 import { appendMessageNow } from "./chat-message-render-item.js";
+import { mergeMessageUpdate } from "./chat-reactions.js";
 
 const SYSTEM_GROUP_MESSAGE_FRESHNESS_MS = 3000;
 const SYSTEM_GROUP_RESUME_GRACE_MS = 250;
@@ -69,6 +70,15 @@ export function renderMessage(message, options = {}) {
   });
   logEvent("chat:recv", `Mensaje recibido de ${message.name || "Invitado"}.`);
   return Promise.all([mainItem, overlayItem]);
+}
+
+export function updateRenderedMessage(message) {
+  if (!message?.id) return;
+  [dom.messages, dom.overlayMessages].filter(Boolean).forEach((container) => {
+    Array.from(container.querySelectorAll(".message")).forEach((item) => {
+      if (item.dataset.messageId === String(message.id)) mergeMessageUpdate(item, message);
+    });
+  });
 }
 
 function canAnimateSystemMessage(message) {

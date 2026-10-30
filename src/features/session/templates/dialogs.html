@@ -87,7 +87,7 @@
         </div>
         <div class="about-dialog__content">
           <div id="aboutDialogDescription" class="about-dialog__intro">
-            <p class="about-dialog__description-lead">Cine Juntos es un proyecto de código abierto (open source) concebido como una base con el propósito de la visualización sincronizada de contenido entre múltiples usuarios de manera comoda y sencilla. De manera tal, permite crear salas con un chat integrado, elegir el contenido a ver y cargarlo en un reproductor que tiene sus funciones sincronizadas entre todos los usuarios: reproducción, velocidad, pausa, etc.</p>
+            <p class="about-dialog__description-lead">Cine Juntos es un proyecto de código abierto (open source) concebido como una base con el propósito de facilitar la visualización sincronizada de contenido entre múltiples usuarios de forma cómoda y sencilla. Para ello, permite crear salas a las que se accede mediante un código de invitación. Cada sala cuenta con un reproductor y un chat, y permite elegir el contenido que se desea ver y cargarlo en el reproductor. La reproducción se sincroniza entre todos los usuarios, incluidas funciones como reproducir, pausar y cambiar la velocidad, entre otras.</p>
             <div class="about-dialog__disclosure">
               <button class="about-dialog__disclosure-toggle" type="button" aria-expanded="false" aria-controls="aboutDialogDescriptionRest">
                 <span class="about-dialog__disclosure-label   about-dialog__disclosure-label-more">Mostrar la descripción completa</span>
@@ -96,8 +96,7 @@
                 </span>
               </button>
               <div id="aboutDialogDescriptionRest" class="about-dialog__disclosure-content" hidden tabindex="-1">
-                <p>Las salas se crean mediante un código de acceso que puede compartirse con otras personas, la reproduccion se sincroniza mediante Firebase Realtime y se puede incorporar el contenido a partir de archivos o enlaces directos alojados en servidores o CDN. Esta demo se publica en GitHub Pages mediante GitHub Actions.</p>
-                <p>Esta página funciona como una demostración funcional del proyecto. No incorpora publicidad ni restricciones propias, más allá de las limitaciones de los servicios utilizados o que utilice el usuario. El proyecto puede modificarse, adaptarse y alojarse según las necesidades del que quiera usarlo.</p>
+                <p>Esta página funciona como una demostración funcional del proyecto. No incorpora publicidad ni impone restricciones propias, más allá de las limitaciones de los servicios utilizados. El proyecto puede modificarse, adaptarse y alojarse libremente según las necesidades de quienes quieran utilizarlo.</p>
               </div>
             </div>
           </div>
@@ -173,6 +172,29 @@
         <div class="player-dialog__actions">
           <button id="cancelLoadDialogButton" type="button" class="button">Cancelar</button>
           <button id="confirmLoadDialogButton" type="button" class="button   button--primary">Cargar</button>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog
+      id="videoDownloadDialog"
+      class="app-dialog   player-dialog   player-dialog--video-download"
+      aria-modal="true"
+      aria-labelledby="videoDownloadDialogTitle"
+      aria-describedby="videoDownloadDialogMessage"
+    >
+      <div class="player-dialog__card">
+        <button id="closeVideoDownloadDialogButton" type="button" class="o-dialog-close" aria-label="Cerrar diálogo" data-tooltip="Cerrar diálogo (Esc)">
+          <span data-lucide="x" aria-hidden="true"></span>
+        </button>
+        <div class="player-dialog__header">
+          <span class="o-dialog-title-icon" aria-hidden="true" data-lucide="triangle-alert"></span>
+          <h2 id="videoDownloadDialogTitle">Descargar video</h2>
+        </div>
+        <p id="videoDownloadDialogMessage" class="player-dialog__message">La descarga puede consumir mucho ancho de banda y hacer que el video tarde más en cargar o tenga pausas para vos y las demás personas de la sala, según sus conexiones. ¿Querés continuar?</p>
+        <div class="player-dialog__actions">
+          <button id="cancelVideoDownloadButton" type="button" class="button" autofocus>Cancelar</button>
+          <button id="confirmVideoDownloadButton" type="button" class="button   button--warning">Descargar</button>
         </div>
       </div>
     </dialog>

@@ -203,6 +203,14 @@ body.page-context--fullscreen .session-view[data-chat-dock="bottom"] .o-workspac
     minmax(0, var(--app-viewport-height));
 }
 
+/* En PC, el dock inferior usa la pantalla completa como marco del video. El
+   contain dejaba bandas libres cuando el viewport no era exactamente 16:9. */
+@media (hover: hover) and (pointer: fine) {
+  body.page-context--fullscreen .session-view[data-chat-dock="bottom"] .player-frame video {
+    object-fit: cover;
+  }
+}
+
 body.page-context--fullscreen .session-view.session-view--chat-collapsed[data-chat-dock="bottom"] .o-workspace {
   height: var(--app-viewport-height);
   min-height: 0;

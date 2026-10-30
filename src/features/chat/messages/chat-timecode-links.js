@@ -1,5 +1,6 @@
 import { dom } from "../../../core/dom.js";
 import { formatClockTime } from "../../../core/utils.js";
+import { scrollToVideoPosition } from "../chat-layout.js";
 
 const TIMECODE_PATTERN = /(?<![\d:])(?:(\d+):)?(\d+):(\d{2})(?![\d:])/g;
 
@@ -22,6 +23,27 @@ export function getValidVideoTimecodeMatches(value) {
 export function getLeadingTimecodeSeconds(text) {
   const match = String(text ?? "").trimStart().match(/^(?:(\d+):)?(\d+):(\d{2})(?=\s|$)/);
   return match ? parseTimecode(match) : null;
+}
+
+export function seekVideoToSeconds(seconds) {
+  if (!dom.videoPlayer || !Number.isFinite(seconds)) return;
+  if (!isPlayerFrameVisible()) scrollToVideoPosition("smooth");
+  dom.videoPlayer.currentTime = seconds;
+}
+
+function isPlayerFrameVisible() {
+  const playerFrame = dom.playerFrame;
+  if (!playerFrame || !playerFrame.getClientRects().length) return false;
+
+  const rect = playerFrame.getBoundingClientRect();
+  const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
+  const viewportHeight = document.documentElement.clientHeight || window.innerHeight;
+  return rect.width > 0
+    && rect.height > 0
+    && rect.right > 0
+    && rect.left < viewportWidth
+    && rect.bottom > 0
+    && rect.top < viewportHeight;
 }
 
 export function appendTextWithTimecodes(container, text, appendPlainText) {
@@ -74,8 +96,6 @@ function createTimecodeButton(label, seconds, documentRef) {
   time.textContent = label;
   visual.append(icon, time);
   button.append(visual);
-  button.addEventListener("click", () => {
-    if (dom.videoPlayer && Number.isFinite(seconds)) dom.videoPlayer.currentTime = seconds;
-  });
+  button.addEventListener("click", () => seekVideoToSeconds(seconds));
   return button;
 }

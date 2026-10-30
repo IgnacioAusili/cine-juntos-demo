@@ -1,4 +1,5 @@
 import { hasInlineFormatting, parseInlineFormatting } from "../inline-formatting-markup.js";
+import { refreshTooltipForTarget } from "../../icons-tooltips.js";
 
 export { hasInlineFormatting };
 
@@ -113,6 +114,7 @@ function appendFormattedNodes(container, nodes, appendPlainText, depth, interact
     if (node.format === "quote") {
       const quote = document.createElement("span");
       quote.className = interactive ? "message__quote" : "message__quote message__quote--preview";
+      if (interactive) quote.dataset.tooltip = "Cita";
       appendFormattedNodes(quote, node.children, appendPlainText, depth + 1, interactive);
       container.append(quote);
       return;
@@ -252,4 +254,5 @@ function toggleSpoiler(element) {
   element.setAttribute("aria-label", revealed ? "Ocultar spoiler" : "Mostrar spoiler");
   element.setAttribute("aria-pressed", String(revealed));
   element.dataset.tooltip = revealed ? "Ocultar spoiler" : "Mostrar spoiler";
+  refreshTooltipForTarget(element);
 }

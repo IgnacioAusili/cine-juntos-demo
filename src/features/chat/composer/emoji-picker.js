@@ -21,6 +21,8 @@ let emojiPickerOpenRequestId = 0;
 
 let emojiPopoverOriginalParent = null;
 
+let activeReactionSelection = null;
+
 function syncFullscreenEmojiPopoverSurface(anchor) {
   const popover = dom.emojiPopover;
   if (!popover || !isMobileLayout() || !document.body.classList.contains('page-context--fullscreen')) {
@@ -140,6 +142,8 @@ export function buildEmojiPicker() {
 }
 
 export async function toggleEmojiPicker(input, anchor, savedSelection = null) {
+  activeReactionSelection = null;
+  setEmojiPopoverMode("compose");
   logMobileInteraction("emoji:toggle-start", input, {
     anchor: anchor?.id || null,
     anchorFocused: document.activeElement === anchor,
@@ -177,6 +181,35 @@ export async function toggleEmojiPicker(input, anchor, savedSelection = null) {
   });
 }
 
+export async function openEmojiPickerForReaction(anchor, onSelect) {
+  if (!anchor?.id || typeof onSelect !== "function") return;
+  if (!dom.emojiPopover.hidden && dom.emojiPopover.dataset.anchor === anchor.id) {
+    hideEmojiPicker();
+    return;
+  }
+
+  state.ui.activeEmojiInput = null;
+  const openRequestId = ++emojiPickerOpenRequestId;
+  await preloadEmojiFont();
+  if (openRequestId !== emojiPickerOpenRequestId) return;
+
+  activeReactionSelection = onSelect;
+  setEmojiPopoverMode("reaction");
+  syncFullscreenEmojiPopoverSurface(anchor);
+  dom.emojiPopover.dataset.anchor = anchor.id;
+  showEmojiPopover(dom.emojiPopover);
+  positionEmojiPopover(dom.emojiPopover, anchor);
+  syncEmojiTriggerState(anchor);
+}
+
+function setEmojiPopoverMode(mode) {
+  dom.emojiPopover.dataset.mode = mode;
+  const label = mode === "reaction" ? "Reaccionar con" : "Insertar";
+  dom.emojiPopover.querySelectorAll(".emoji-popover__option").forEach((button) => {
+    button.setAttribute("aria-label", `${label} ${button.textContent}`);
+  });
+}
+
 function syncEmojiTriggerState(activeAnchor = null) {
   [dom.messageEmojiButton, dom.overlayEmojiButton].forEach((button) => {
     if (!button) return;
@@ -184,15 +217,22 @@ function syncEmojiTriggerState(activeAnchor = null) {
     button.classList.toggle('icon-button--emoji-picker-open', isActive);
     button.setAttribute("aria-expanded", String(isActive));
   });
+  document.querySelectorAll(".message__reaction-picker").forEach((button) => {
+    const isActive = button === activeAnchor;
+    button.classList.toggle("message__reaction-picker--open", isActive);
+    button.setAttribute("aria-expanded", String(isActive));
+  });
 }
 
 export function hideEmojiPicker() {
   const popover = dom.emojiPopover;
+  activeReactionSelection = null;
   emojiPickerOpenRequestId += 1;
   if (popover.hidden) {
     popover.classList.remove('emoji-popover--open', 'emoji-popover--closing');
     popover.dataset.anchor = "";
     popover.dataset.placement = "";
+    popover.dataset.mode = "";
     popover.style.removeProperty("--emoji-popover-anchor-x");
     restoreEmojiPopoverSurface();
     syncEmojiTriggerState();
@@ -204,12 +244,14 @@ export function hideEmojiPicker() {
   popover.classList.remove('emoji-popover--open');
   popover.classList.add('emoji-popover--closing');
   dom.emojiPopover.dataset.anchor = "";
+  dom.emojiPopover.dataset.mode = "";
   syncEmojiTriggerState();
   emojiPopoverHideTimer = window.setTimeout(() => {
     emojiPopoverHideTimer = 0;
     popover.hidden = true;
     popover.classList.remove('emoji-popover--closing');
     popover.dataset.placement = "";
+    popover.dataset.mode = "";
     popover.style.removeProperty("--emoji-popover-anchor-x");
     restoreEmojiPopoverSurface();
   }, EMOJI_POPOVER_TRANSITION_MS);
@@ -239,6 +281,13 @@ export function normalizeEmojiShortcodesInput(input) {
 }
 
 function insertEmoji(emoji) {
+  if (activeReactionSelection) {
+    const onSelect = activeReactionSelection;
+    activeReactionSelection = null;
+    hideEmojiPicker();
+    onSelect(emoji);
+    return;
+  }
   if (!state.ui.activeEmojiInput) return;
   const input = state.ui.activeEmojiInput;
   logMobileInteraction("emoji:insert-start", input, { emoji, activeEmojiInput: input.id || null });

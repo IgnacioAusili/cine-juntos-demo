@@ -4,4 +4,5 @@ export const playerRuntimeState = {
   pendingLoadCompletionAnnouncement: false,
   pendingLoadCompletionAnimateSystemGroups: true,
   pendingVideoActivityAnnouncement: false,
+  pendingSourceReplacement: null,
 };

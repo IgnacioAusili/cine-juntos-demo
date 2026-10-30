@@ -23,6 +23,8 @@ export function showMessageMenu(message, x, y, replyInput = null, linkHref = "")
   if (quoteButton) quoteButton.hidden = !currentQuoteSelection;
   const openLinkButton = dom.messageMenu.querySelector('[data-action="open-link"]');
   if (openLinkButton) openLinkButton.hidden = !currentLinkHref;
+  const reactionButton = dom.messageMenu.querySelector('[data-action="react"]');
+  if (reactionButton) reactionButton.hidden = Boolean(message.system);
   state.chat.messageMenuOpenedAt = Date.now();
   dom.messageMenu.hidden = false;
   const rect = dom.messageMenu.getBoundingClientRect();

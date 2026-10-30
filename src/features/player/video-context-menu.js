@@ -1,8 +1,9 @@
 import { dom } from "../../core/dom.js";
 import { formatClockTime } from "../../core/utils.js";
 import { focusChatInput } from "../chat/composer/chat-input-focus.js";
-import { insertRichEditorText, setRichEditorSelection } from "../chat/composer/chat-rich-editor.js";
-import { setInsideChatVisible } from "../chat/index.js";
+import { getRichEditorSelection, insertRichEditorText, setRichEditorSelection } from "../chat/composer/chat-rich-editor.js";
+import { scrollToChatPosition, setExternalChatCollapsed } from "../chat/index.js";
+import { requestVideoDownload } from "./video-download.js";
 import { closeVideoLoadPopover, openVideoLoadPopover } from "./video-load-popover.js";
 
 const LONG_PRESS_MS = 560;
@@ -102,6 +103,8 @@ function openMenu(x, y) {
   const hasVideo = Boolean(dom.videoPlayer?.currentSrc || dom.videoPlayer?.getAttribute("src"));
   [
     ["mention", "Mencionar este momento", "message", !hasVideo],
+    ["copy", "Copiar", "copy", !hasVideo],
+    ["paste", "Pegar", "clipboard", false],
     ["load", "Cargar otro video", "film", false],
     ["download", "Descargar", "download", !hasVideo],
     ["remove", "Sacar video", "trash", !hasVideo],
@@ -137,13 +140,21 @@ async function handleMenuAction(event) {
   if (action === "mention") {
     closeContextMenu();
     mentionCapturedMoment();
+  } else if (action === "copy") {
+    const source = dom.videoPlayer.getAttribute("src") || dom.videoPlayer.currentSrc || dom.videoUrlInput.value.trim();
+    closeContextMenu();
+    void copyText(source);
+  } else if (action === "paste") {
+    closeContextMenu();
+    const source = await readVideoUrlFromClipboard();
+    if (source) await loadVideo(source);
   } else if (action === "load") {
     closeContextMenu();
     openVideoLoadPopover(openedAtX, openedAtY, loadVideo);
   } else if (action === "download") {
     const source = dom.videoPlayer.currentSrc || dom.videoPlayer.src;
     closeContextMenu();
-    downloadVideo(source);
+    void requestVideoDownload(source);
   } else if (action === "remove") {
     closeContextMenu();
     await removeVideo();
@@ -151,33 +162,19 @@ async function handleMenuAction(event) {
 }
 
 function mentionCapturedMoment() {
-  const input = dom.overlayMessageInput;
+  const input = dom.messageInput;
   const tag = `${formatClockTime(capturedVideoTime)} `;
-  insertRichEditorText(input, tag, { start: 0, end: 0 });
-  setRichEditorSelection(input, tag.length);
-  setInsideChatVisible(true, { source: "video-context-menu" });
-  window.requestAnimationFrame(() => focusChatInput(input));
-}
-
-function downloadVideo(source) {
-  if (!source) return;
-  const anchor = document.createElement("a");
-  anchor.href = source;
-  anchor.download = getVideoFilename(source);
-  anchor.target = "_blank";
-  anchor.rel = "noopener noreferrer";
-  document.body.append(anchor);
-  anchor.click();
-  anchor.remove();
-}
-
-function getVideoFilename(source) {
-  try {
-    const filename = decodeURIComponent(new URL(source, window.location.href).pathname.split("/").pop() || "");
-    return filename || "video";
-  } catch {
-    return "video";
+  const selection = getRichEditorSelection(input);
+  const caretPosition = selection.start + tag.length;
+  insertRichEditorText(input, tag, selection);
+  setRichEditorSelection(input, caretPosition);
+  if (dom.sessionView.classList.contains("session-view--chat-collapsed")) {
+    setExternalChatCollapsed(false, { source: "video-context-menu" });
   }
+  window.requestAnimationFrame(() => {
+    scrollToChatPosition("smooth");
+    window.requestAnimationFrame(() => focusChatInput(input, caretPosition));
+  });
 }
 
 function createIcon(name) {
@@ -191,6 +188,8 @@ function createIcon(name) {
   svg.setAttribute("aria-hidden", "true");
   const paths = {
     message: ["path|M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4z", "path|M8 10h8", "path|M8 14h5"],
+    copy: ["rect|8|8|13|13|2", "path|M16 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h3"],
+    clipboard: ["rect|4|6|16|15|2", "path|M9 4h6v4H9z", "path|M9 14h6", "path|M12 11v6"],
     film: ["rect|M4 4h16v16H4z", "path|M4 8h16", "path|M4 16h16", "path|M8 4v4", "path|M16 4v4", "path|M8 16v4", "path|M16 16v4"],
     download: ["path|M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4", "path|M7 10l5 5 5-5", "path|M12 15V3"],
     trash: ["path|M3 6h18", "path|M8 6V4h8v2", "path|M19 6l-1 14H6L5 6", "path|M10 11v5", "path|M14 11v5"],
@@ -199,15 +198,55 @@ function createIcon(name) {
     const [tag, data] = definition.split("|");
     const shape = document.createElementNS("http://www.w3.org/2000/svg", tag);
     if (tag === "rect") {
-      shape.setAttribute("x", "4");
-      shape.setAttribute("y", "4");
-      shape.setAttribute("width", "16");
-      shape.setAttribute("height", "16");
-      shape.setAttribute("rx", "2");
+      const parts = definition.split("|");
+      const [, x, y, width, height, radius] = parts;
+      const bounds = parts.length === 6 ? [x, y, width, height, radius] : ["4", "4", "16", "16", "2"];
+      shape.setAttribute("x", bounds[0]);
+      shape.setAttribute("y", bounds[1]);
+      shape.setAttribute("width", bounds[2]);
+      shape.setAttribute("height", bounds[3]);
+      shape.setAttribute("rx", bounds[4]);
     } else shape.setAttribute("d", data);
     svg.append(shape);
   });
   return svg;
+}
+
+async function copyText(text) {
+  if (!text) return;
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      return;
+    }
+  } catch {
+    // Fallback for browsers that deny clipboard API access.
+  }
+
+  const input = document.createElement("textarea");
+  input.value = text;
+  input.setAttribute("readonly", "");
+  input.style.position = "fixed";
+  input.style.opacity = "0";
+  document.body.append(input);
+  input.select();
+  try {
+    document.execCommand("copy");
+  } catch {
+    // Clipboard access is optional; the context menu can close without it.
+  }
+  input.remove();
+}
+
+async function readVideoUrlFromClipboard() {
+  try {
+    const text = await navigator.clipboard?.readText();
+    const candidate = String(text || "").trim();
+    const url = new URL(candidate);
+    return ["http:", "https:"].includes(url.protocol) && url.hostname ? candidate : "";
+  } catch {
+    return "";
+  }
 }
 
 function placePopup(popup, x, y) {

@@ -25,6 +25,7 @@ import {
   beginSystemMessageHydration,
   finishSystemMessageHydration,
   renderMessage,
+  updateRenderedMessage,
   renderReplyPreview,
   resetInsideUnread,
   resetPageUnread,
@@ -132,6 +133,7 @@ export async function joinRoom(rawRoomCode, sourceButton = "join") {
     const connectionHandlers = {
       onState: whenCurrent(handleRemoteState),
       onMessage: whenCurrent(renderMessage),
+      onMessageUpdated: whenCurrent(updateRenderedMessage),
       onMembers: whenCurrent(renderMembers),
       onConnection: whenCurrent(setConnection),
       onStatus: whenCurrent(setSyncStatus),

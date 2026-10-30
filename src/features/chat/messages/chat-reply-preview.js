@@ -28,7 +28,6 @@ function hideReplyPreviewContainer(container) {
   container.hidden = true;
   setReplyPreviewClosing(container, false);
   container.classList.remove("reply-preview--visible");
-  container.classList.remove("reply-preview--quote");
   container.innerHTML = "";
   container.style.removeProperty("height");
   container.style.removeProperty("transition");
@@ -61,7 +60,8 @@ function createReplyPreviewContent(container) {
   const quote = state.chat.replyTarget.quote;
   if (quote?.text) {
     replyBody.classList.add("reply-preview__body--quote");
-    replyBody.textContent = truncateText(quote.text, 100);
+    replyBody.dataset.tooltip = "Fragmento citado";
+    appendQuotePreview(replyBody, truncateText(quote.text, 100));
   } else if (replyText === "(Imagen)") {
     replyBody.classList.add("reply-preview__body--image");
     replyBody.textContent = replyText;
@@ -95,6 +95,23 @@ function createReplyPreviewContent(container) {
   replyContent.className = 'reply-preview__content';
   replyContent.append(replyIcon, textBtn, close);
   return replyContent;
+}
+
+function appendQuotePreview(container, text) {
+  const openingMark = document.createElement("span");
+  openingMark.className = "reply-quote-mark";
+  openingMark.setAttribute("aria-hidden", "true");
+  openingMark.textContent = "❝";
+
+  const quoteText = document.createElement("span");
+  quoteText.className = "reply-quote-text";
+  quoteText.textContent = text;
+
+  const closingMark = document.createElement("span");
+  closingMark.className = "reply-quote-mark";
+  closingMark.setAttribute("aria-hidden", "true");
+  closingMark.textContent = "❞";
+  container.append(openingMark, quoteText, closingMark);
 }
 
 function hydrateReplyPreviewIcons(container) {
@@ -160,10 +177,6 @@ export function renderReplyPreview({ animate = true, preserveHeight = false } = 
 
   [dom.replyPreview, dom.overlayReplyPreview].forEach((container) => {
     if (!container) return;
-    container.classList.toggle(
-      "reply-preview--quote",
-      Boolean(state.chat.replyTarget?.quote?.text),
-    );
     const previousHideTimer = pendingReplyPreviewHides.get(container);
     if (previousHideTimer != null) {
       window.clearTimeout(previousHideTimer);
@@ -202,7 +215,6 @@ export function renderReplyPreview({ animate = true, preserveHeight = false } = 
         return;
       }
 
-      container.style.removeProperty("--reply-participant-accent");
       if (!animate) {
         hideReplyPreview();
         return;

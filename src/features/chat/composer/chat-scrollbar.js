@@ -3,6 +3,12 @@ import { dom } from "../../../core/dom.js";
 const scrollbarDragState = new WeakMap();
 const COMPOSER_SCROLLBAR_OVERFLOW_TOLERANCE = 4;
 
+function forEachMessageElement(node, callback) {
+  if (!(node instanceof Element)) return;
+  if (node.matches(".message")) callback(node);
+  node.querySelectorAll(".message").forEach(callback);
+}
+
 export function wireComposerScrollbar(input) {
   if (!input || input.dataset.composerScrollbarBound === "true") return;
   input.dataset.composerScrollbarBound = "true";
@@ -18,9 +24,44 @@ export function wireChatScrollbar(messagesContainer) {
   messagesContainer.dataset.chatScrollbarBound = "true";
 
   const update = () => syncChatScrollbar(messagesContainer);
+  let updateFrame = 0;
+  const scheduleUpdate = () => {
+    if (updateFrame) return;
+    updateFrame = window.requestAnimationFrame(() => {
+      updateFrame = 0;
+      update();
+    });
+  };
   messagesContainer.addEventListener("scroll", update, { passive: true });
   window.addEventListener("resize", update, { passive: true });
   window.addEventListener("chat-layout-settled", update, { passive: true });
+  if (typeof ResizeObserver === "function") {
+    const resizeObserver = new ResizeObserver(scheduleUpdate);
+    resizeObserver.observe(messagesContainer);
+    messagesContainer.querySelectorAll(".message").forEach((message) => resizeObserver.observe(message));
+
+    if (typeof MutationObserver === "function") {
+      const mutationObserver = new MutationObserver((records) => {
+        records.forEach(({ addedNodes, removedNodes }) => {
+          addedNodes.forEach((node) => forEachMessageElement(node, (message) => resizeObserver.observe(message)));
+          removedNodes.forEach((node) => forEachMessageElement(node, (message) => resizeObserver.unobserve(message)));
+        });
+        scheduleUpdate();
+      });
+      mutationObserver.observe(messagesContainer, {
+        childList: true,
+        subtree: true,
+        characterData: true,
+      });
+    }
+  } else if (typeof MutationObserver === "function") {
+    const mutationObserver = new MutationObserver(scheduleUpdate);
+    mutationObserver.observe(messagesContainer, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    });
+  }
   wireChatScrollbarDragging(messagesContainer);
   update();
 }
@@ -118,6 +159,13 @@ export function syncChatScrollbar(messagesContainer) {
   const thumb = shell?.querySelector('.chat-scrollbar__thumb');
   if (!shell || !track || !thumb) return;
 
+  const overflow = messagesContainer.scrollHeight - messagesContainer.clientHeight;
+  if (overflow > 1) {
+    shell.setAttribute("data-chat-scrollable", "true");
+  } else {
+    shell.removeAttribute("data-chat-scrollable");
+  }
+
   const isLayoutTransitioning = dom.sessionView?.classList.contains('session-view--chat-layout-transitioning')
     || dom.sessionView?.classList.contains('session-view--chat-dock-switching');
   if (isLayoutTransitioning) {
@@ -127,7 +175,6 @@ export function syncChatScrollbar(messagesContainer) {
     return;
   }
 
-  const overflow = messagesContainer.scrollHeight - messagesContainer.clientHeight;
   if (overflow <= 1) {
     shell.removeAttribute("data-scrollbar-visible");
     thumb.style.height = "";

@@ -4,6 +4,8 @@ import { expandSystemMessageGroupForItem } from "../system-messages/system-messa
 const pendingOverlayHighlights = new WeakMap();
 const pendingOverlayHighlightTimers = new WeakMap();
 const pendingFragmentHighlightTimers = new WeakMap();
+const pendingFragmentHighlightLayers = new WeakMap();
+let activeFragmentHighlightContent = null;
 
 export function scrollToMessage(messageId, preferredContainer = null) {
   if (!messageId) return;
@@ -73,6 +75,9 @@ function scrollMessageIntoView(container, target) {
 }
 
 function highlightMessageFragment(content, start, end) {
+  if (activeFragmentHighlightContent && activeFragmentHighlightContent !== content) {
+    clearFragmentHighlight(activeFragmentHighlightContent);
+  }
   clearFragmentHighlight(content);
   const matches = [];
   const walker = content.ownerDocument.createTreeWalker(content, NodeFilter.SHOW_TEXT);
@@ -87,46 +92,90 @@ function highlightMessageFragment(content, start, end) {
   }
   if (!matches.length) return false;
 
-  const groups = [];
-  matches.forEach((match) => {
-    const previousGroup = groups.at(-1);
-    if (
-      previousGroup
-      && previousGroup.parent === match.node.parentNode
-      && previousGroup.last.node.nextSibling === match.node
-    ) {
-      previousGroup.last = match;
-      return;
-    }
-    groups.push({ parent: match.node.parentNode, first: match, last: match });
-  });
+  const first = matches[0];
+  const last = matches.at(-1);
+  if (!first.node.isConnected || !last.node.isConnected) return false;
 
-  groups.reverse().forEach(({ first, last }) => {
-    if (!first.node.isConnected || !last.node.isConnected) return;
-    const range = content.ownerDocument.createRange();
-    range.setStart(first.node, first.start);
-    range.setEnd(last.node, last.end);
+  const range = content.ownerDocument.createRange();
+  range.setStart(first.node, first.start);
+  range.setEnd(last.node, last.end);
+
+  const rects = [...range.getClientRects()].filter((rect) => rect.width > 0 && rect.height > 0);
+  if (!rects.length) return false;
+  const bubble = content.closest(".message__bubble");
+  if (!bubble) return false;
+
+  const highlightLayer = content.ownerDocument.createElement("div");
+  highlightLayer.className = "message-fragment-highlight-layer";
+  highlightLayer.setAttribute("aria-hidden", "true");
+  bubble.append(highlightLayer);
+  bubble.classList.add("message__bubble--fragment-highlighted");
+  pendingFragmentHighlightLayers.set(content, highlightLayer);
+  activeFragmentHighlightContent = content;
+
+  const bubbleRect = bubble.getBoundingClientRect();
+  mergeFragmentLineRects(rects).forEach((line, index, lines) => {
+    const center = (line.top + line.bottom) / 2;
+    const previousGap = index > 0 ? center - lines[index - 1].center : Infinity;
+    const nextGap = index < lines.length - 1 ? lines[index + 1].center - center : Infinity;
+    const halfHeight = Math.max(1, Math.min(
+      (line.bottom - line.top) / 2 - 1,
+      previousGap / 2 - 1.1,
+      nextGap / 2 - 1.1,
+    ));
     const highlight = content.ownerDocument.createElement("span");
     highlight.className = "message-fragment-highlight";
-    range.surroundContents(highlight);
+    highlight.style.left = `${line.left - bubbleRect.left - bubble.clientLeft + bubble.scrollLeft}px`;
+    highlight.style.top = `${center - halfHeight - bubbleRect.top - bubble.clientTop + bubble.scrollTop}px`;
+    highlight.style.width = `${line.right - line.left}px`;
+    highlight.style.height = `${halfHeight * 2}px`;
+    highlightLayer.append(highlight);
   });
 
-  pendingFragmentHighlightTimers.set(content, window.setTimeout(() => {
-    clearFragmentHighlight(content);
-  }, 2400));
+  const view = content.ownerDocument.defaultView;
+  pendingFragmentHighlightTimers.set(content, view.setTimeout(() => clearFragmentHighlight(content), 2400));
   return true;
+}
+
+function mergeFragmentLineRects(rects) {
+  const sortedRects = rects
+    .map((rect) => ({
+      left: rect.left,
+      right: rect.right,
+      top: rect.top,
+      bottom: rect.bottom,
+      center: (rect.top + rect.bottom) / 2,
+    }))
+    .sort((first, second) => first.center - second.center || first.left - second.left);
+  const lines = [];
+
+  sortedRects.forEach((rect) => {
+    const line = lines.at(-1);
+    if (line && Math.abs(rect.center - line.center) <= 2) {
+      line.left = Math.min(line.left, rect.left);
+      line.right = Math.max(line.right, rect.right);
+      line.top = Math.min(line.top, rect.top);
+      line.bottom = Math.max(line.bottom, rect.bottom);
+      line.center = (line.top + line.bottom) / 2;
+      return;
+    }
+    lines.push({ ...rect });
+  });
+
+  return lines;
 }
 
 function clearFragmentHighlight(content) {
   const timer = pendingFragmentHighlightTimers.get(content);
-  if (timer) window.clearTimeout(timer);
+  if (timer) content.ownerDocument.defaultView.clearTimeout(timer);
   pendingFragmentHighlightTimers.delete(content);
-  content.querySelectorAll(".message-fragment-highlight").forEach((highlight) => {
-    const parent = highlight.parentNode;
-    while (highlight.firstChild) parent.insertBefore(highlight.firstChild, highlight);
-    highlight.remove();
-    parent.normalize();
-  });
+  const highlightLayer = pendingFragmentHighlightLayers.get(content);
+  if (highlightLayer) {
+    highlightLayer.remove();
+    content.closest(".message__bubble")?.classList.remove("message__bubble--fragment-highlighted");
+  }
+  pendingFragmentHighlightLayers.delete(content);
+  if (activeFragmentHighlightContent === content) activeFragmentHighlightContent = null;
 }
 
 /**

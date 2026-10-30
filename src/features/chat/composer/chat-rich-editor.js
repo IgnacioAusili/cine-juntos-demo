@@ -1,7 +1,8 @@
 import { buildTextModel, findPointIndex } from "./chat-rich-editor-selection.js";
 import { handleRichEditorLinkClick } from "../messages/chat-link-confirmation.js";
-import { getValidVideoTimecodeMatches } from "../messages/chat-timecode-links.js";
+import { getLeadingTimecodeSeconds, getValidVideoTimecodeMatches, seekVideoToSeconds } from "../messages/chat-timecode-links.js";
 import { parseInlineFormatting } from "../inline-formatting-markup.js";
+import { refreshTooltipForTarget } from "../../icons-tooltips.js";
 
 const BLOCK_TAGS = new Set(["DIV", "P"]);
 const RICH_FORMAT_MARKERS = {
@@ -59,12 +60,22 @@ export function installRichEditor(editor) {
     replaceRichEditorSelection(editor, replacement, start, end);
   };
   editor.addEventListener("click", (event) => {
-    moveRichEditorCaretOutsideQuoteAtPoint(editor, event.clientX, event.clientY);
     const target = event.target instanceof Element ? event.target : event.target?.parentElement;
+    const timecode = target?.closest('[data-chat-timecode="true"]');
+    if (timecode && editor.contains(timecode) && (event.ctrlKey || event.metaKey)) {
+      const seconds = getLeadingTimecodeSeconds(timecode.textContent);
+      if (seconds !== null) {
+        event.preventDefault();
+        seekVideoToSeconds(seconds);
+      }
+      return;
+    }
+    moveRichEditorCaretOutsideQuoteAtPoint(editor, event.clientX, event.clientY);
     const spoiler = target?.closest("[data-chat-format='spoiler']");
     if (spoiler && editor.contains(spoiler)) {
       const revealed = spoiler.classList.toggle("chat-rich-editor__spoiler--revealed");
       spoiler.dataset.tooltip = revealed ? "Ocultar spoiler" : "Mostrar spoiler";
+      refreshTooltipForTarget(spoiler);
     }
     const link = target?.closest("a[data-chat-format='link']");
     if (link && editor.contains(link)) {
@@ -890,8 +901,11 @@ function setCaretAfterRichFormat(range, element) {
   boundary.dataset.richEditorPlainBoundary = "true";
   const text = element.ownerDocument.createTextNode(RICH_EDITOR_CARET_MARKER);
   boundary.append(text);
-  element.parentNode.insertBefore(boundary, element.nextSibling);
-  range.setStart(text, RICH_EDITOR_CARET_MARKER.length);
+  const parent = element.parentNode;
+  parent.insertBefore(boundary, element.nextSibling);
+  // Dejar el cursor en el límite del editor evita que el navegador continúe
+  // escribiendo dentro del último formato inline aplicado.
+  range.setStart(parent, [...parent.childNodes].indexOf(boundary) + 1);
   range.collapse(true);
   return boundary;
 }

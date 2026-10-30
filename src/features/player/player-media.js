@@ -5,6 +5,7 @@ import { showErrorDialog, showResumeVideoDialog, showSlowLoadDialog } from "../s
 import { pauseRoomForPlaybackIssue } from "./player-sync-logic.js";
 import { playerRuntimeState } from "./player-runtime-state.js";
 
+export const SKIP_LOAD_REPLACE_DIALOG_KEY = "cine-juntos-skip-load-replace-dialog";
 const VIDEO_RESUME_STORAGE_KEY = "cine-juntos-video-resume-times";
 const SLOW_LOAD_DIALOG_DELAY_MS = 5 * 60 * 1000;
 const MIN_RESUME_PROMPT_SECONDS = 5;
@@ -14,10 +15,14 @@ const VIDEO_FINGERPRINT_HEIGHT = 18;
 let playerMediaSourcePort = null;
 
 export function configurePlayerMediaSourcePort(port) {
-  if (!port?.setVideoSource || !port?.setVideoStatus || !port?.syncPlayerControls) {
+  if (!port?.setVideoSource || !port?.setVideoStatus || !port?.syncPlayerControls || !port?.restorePreviousVideoSource) {
     throw new TypeError("El puerto de medio requiere operaciones para cargar y cambiar el estado.");
   }
   playerMediaSourcePort = port;
+}
+
+export function restorePreviousVideoSource(sourceKey) {
+  return Boolean(playerMediaSourcePort?.restorePreviousVideoSource(sourceKey));
 }
 
 function syncPlayerControlsNow(...args) {
@@ -178,6 +183,14 @@ export function schedulePlaybackErrorConfirmation() {
     const error = dom.videoPlayer.error;
     const errorCode = error?.code || currentSnapshot.errorCode;
     const details = describePlaybackError(errorCode);
+    if (restorePreviousVideoSource(currentSnapshot.sourceKey)) {
+      logEvent("video", "Se restaurará el video anterior tras fallar la nueva carga.");
+      clearSlowLoadPromptTracking();
+      syncPlayerControlsNow(true);
+      showErrorDialog("No se pudo cargar el video nuevo. Se está restaurando el video anterior.");
+      return;
+    }
+
     playerMediaSourcePort.setVideoStatus("error", "Error");
     logEvent("error", `Error de video confirmado (${details}).`);
     clearSlowLoadPromptTracking();

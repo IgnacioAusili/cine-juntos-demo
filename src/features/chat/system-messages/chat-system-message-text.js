@@ -17,9 +17,9 @@ export function normalizeOwnSystemBody(bodyText) {
 
   const rules = [
     [/^inició el video$/i, "Iniciaste el video"],
-    [/^ingresó un video$/i, "Ingresaste un video"],
-    [/^reprodujo el video en (.+)$/i, "Reprodujiste el video en $1"],
-    [/^pausó el video en (.+)$/i, "Pausaste el video en $1"],
+    [/^ingresó un video$/i, "Has ingresado un video"],
+    [/^reprodujo el video en (.+)$/i, "Has reproducido el video en $1"],
+    [/^pausó el video en (.+)$/i, "Has pausado el video en $1"],
     [/^saltó a (.+)$/i, "Saltaste a $1"],
     [/^cambió la velocidad a (.+)$/i, "Cambiaste la velocidad a $1"],
     [/^le ha cargado el video$/i, "Se te ha cargado el video"],

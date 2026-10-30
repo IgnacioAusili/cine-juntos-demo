@@ -7,6 +7,11 @@
   --message-spoiler-duration: 140ms;
   --message-spoiler-blur: blur(0.2em);
   --message-spoiler-outline: 2px;
+  --message-quote-panel-padding-block: 0.3em;
+  --message-quote-panel-padding-inline: 1.35em;
+  --message-quote-mark-inset-inline-start: 0.3em;
+  --message-quote-mark-inset-inline-end: 0.4em;
+  --message-quote-mark-inset-block: 0.22em;
   --message-monospace-copy-outline: 2px;
   --message-monospace-copy-outline-offset: 2px;
   --message-monospace-copy-feedback-size: 1.05em;
@@ -30,13 +35,14 @@
 
 .message__quote,
 .message-form__rich-editor .chat-rich-editor__quote {
+  position: relative;
   display: inline-block;
   max-width: 100%;
   box-sizing: border-box;
   margin: 0;
-  padding: 0 0.55em;
+  padding: var(--message-quote-panel-padding-block) var(--message-quote-panel-padding-inline);
   border-inline-start: 2px solid var(--participant-accent, var(--accent-2));
-  border-radius: 0.2em;
+  border-radius: 0.35em;
   background: color-mix(in srgb, var(--participant-accent, var(--accent-2)) 12%, rgba(255, 255, 255, 0.06));
   font-size: 0.86em;
   line-height: 1.2;
@@ -64,6 +70,30 @@
   opacity: 0.82;
   font-size: 0.78em;
   line-height: 1;
+}
+
+.message__quote::before,
+.message__quote::after,
+.message-form__rich-editor .chat-rich-editor__quote::before,
+.message-form__rich-editor .chat-rich-editor__quote::after {
+  display: inline-block;
+  position: absolute;
+  font-size: 1.2em;
+  font-weight: 800;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.message__quote::before,
+.message-form__rich-editor .chat-rich-editor__quote::before {
+  inset-inline-start: var(--message-quote-mark-inset-inline-start);
+  top: var(--message-quote-mark-inset-block);
+}
+
+.message__quote::after,
+.message-form__rich-editor .chat-rich-editor__quote::after {
+  inset-inline-end: var(--message-quote-mark-inset-inline-end);
+  bottom: var(--message-quote-mark-inset-block);
 }
 
 .message__monospace--copyable {
@@ -162,7 +192,7 @@
   color: var(--brand-active, var(--accent-2));
   cursor: text;
   user-select: text;
-  vertical-align: middle;
+  vertical-align: 0.04em;
 }
 
 .message-form__rich-editor .chat-rich-editor__timecode .message-video-ts__visual {

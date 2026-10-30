@@ -9,39 +9,39 @@ export const EMOJI_PICKER_ITEMS = [
   { emoji: "🥰", tags: ["enamorado", "amoroso"] },
   { emoji: "😍", tags: ["amor", "adoracion"] },
   { emoji: "🥺", tags: ["tierno", "suplicar"] },
+
+  // Emoción y expresiones.
   { emoji: "🥹", tags: ["emocion", "orgullo"] },
   { emoji: "😏", tags: ["coqueto", "picardia"] },
   { emoji: "🫦", tags: ["morder", "labios"] },
   { emoji: "🤤", tags: ["antojo", "babear"] },
   { emoji: "🥳", tags: ["fiesta", "celebrar"] },
-
-  // Gestos, estados y reacciones.
   { emoji: "😳", tags: ["sonrojo", "vergüenza"] },
-  { emoji: "🤔", tags: ["duda", "pensar"] },
   { emoji: "🤨", tags: ["sospecha", "desconfianza"] },
-  { emoji: "😕", tags: ["confundido", "confusion"] },
+
+  // Dudas, sorpresa y estados.
+  { emoji: "🤔", tags: ["duda", "pensar"] },
+  { emoji: "❓", tags: ["pregunta", "interrogacion"] },
   { emoji: "🤯", tags: ["asombro", "explosion"] },
-  { emoji: "😎", tags: ["cool", "genial"] },
   { emoji: "😱", tags: ["miedo", "susto"] },
+  { emoji: "😎", tags: ["cool", "genial"] },
   { emoji: "😮‍💨", tags: ["suspiro", "alivio"] },
   { emoji: "🤫", tags: ["silencio", "secreto"] },
+
+  // Miradas, tristeza y rechazo.
   { emoji: "🙈", tags: ["esconderse", "vergonzoso"] },
   { emoji: "🫣", tags: ["mirar", "curioso"] },
-
-  // Tristeza y dolor.
   { emoji: "😔", tags: ["triste", "melancolia"] },
   { emoji: "😭", tags: ["lloro", "lagrimas"] },
   { emoji: "💔", tags: ["desamor", "herido"] },
-
-  // Enojo y rechazo.
   { emoji: "😡", tags: ["enojo", "furia"] },
   { emoji: "🤮", tags: ["asco", "nausea"] },
+
+  // Respuestas relacionadas.
   { emoji: "😒", tags: ["fastidio", "molesto"] },
   { emoji: "❌", tags: ["no", "error"] },
-  { emoji: "👎", tags: ["mal", "desacuerdo"] },
-
-  // Aprobacion.
   { emoji: "✅", tags: ["ok", "correcto"] },
+  { emoji: "👎", tags: ["mal", "desacuerdo"] },
   { emoji: "👍", tags: ["bien", "aprobado"] },
   { emoji: "🙂‍↕️", tags: ["asentir", "aceptar"] },
   { emoji: "🙏", tags: ["gracias", "favor"] },

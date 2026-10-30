@@ -32,6 +32,7 @@ let stylesButton;
 let stylesSubmenu;
 let selectAllButton;
 let copyButton;
+let cutButton;
 let selectAllLinkButton;
 let clipboardStatus;
 let linkForm;
@@ -117,6 +118,10 @@ export function wireChatFormatMenu(inputs) {
       copySelection();
       return;
     }
+    if (action === "cut") {
+      cutSelection();
+      return;
+    }
     if (action === "paste") {
       pasteSelection();
       return;
@@ -195,6 +200,7 @@ function getFormatMenu() {
   });
   selectAllButton = createMenuButton("select-all", "Seleccionar todo");
   copyButton = createMenuButton("copy", "Copiar");
+  cutButton = createMenuButton("cut", "Cortar");
   const pasteButton = createMenuButton("paste", "Pegar");
   stylesGroup = document.createElement("div");
   stylesGroup.className = "chat-format-menu__styles-group";
@@ -211,7 +217,7 @@ function getFormatMenu() {
   stylesSubmenu.hidden = true;
   stylesSubmenu.append(formatActions);
   stylesGroup.append(stylesButton, stylesSubmenu);
-  menuActions.append(selectAllButton, copyButton, pasteButton, stylesGroup);
+  menuActions.append(selectAllButton, copyButton, cutButton, pasteButton, stylesGroup);
   clipboardStatus = document.createElement("div");
   clipboardStatus.className = "chat-format-menu__clipboard-status";
   clipboardStatus.setAttribute("role", "status");
@@ -290,6 +296,10 @@ function openMenu(formatMenu, x, y, mode = "format") {
 function setTextActionsVisible(visible) {
   if (selectAllButton) selectAllButton.hidden = !visible;
   if (copyButton) copyButton.hidden = !visible;
+  if (cutButton) {
+    const range = currentSelection?.range;
+    cutButton.hidden = !visible || !range || range.collapsed || !range.toString();
+  }
   if (selectAllLinkButton) selectAllLinkButton.hidden = !visible;
   if (stylesGroup) stylesGroup.hidden = !visible;
 }
@@ -501,6 +511,42 @@ function copySelection() {
   }
   navigator.clipboard.writeText(plainText).then(closeMenu).catch(() => {
     showClipboardError("No se pudo copiar desde el menú. Usa Ctrl+C.");
+  });
+}
+
+function cutSelection() {
+  const selection = currentSelection;
+  if (!selection?.range || selection.range.collapsed) return;
+  const { input, range } = selection;
+  const plainText = range.toString();
+  if (!plainText) return;
+
+  focusChatInput(input);
+  setRichEditorRange(input, range);
+  const cut = (() => {
+    try {
+      return document.execCommand("cut");
+    } catch {
+      return false;
+    }
+  })();
+  if (cut) {
+    closeMenu();
+    focusChatInput(input);
+    return;
+  }
+  if (!navigator.clipboard?.writeText) {
+    showClipboardError("No se pudo cortar desde el menú. Usa Ctrl+X.");
+    return;
+  }
+  navigator.clipboard.writeText(plainText).then(() => {
+    if (menu.hidden || currentSelection !== selection) return;
+    focusChatInput(input);
+    if (!replaceRichEditorRangeText(input, "", range)) return;
+    closeMenu();
+    focusChatInput(input);
+  }).catch(() => {
+    showClipboardError("No se pudo cortar desde el menú. Usa Ctrl+X.");
   });
 }
 

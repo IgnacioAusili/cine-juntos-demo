@@ -1,10 +1,8 @@
 import { dom } from "../../core/dom.js";
 import { tooltipState } from "./tooltip-state.js";
 import { state } from "../../core/state.js";
-import { setConnection } from "../session/session-ui.js";
-import { isTouchPointer, TOUCH_LONG_PRESS_DELAY_MS } from "../../core/touch-interactions.js";
-import { setTooltipChromeTransition, syncTooltipChrome } from "./tooltip-bubble-chrome.js";
-import { TOOLTIP_ANCHOR_SELECTOR, TOOLTIP_VIEWPORT_PADDING, TOOLTIP_GAP, TOOLTIP_BORDER_WIDTH_PX, TOOLTIP_RADIUS_PX, TOOLTIP_TAIL_WIDTH_PX, TOOLTIP_TAIL_HEIGHT_PX, TOOLTIP_SHOW_DELAY_MS, HELP_TOOLTIP_SHOW_DELAY_MS, PRESENCE_TOOLTIP_SHOW_DELAY_MS, TOOLTIP_HIDE_ANIMATION_MS, TOUCH_FOCUS_SUPPRESSION_MS, TOUCH_TOOLTIP_MOVE_TOLERANCE_PX, TOUCH_HELP_TOOLTIP_MAX_VISIBLE_MS } from "./tooltip-constants.js";
+import { setTooltipChromeTransition } from "./tooltip-bubble-chrome.js";
+import { TOOLTIP_ANCHOR_SELECTOR, TOOLTIP_VIEWPORT_PADDING, TOOLTIP_GAP, TOOLTIP_BORDER_WIDTH_PX, TOOLTIP_RADIUS_PX, TOOLTIP_TAIL_WIDTH_PX, TOOLTIP_TAIL_HEIGHT_PX, TOOLTIP_SHOW_DELAY_MS, HELP_TOOLTIP_SHOW_DELAY_MS, PRESENCE_TOOLTIP_SHOW_DELAY_MS, TOOLTIP_HIDE_ANIMATION_MS } from "./tooltip-constants.js";
 
 
 export function suppressTouchTooltipClick(anchor) {
@@ -20,9 +18,22 @@ export function refreshTooltipForTarget(target) {
   if (!dom.tooltipLayer || dom.tooltipLayer.hidden) return;
   const context = getTooltipContext(target);
   if (!context || state.ui.tooltipTarget !== context.anchor) return;
+  setTooltipVariant(context);
   dom.tooltipLayer.textContent = context.source.dataset.tooltip || "";
   if (!dom.tooltipLayer.textContent) return;
-  positionTooltip(context.anchor);
+  positionTooltip(context.anchor, isQuoteTooltipContext(context));
+}
+
+function isQuoteTooltipContext(context) {
+  return Boolean(context?.source?.matches?.(".message__quote"));
+}
+
+function setTooltipVariant(context) {
+  if (isQuoteTooltipContext(context)) {
+    dom.tooltipLayer.dataset.tooltipVariant = "quote";
+  } else {
+    dom.tooltipLayer.removeAttribute("data-tooltip-variant");
+  }
 }
 
 export function isPointInsideElement(element, clientX, clientY) {
@@ -142,6 +153,7 @@ export function showTooltip(context) {
   setTooltipTouchHover(state.ui.tooltipTarget, false);
   state.ui.tooltipTarget = context.anchor;
   setTooltipTouchHover(context.anchor, true);
+  setTooltipVariant(context);
   dom.tooltipLayer.textContent = text;
   dom.tooltipLayer.style.setProperty("transition", "none");
   setTooltipChromeTransition("none");
@@ -155,7 +167,7 @@ export function showTooltip(context) {
   window.cancelAnimationFrame(tooltipState.tooltipFrame);
   tooltipState.tooltipFrame = window.requestAnimationFrame(() => {
     if (state.ui.tooltipTarget !== context.anchor || dom.tooltipLayer.hidden) return;
-    positionTooltip(context.anchor);
+    positionTooltip(context.anchor, isQuoteTooltipContext(context));
     dom.tooltipLayer.style.visibility = "";
     void dom.tooltipLayer.offsetWidth;
     window.requestAnimationFrame(() => {
@@ -167,9 +179,47 @@ export function showTooltip(context) {
   });
 }
 
-export function positionTooltip(anchor) {
+function positionQuoteTooltip(anchor, tooltipRect) {
+  const bubble = anchor.closest?.(".message__bubble") || anchor;
+  const rect = bubble.getBoundingClientRect();
+  const gap = TOOLTIP_TAIL_HEIGHT_PX;
+  const padding = TOOLTIP_VIEWPORT_PADDING;
+  const maxLeft = Math.max(padding, window.innerWidth - tooltipRect.width - padding);
+  const maxTop = Math.max(padding, window.innerHeight - tooltipRect.height - padding);
+  const leftCandidate = rect.left - tooltipRect.width - gap;
+  const rightCandidate = rect.right + gap;
+  const fitsLeft = leftCandidate >= padding;
+  const fitsRight = rightCandidate + tooltipRect.width <= window.innerWidth - padding;
+  const message = bubble.closest?.(".message");
+  const preferredSide = message?.classList.contains("message--mine") ? "left" : "right";
+  let side = preferredSide;
+
+  if (side === "left" && !fitsLeft && fitsRight) side = "right";
+  else if (side === "right" && !fitsRight && fitsLeft) side = "left";
+  else if (!fitsLeft && !fitsRight) {
+    const leftSpace = rect.left - padding;
+    const rightSpace = window.innerWidth - padding - rect.right;
+    side = leftSpace >= rightSpace ? "left" : "right";
+  }
+
+  const rawLeft = side === "left" ? leftCandidate : rightCandidate;
+  const left = Math.min(Math.max(rawLeft, padding), maxLeft);
+  const rawTop = rect.top + rect.height / 2 - tooltipRect.height / 2;
+  const top = Math.min(Math.max(rawTop, padding), maxTop);
+
+  dom.tooltipLayer.style.top = `${top}px`;
+  dom.tooltipLayer.style.left = `${left}px`;
+  dom.tooltipLayer.style.removeProperty("--tooltip-arrow-offset");
+  dom.tooltipLayer.dataset.placement = side;
+}
+
+export function positionTooltip(anchor, quoteVariant = anchor?.classList?.contains("message__quote")) {
   const rect = getTooltipAnchorRect(anchor);
   const tooltipRect = dom.tooltipLayer.getBoundingClientRect();
+  if (quoteVariant) {
+    positionQuoteTooltip(anchor, tooltipRect);
+    return;
+  }
   const tooltipVisualHeight = tooltipRect.height + TOOLTIP_TAIL_HEIGHT_PX;
   const maxLeft = Math.max(TOOLTIP_VIEWPORT_PADDING, window.innerWidth - tooltipRect.width - TOOLTIP_VIEWPORT_PADDING);
   const maxTop = Math.max(TOOLTIP_VIEWPORT_PADDING, window.innerHeight - tooltipRect.height - TOOLTIP_VIEWPORT_PADDING);
@@ -217,6 +267,7 @@ export function hideTooltip(force = false) {
     setTooltipChromeTransition("");
     dom.tooltipLayer.removeAttribute("data-animation-state");
     dom.tooltipLayer.removeAttribute("data-placement");
+    dom.tooltipLayer.removeAttribute("data-tooltip-variant");
   };
 
   window.clearTimeout(tooltipState.tooltipHideTimer);

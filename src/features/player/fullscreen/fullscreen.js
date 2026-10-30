@@ -174,7 +174,8 @@ function getFullscreenSnapPoints() {
 
   if (!collapsed) {
     if (dock === "bottom" && dom.chatArea) {
-      points.push(getDocumentTop(dom.chatArea) - gutter);
+      const chatTopInset = isPageFullscreenActive() ? 0 : gutter;
+      points.push(getDocumentTop(dom.chatArea) - chatTopInset);
     }
     if (dock === "top" && dom.videoArea) {
       points.push(getDocumentTop(dom.videoArea));
@@ -298,13 +299,22 @@ export function handleFullscreenChange() {
   dom.pageFullscreenButton.removeAttribute("title");
   dom.pageFullscreenButton.setAttribute("aria-label", tooltip);
   setControlIcon(dom.pageFullscreenButton, isFullscreen ? "minimize" : "maximize");
+  const isDesktopPointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
   const fullscreenVideoScrollTop = isFullscreen
     && dom.sessionView?.dataset.chatDock === "bottom"
-    && window.matchMedia("(hover: hover) and (pointer: fine)").matches
+    && isDesktopPointer
     && dom.videoArea
     ? getDocumentTop(dom.videoArea)
     : null;
-  restoreFullscreenScroll(isFullscreen, fullscreenVideoScrollTop);
+  const alignFullscreenScrollToBottom = isFullscreen
+    && dom.sessionView?.dataset.chatDock === "right"
+    && isDesktopPointer
+    && Boolean(dom.videoArea);
+  restoreFullscreenScroll(
+    isFullscreen,
+    fullscreenVideoScrollTop,
+    alignFullscreenScrollToBottom,
+  );
   syncInsideChatPanelOffset();
   // El fullscreen cambia el origen y las filas del layout móvil. Recalcular
   // también el anclaje del control externo evita que la flecha del chat

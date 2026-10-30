@@ -7,6 +7,7 @@ export {
   beginSystemMessageHydration,
   finishSystemMessageHydration,
   renderMessage,
+  updateRenderedMessage,
 } from "./messages/chat-render.js";
 export {
   fillChatHistoryViewport,
@@ -33,6 +34,7 @@ export {
 export {
   getPersistedInsideChatStyle,
   restoreExternalChatCollapsed,
+  scrollToChatPosition,
   scrollToVideoPosition,
   setChatDock,
   setExternalChatAutoExpandEnabled,

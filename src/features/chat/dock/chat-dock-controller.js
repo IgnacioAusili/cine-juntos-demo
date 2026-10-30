@@ -13,7 +13,7 @@ import {
 import { chatDockTransitionState } from "./chat-layout-transition-state.js";
 import { updateCollapseButton } from "./chat-collapse-handles.js";
 import { CHAT_DOCK_TRANSITIONS, resolveChatDockTransition } from "./dock-transition-router.js";
-import { getBottomToRightScrollTop, animateDockSwitchWithCollapse, animateFullscreenBottomToRightWithNativeCollapse, animateRightToBottomWithNativeCollapse, animateFullscreenDockSwitch, scheduleBottomToRightSwitch } from "./chat-dock-transitions.js";
+import { getBottomToRightScrollTop, animateDockSwitchWithCollapse, animateRightToBottomWithNativeCollapse, animateFullscreenDockSwitch, scheduleBottomToRightSwitch } from "./chat-dock-transitions.js";
 
 const controllerOperations = {};
 export function configureChatDockController(operations) { Object.assign(controllerOperations, operations || {}); }
@@ -36,9 +36,6 @@ function dispatchChatDockTransition(currentDock, nextDock, options, videoScrollT
   switch (transition) {
     case CHAT_DOCK_TRANSITIONS.COLLAPSE_SWITCH_EXPAND:
       animateDockSwitchWithCollapse(currentDock, nextDock, videoScrollTop);
-      return true;
-    case CHAT_DOCK_TRANSITIONS.FULLSCREEN_BOTTOM_TO_RIGHT:
-      animateFullscreenBottomToRightWithNativeCollapse();
       return true;
     case CHAT_DOCK_TRANSITIONS.BOTTOM_TO_RIGHT:
       scheduleBottomToRightSwitch(nextDock, videoScrollTop);

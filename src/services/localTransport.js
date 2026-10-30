@@ -32,6 +32,10 @@ export function createLocalTransport(roomCode, firebaseError = null) {
       handlers.onMessage?.(packet.payload);
     }
 
+    if (packet.kind === "message-reaction") {
+      handlers.onMessageUpdated?.({ id: packet.payload?.id, reaction: packet.payload?.reaction });
+    }
+
     if (packet.kind === "member") {
       rememberLocalMember(roomCode, packet.payload);
       if (packet.payload?.id) {
@@ -97,6 +101,16 @@ export function createLocalTransport(roomCode, firebaseError = null) {
     async sendMessage(payload) {
       postLocalEvent(channel, storageKey, "message", payload);
       logEvent("local", "Mensaje enviado.");
+    },
+    async updateMessageReaction(message, emoji) {
+      const messageId = message?.id;
+      if (!messageId || typeof emoji !== "string" || !emoji) return;
+      const userId = state.session.clientId;
+      const nextEmoji = message.reactions?.[userId] === emoji ? null : emoji;
+      const reaction = { userId, emoji: nextEmoji };
+      postLocalEvent(channel, storageKey, "message-reaction", { id: messageId, reaction });
+      handlers.onMessageUpdated?.({ id: messageId, reaction });
+      logEvent("local", "Reacción de mensaje actualizada.");
     },
     now() {
       return Date.now();

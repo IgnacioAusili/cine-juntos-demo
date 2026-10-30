@@ -172,6 +172,7 @@ export function wireFloatingComposerLayout() {
 
     floatingComposerObservers.set(form, observer);
     observer.observe(form);
+    if (inputWrapper) observer.observe(inputWrapper);
     window.addEventListener("resize", scheduleReserveUpdate, { passive: true });
     window.addEventListener("chat-reply-preview-layout", syncReplyPreviewReserve, { passive: true });
     if (form === dom.messageForm) {

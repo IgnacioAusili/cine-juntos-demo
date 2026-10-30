@@ -14,7 +14,9 @@ import {
 } from "../../core/utils.js";
 import { markParticipantActive, rememberParticipant } from "../presence/index.js";
 import { sendVideoEventMessage } from "../chat/index.js";
-import { configurePlaybackRecoveryPort, describePlaybackIssue, cancelPendingPlaybackIssueDetection, pauseRoomForPlaybackIssue, clearPlaybackRecoveryTracking, attemptPlaybackRecovery } from "./player-sync-recovery.js";
+import { setSyncStatus } from "../session/session-ui.js";
+import { configurePlaybackRecoveryPort, describePlaybackIssue } from "./player-sync-recovery.js";
+import { playerRuntimeState } from "./player-runtime-state.js";
 export { cancelPendingPlaybackIssueDetection, pauseRoomForPlaybackIssue, clearPlaybackRecoveryTracking, attemptPlaybackRecovery } from "./player-sync-recovery.js";
 let playerMediaPort = null;
 
@@ -96,8 +98,10 @@ async function applyRemoteState(statePayload, force = false, { isInitialRemoteSt
         // los tiempos pueden ser diferentes en cada navegador.
         announceLoadCompletion: true,
         animateSystemGroups: false,
+        skipRollbackBackup: statePayload.action === "video-restore",
       });
-      await media.waitForVideoMetadata().catch(() => {});
+      const videoLoadResult = await media.waitForVideoMetadata().catch(() => ({ failed: true }));
+      if (videoLoadResult?.failed || dom.videoPlayer.error) return;
     }
 
     const targetTime = getRemoteTargetTime(statePayload);
@@ -212,6 +216,7 @@ export function publishState(action, overrides = {}) {
   if (
     localNow - state.player.lastStateSentAt < SEND_THROTTLE_MS &&
     action !== "video" &&
+    action !== "video-restore" &&
     action !== "sync" &&
     action !== "hold"
   ) return;
@@ -297,6 +302,7 @@ function getCurrentVideoSourceKey() {
 
 function getSyncVideoSource() {
   return String(
+    playerRuntimeState.pendingSourceReplacement?.source ||
     dom.videoPlayer.getAttribute("src") ||
     dom.videoPlayer.src ||
     dom.videoUrlInput.value.trim() ||

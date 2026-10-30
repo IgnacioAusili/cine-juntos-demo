@@ -1,6 +1,6 @@
 import { dom } from "../../core/dom.js";
 import { buildContinuousBubblePath, clampBubbleTailCenter } from "../../core/continuous-bubble.js";
-import { TOOLTIP_VIEWPORT_PADDING, TOOLTIP_GAP, TOOLTIP_BORDER_WIDTH_PX, TOOLTIP_RADIUS_PX, TOOLTIP_TAIL_WIDTH_PX, TOOLTIP_TAIL_HEIGHT_PX } from "./tooltip-constants.js";
+import { TOOLTIP_BORDER_WIDTH_PX, TOOLTIP_RADIUS_PX, TOOLTIP_TAIL_WIDTH_PX, TOOLTIP_TAIL_HEIGHT_PX } from "./tooltip-constants.js";
 
 let tooltipChrome = null;
 let tooltipChromePath = null;
@@ -54,6 +54,11 @@ export function syncTooltipChrome() {
   }
 
   const layer = dom.tooltipLayer;
+  if (layer.dataset.tooltipVariant === "quote") {
+    tooltipChrome.style.visibility = "hidden";
+    tooltipChrome.style.opacity = "0";
+    return;
+  }
   const style = getComputedStyle(layer);
   const rect = layer.getBoundingClientRect();
   const geometry = getBubbleGeometry(style, {
@@ -224,7 +229,7 @@ export function initializeBubbleChrome() {
   const tooltipObserver = new MutationObserver(syncTooltipChrome);
   tooltipObserver.observe(dom.tooltipLayer, {
     attributes: true,
-    attributeFilter: ["data-animation-state", "data-edge", "data-placement", "hidden", "style"],
+    attributeFilter: ["data-animation-state", "data-edge", "data-placement", "data-tooltip-variant", "hidden", "style"],
     childList: true,
     characterData: true,
     subtree: true,

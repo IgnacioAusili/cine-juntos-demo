@@ -11,7 +11,6 @@ const sessionView = document.querySelector("#sessionView");
 const appShell = document.querySelector(".app-shell");
 const workspace = sessionView?.querySelector('.o-workspace');
 const videoArea = sessionView?.querySelector('.o-video-area');
-const videoPlayer = sessionView?.querySelector("#videoPlayer");
 const playerFrame = sessionView?.querySelector(".player-frame");
 const chatArea = sessionView?.querySelector(".chat-area");
 const chatTools = chatArea?.querySelector(".chat-tools");
@@ -129,7 +128,7 @@ function measureComponentLayout({ allowDuringChatTransition = false } = {}) {
     sessionView,
     workspace,
     playerFrame,
-    videoPlayer,
+    videoPlayer: sessionView?.querySelector("#videoPlayer"),
     chatArea,
     chatTools,
     messageListShell,
@@ -187,7 +186,7 @@ function measureComponentLayout({ allowDuringChatTransition = false } = {}) {
       initialSessionScrollPending = false;
       if (isFullHeightCollapsedPlayer) {
         videoArea.scrollIntoView({ block: "start", inline: "nearest", behavior: "auto" });
-      } else if (!hasLoadedVideo(videoPlayer)) {
+      } else if (!hasLoadedVideo(sessionView?.querySelector("#videoPlayer"))) {
         if (
           sessionView.dataset.chatDock === "bottom"
           && isCollapsed
@@ -215,7 +214,7 @@ function measureComponentLayout({ allowDuringChatTransition = false } = {}) {
     } else if (
       scrollTarget === "center-video"
       && (isSequential || isCollapsed)
-      && (hasLoadedVideo(videoPlayer) || isFullHeightCollapsedPlayer)
+      && (hasLoadedVideo(sessionView?.querySelector("#videoPlayer")) || isFullHeightCollapsedPlayer)
     ) {
       videoArea.scrollIntoView({
         block: isFullHeightCollapsedPlayer ? "start" : "center",
@@ -259,7 +258,7 @@ wireComponentAspectObservers({
   sessionView,
   workspace,
   videoArea,
-  videoPlayer,
+  videoPlayer: sessionView?.querySelector("#videoPlayer"),
   playerFrame,
   chatArea,
   chatTools,

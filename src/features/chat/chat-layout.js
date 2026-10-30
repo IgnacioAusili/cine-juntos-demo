@@ -43,7 +43,7 @@ import {
   wireInsideChatPanelPlacement,
 } from "../player/inside-chat-layout.js";
 import { syncComponentAspectLayoutNow } from "./dock/component-aspect-layout.js";
-import { configureChatDockTransitionOperations, animateFullscreenDockSwitch, animateRightToBottomWithNativeCollapse, animateFullscreenBottomToRightWithNativeCollapse, getBottomToRightScrollTop, scheduleBottomToRightSwitch, clearBottomChatTransitionVisuals, lockBottomChatScrollAnchoring, restoreBottomChatScrollAnchoring, cancelBottomChatTransition, isDesktopBottomDock, completeDesktopBottomChatTransition, easeBottomChatCurtainProgress, setDesktopBottomChatCurtainProgress, getWorkspaceRowHeights, getWorkspaceContentHeight, setMobileBottomTransitionProgress, setDesktopBottomTransitionRowsProgress, completeMobileBottomChatTransition, stepMobileBottomChatTransition, stepDesktopBottomChatTransition, animateDesktopBottomChatCollapse, animateDesktopBottomChatExpand, animateBottomChatCollapse, animateBottomChatExpand } from "./dock/chat-dock-transitions.js";
+import { configureChatDockTransitionOperations, animateFullscreenDockSwitch, animateRightToBottomWithNativeCollapse, getBottomToRightScrollTop, scheduleBottomToRightSwitch, clearBottomChatTransitionVisuals, lockBottomChatScrollAnchoring, restoreBottomChatScrollAnchoring, cancelBottomChatTransition, isDesktopBottomDock, completeDesktopBottomChatTransition, easeBottomChatCurtainProgress, setDesktopBottomChatCurtainProgress, getWorkspaceRowHeights, getWorkspaceContentHeight, setMobileBottomTransitionProgress, setDesktopBottomTransitionRowsProgress, completeMobileBottomChatTransition, stepMobileBottomChatTransition, stepDesktopBottomChatTransition, animateDesktopBottomChatCollapse, animateDesktopBottomChatExpand, animateBottomChatCollapse, animateBottomChatExpand } from "./dock/chat-dock-transitions.js";
 import { CHAT_LAYOUT_SETTLE_MS, COLLAPSE_HANDLE_HIDE_MS, BOTTOM_DOCK_UNION_REVEAL_PX } from "./dock/chat-layout-timing.js";
 
 const CHAT_STYLE_KEY = "cine-juntos-chat-style";
@@ -86,6 +86,33 @@ export function scrollToVideoPosition(behavior = "smooth") {
   lockChatScrollSnapDuringProgrammaticScroll();
   const targetTop = getBottomToRightScrollTop();
   scrollPageTo(targetTop, behavior);
+}
+
+export function scrollToChatPosition(behavior = "smooth") {
+  if (!dom.sessionView || dom.sessionView.hidden || !dom.messageForm) return;
+  if (dom.sessionView.dataset.chatDock === "bottom") {
+    revealBottomDockUnion(behavior);
+    return;
+  }
+
+  const viewport = isFullscreenPageActive()
+    ? getPageScrollContainer()
+    : document.documentElement;
+  const viewportWidth = viewport.clientWidth || window.innerWidth;
+  const viewportHeight = viewport.clientHeight || window.innerHeight;
+  const composerRect = dom.messageForm.getBoundingClientRect();
+  if (composerRect.width <= 0 || composerRect.height <= 0) return;
+  const composerIsVisible = composerRect.left >= 0
+    && composerRect.right <= viewportWidth
+    && composerRect.top >= 0
+    && composerRect.bottom <= viewportHeight;
+  if (composerIsVisible) return;
+
+  dom.messageForm.scrollIntoView({
+    block: "end",
+    inline: "nearest",
+    behavior: isFullscreenPageActive() ? "auto" : behavior,
+  });
 }
 
 function scheduleMessageTimeAdjustmentAfterLayout() {

@@ -6,6 +6,27 @@ import { createSwipeReply } from "./swipe-reply.js";
 import { hideMessageMenu, showMessageMenu } from "./message-menu.js";
 
 const LONG_PRESS_DELAY = 560;
+let messageSelectionWatcherBound = false;
+
+function watchMessageTextSelection() {
+  if (messageSelectionWatcherBound) return;
+  messageSelectionWatcherBound = true;
+
+  document.addEventListener("selectionchange", () => {
+    document.querySelectorAll(".message--text-selected").forEach((item) => {
+      item.classList.remove("message--text-selected");
+    });
+
+    const selection = window.getSelection();
+    if (!selection || selection.isCollapsed || !selection.rangeCount) return;
+
+    [selection.anchorNode, selection.focusNode].forEach((node) => {
+      const element = node?.nodeType === Node.ELEMENT_NODE ? node : node?.parentElement;
+      const item = element?.closest?.(".message__bubble")?.closest(".message");
+      item?.classList.add("message--text-selected");
+    });
+  });
+}
 
 export function extendMessageHitArea(item, container) {
   const containerStyle = window.getComputedStyle(container);
@@ -39,6 +60,7 @@ export function wireMessageInteractions(
     allowSwipeInsideBubble = false,
   },
 ) {
+  watchMessageTextSelection();
   const swipeBands = [interactionBand, ...interactionBands].filter(Boolean);
   const swipe = createSwipeReply(bubble, hint, {
     onReply: () => setReplyTarget?.(message, replyInput),

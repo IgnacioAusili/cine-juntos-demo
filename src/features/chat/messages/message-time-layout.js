@@ -122,10 +122,10 @@ export function adjustMessageTimeForBubble(bubble) {
     content?.querySelector('.message__media, .message__video, .message__media-link'),
   );
   const isEmojiOnly = messageBubble.classList.contains('message__bubble--emoji-only');
+  const isQuoteOnly = messageBubble.classList.contains('message__bubble--quote-only');
 
-  // Los emojis tienen la hora en una tarjeta independiente debajo del glyph.
-  // No deben recibir el layout de floats usado por mensajes de texto.
-  if (isEmojiOnly) {
+  // Emojis y citas únicas reservan una franja debajo de su contenido para la hora.
+  if (isEmojiOnly || isQuoteOnly) {
     resetStandaloneTimeLayout(messageBubble, content, timeAnchor);
     resetMessageTimeLayout(timeAnchor);
     restoreOriginalText(text);

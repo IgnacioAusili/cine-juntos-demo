@@ -180,11 +180,10 @@
     padding-left: 8px;
   }
 
-  /* La métrica de la fuente deja unos píxeles de aire visual en el último
-     renglón. Este reparto compacto compensa esa métrica sin recortar texto. */
+  /* El padding simétrico centra el bloque de líneas dentro del campo que
+     crece al pasar a multilinea. */
   .message-form .message-form__input-wrapper[data-expanded="true"] .message-form__rich-editor {
-    padding-top: 1px;
-    padding-bottom: 5px;
+    padding-block: 3px;
   }
 
   /* Ambos docks usan la misma altura de una línea; el autoajuste multilinea
@@ -218,6 +217,10 @@
   .message-form .message-form__input-wrapper:not([data-expanded="true"]) #messageInput {
     /* La caja móvil mide al menos 36px: 20px de línea más 8px por lado la
        centra de forma consistente en los motores móviles y de escritorio. */
+    padding-block: 8px;
+  }
+
+  .message-form:not(.message-form--overlay) .message-form__input-wrapper[data-expanded="true"] .message-form__rich-editor {
     padding-block: 8px;
   }
 }

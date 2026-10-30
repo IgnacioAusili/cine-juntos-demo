@@ -1,3 +1,7 @@
+:root {
+  --message-stream-item-spacing: 16px;
+}
+
 .message__video-ts,
 .player-frame .chat-message-list.chat-message-list--overlay .message__video-ts,
 .mini-player-surface .chat-message-list.chat-message-list--overlay .message__video-ts {
@@ -28,7 +32,7 @@
   max-width: 100%;
   align-items: flex-start;
   gap: 3px;
-  margin-bottom: 8px;
+  margin-bottom: var(--message-stream-item-spacing);
   overflow: visible;
 }
 

@@ -2,6 +2,7 @@ import { dom } from "../../../core/dom.js";
 import { getDisplayName, logEvent, state } from "../../../core/state.js";
 import { autoResizeMessageInput, handlePasteEvent, hideEmojiPicker, normalizeEmojiShortcodesInput, repositionEmojiPicker, submitMessageFrom, toggleEmojiPicker, updateCharCounter, wireComposerScrollbar } from "./chat-input.js";
 import { setReplyTarget } from "../messages/chat-reply.js";
+import { openMessageReactionPicker } from "../messages/chat-reactions.js";
 import { copyMessageText, getCurrentMessageMenuQuoteSelection, hideMessageMenu, openMessageMenuLink, selectMessageText } from "../messages/message-menu.js";
 import { focusChatInput } from "./chat-input-focus.js";
 import { isMobileChatLayout } from "../chat-event-helpers.js";
@@ -117,6 +118,15 @@ document.addEventListener("click", (event) => {
 dom.messageMenu.addEventListener("click", (event) => {
   const action = event.target.closest("button")?.dataset.action;
   if (!action || !state.chat.menuMessage) return;
+  if (action === "react") {
+    event.preventDefault();
+    event.stopPropagation();
+    const message = state.chat.menuMessage;
+    const replyInput = state.chat.menuReplyInput;
+    hideMessageMenu();
+    window.requestAnimationFrame(() => openMessageReactionPicker(message, replyInput));
+    return;
+  }
   if (action === "copy") copyMessageText(state.chat.menuMessage);
   if (action === "select-all") {
     selectMessageText(state.chat.menuMessage, state.chat.menuReplyInput);

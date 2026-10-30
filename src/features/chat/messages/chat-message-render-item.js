@@ -12,6 +12,8 @@ import { setReplyTarget, scrollToMessage, scrollToMessageFragment } from "./chat
 import { watchSystemMessageLayout, fitSystemMessageBubble } from "../system-messages/chat-system-message-layout.js";
 import { incrementScrollIndicator } from "./unread-counters.js";
 import { scheduleSystemMessageCollapse } from "../system-messages/system-message-groups.js";
+import { seekVideoToSeconds } from "./chat-timecode-links.js";
+import { createMessageReactionControls } from "./chat-reactions.js";
 
 export function appendMessageNow(container, message, { animateSystemGroups = true, prepend = false } = {}) {
   const isMine = message.from === state.session.clientId;
@@ -63,11 +65,7 @@ export function appendMessageNow(container, message, { animateSystemGroups = tru
     tsBtn.removeAttribute("title");
     tsBtn.setAttribute("aria-label", `Saltar a ${formatClockTime(message.videoTimestamp)} en el video`);
     tsBtn.innerHTML = `<span class="message-video-ts__visual"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="8" height="8" aria-hidden="true"><polygon points="5,3 19,12 5,21"/></svg><span class="message-video-ts__time">${formatClockTime(message.videoTimestamp)}</span></span>`;
-    tsBtn.addEventListener("click", () => {
-      if (dom.videoPlayer && Number.isFinite(message.videoTimestamp)) {
-        dom.videoPlayer.currentTime = message.videoTimestamp;
-      }
-    });
+    tsBtn.addEventListener("click", () => seekVideoToSeconds(message.videoTimestamp));
   }
 
   if (isMine) {
@@ -123,9 +121,8 @@ export function appendMessageNow(container, message, { animateSystemGroups = tru
     const replyBody = document.createElement("span");
     replyBody.className = "message__reply-body";
     if (message.replyTo.quote?.text) {
-      reply.classList.add("message__reply--quote");
       replyBody.classList.add("message__reply-body--quote");
-      replyBody.textContent = truncateText(message.replyTo.quote.text, 100);
+      appendQuotePreview(replyBody, truncateText(message.replyTo.quote.text, 100));
     } else {
       replyBody.textContent = truncateText(replyLabel, 90);
     }
@@ -260,7 +257,10 @@ export function appendMessageNow(container, message, { animateSystemGroups = tru
 
     if (replyTextRow) {
       replyTextRow.prepend(timeAnchor);
-    } else if (!isQuoteOnly) {
+    } else if (isQuoteOnly) {
+      timeAnchor.classList.add('message__time-anchor--quote-only');
+      bubble.append(timeAnchor);
+    } else {
       bubble.insertBefore(timeAnchor, content);
     }
 
@@ -276,8 +276,7 @@ export function appendMessageNow(container, message, { animateSystemGroups = tru
     hintWrapper.append(hint);
 
     if (isQuoteOnly) {
-      timeAnchor.classList.add('message__time-anchor--quote-only');
-      bubbleRow.append(bubble, timeAnchor, hintWrapper);
+      bubbleRow.append(bubble, hintWrapper);
     } else {
       bubbleRow.append(bubble, hintWrapper);
     }
@@ -294,11 +293,20 @@ export function appendMessageNow(container, message, { animateSystemGroups = tru
       allowSwipeInsideBubble: true,
     });
   }
+  const reactionTools = createMessageReactionControls(item);
+  if (reactionTools) {
+    const reactionAnchor = isMediaOnly ? item.querySelector(".message__media-row") : bubble;
+    reactionAnchor?.append(reactionTools);
+  }
   if (prepend) {
     container.prepend(item);
     if (isContinuation) removeContinuationAuthorName(previousMessage);
   } else {
     container.append(item);
+    if (!message.system) {
+      container.querySelector(".message--reaction-latest")?.classList.remove("message--reaction-latest");
+      item.classList.add("message--reaction-latest");
+    }
   }
   if (message.system) {
     watchSystemMessageLayout(container);
@@ -323,4 +331,21 @@ export function appendMessageNow(container, message, { animateSystemGroups = tru
   }
 
   return item;
+}
+
+function appendQuotePreview(container, text) {
+  const openingMark = document.createElement("span");
+  openingMark.className = "reply-quote-mark";
+  openingMark.setAttribute("aria-hidden", "true");
+  openingMark.textContent = "❝";
+
+  const quoteText = document.createElement("span");
+  quoteText.className = "reply-quote-text";
+  quoteText.textContent = text;
+
+  const closingMark = document.createElement("span");
+  closingMark.className = "reply-quote-mark";
+  closingMark.setAttribute("aria-hidden", "true");
+  closingMark.textContent = "❞";
+  container.append(openingMark, quoteText, closingMark);
 }
