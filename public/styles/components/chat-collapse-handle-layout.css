@@ -13,7 +13,7 @@
 .session-view.session-view--chat-collapsed[data-chat-dock="right"] .chat-area__collapse-hover-zone {
   position: absolute;
   top: var(--chat-right-mobile-collapsed-handle-top, 50%);
-  right: var(--chat-handle-gap-collapsed, 16px);
+  right: var(--chat-handle-gap-collapsed, 8px);
   bottom: auto;
   left: auto;
   width: 44px;
@@ -41,12 +41,13 @@
 .session-view.session-view--chat-collapsed[data-chat-dock="right"] .chat-area__collapse-hover-zone.u-transitioning .chat-area__collapse-handle,
 .session-view.session-view--chat-collapsed[data-chat-dock="right"] .chat-area__collapse-hover-zone.u-transitioning .chat-area__collapse-icon-anchor {
   visibility: visible;
-  opacity: 0 !important;
+  opacity: 0;
 }
 
 /* La flecha lateral de expandir comparte el estado de actividad del overlay
    del reproductor, igual que la flecha del chat acoplado abajo. */
-.session-view.session-view--chat-collapsed[data-chat-dock="right"]:has(.player-frame.player-frame--overlay-visible) .chat-area__collapse-handle {
+.session-view.session-view--chat-collapsed[data-chat-dock="right"]:has(.player-frame.player-frame--overlay-visible) .chat-area__collapse-handle,
+.session-view.session-view--chat-collapsed[data-chat-dock="right"]:has(.player-frame.player-frame--overlay-visible) .chat-area__collapse-icon-anchor {
   opacity: 1;
   cursor: pointer;
 }

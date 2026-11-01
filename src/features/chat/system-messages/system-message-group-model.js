@@ -1,14 +1,20 @@
 import { SYSTEM_GROUP_MIN_SIZE, groupStates, groupTransitions } from "./system-message-group-state.js";
 import { cancelGroupTransition, animateGroupTransition } from "./system-message-group-transitions.js";
-import { getGroupTransitionTarget, prepareCollapseVisualTransition, prepareExpansionVisualTransition } from "./system-message-group-visuals.js";
+import { prepareCollapseVisualTransition, prepareExpansionVisualTransition } from "./system-message-group-visuals.js";
 import { cancelGroupToggleAnimation, moveGroupToggle } from "./system-message-group-toggle.js";
 import { settleSystemMessageRoll, resetSystemMessageRowAnchor } from "./system-message-roll.js";
 
 export function getLatestSystemStreak(container) {
-  const messages = Array.from(container.children).filter((child) => child.classList.contains("message"));
-  let start = messages.length;
-  while (start > 0 && messages[start - 1].classList.contains('message--system')) start -= 1;
-  return messages.slice(start);
+  const streak = [];
+  const children = Array.from(container.children);
+  for (let index = children.length - 1; index >= 0; index -= 1) {
+    const child = children[index];
+    if (child.classList.contains("chat-date-separator")) break;
+    if (!child.classList.contains("message")) continue;
+    if (!child.classList.contains('message--system')) break;
+    streak.unshift(child);
+  }
+  return streak;
 }
 
 export function getGroupItems(header) {

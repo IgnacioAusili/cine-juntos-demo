@@ -132,7 +132,9 @@ body.page-context--fullscreen .session-view[data-chat-dock="right"] .chat-area {
   backdrop-filter: blur(16px);
 }
 
-body.page-context--fullscreen .session-view[data-chat-dock="right"] .chat-area__collapse-hover-zone {
+body.page-context--fullscreen
+  .session-view:not(.session-view--chat-collapsed)[data-chat-dock="right"]
+  .chat-area__collapse-hover-zone {
   position: absolute;
   grid-area: auto;
   top: 50%;
@@ -145,34 +147,19 @@ body.page-context--fullscreen .session-view[data-chat-dock="right"] .chat-area__
   transform: translateY(-50%);
 }
 
-/* Con el chat cerrado, el área del panel mide cero. Anclar la flecha al borde
-   derecho de esa área evita que el ancho reservado del chat la desplace. */
-body.page-context--fullscreen
-  .session-view.session-view--chat-collapsed[data-chat-dock="right"]
-  .chat-area__collapse-hover-zone {
-  right: var(--chat-handle-gap-collapsed, 4px);
-  left: auto;
-}
-
-@media (min-width: 981px) {
-  /* En PC fullscreen la grilla debe interpolar el ancho del panel. El layout
-     lateral normal deja transition en none porque usa flex; acá se restaura
-     solo para la variante de grilla de pantalla completa. */
+@media (hover: hover) and (pointer: fine) {
+  /* El dock lateral conserva el mismo flex de ancho dentro y fuera de
+     fullscreen. Así width y flex-basis animan el panel sin depender del
+     breakpoint que antes dejaba la grilla sin transición en viewports chicos. */
   body.page-context--fullscreen .session-view[data-chat-dock="right"] .o-workspace,
   body.page-context--fullscreen .app-shell:fullscreen .session-view[data-chat-dock="right"] .o-workspace {
-    transition: grid-template-columns 350ms cubic-bezier(0.22, 1, 0.36, 1);
+    display: flex;
+    flex-wrap: nowrap;
+    grid-template-columns: none;
+    grid-template-rows: none;
+    grid-template-areas: none;
+    transition: none;
   }
-
-  /* La grilla controla el ancho del panel durante la animación. Mantener el
-     contenido del chat como un item de grilla evita que width: 0 lo oculte de
-     golpe antes de que termine el cierre. */
-  body.page-context--fullscreen .session-view[data-chat-dock="right"] .chat-area,
-  body.page-context--fullscreen .app-shell:fullscreen .session-view[data-chat-dock="right"] .chat-area {
-    flex: none;
-    width: auto;
-    min-width: 0;
-  }
-
 }
 
 /* El toolbar se ancla al workspace para extenderse sobre video y chat. */

@@ -48,6 +48,27 @@ function clamp(value, min, max) {
   return Math.min(Math.max(value, min), Math.max(min, max));
 }
 
+function rectanglesOverlap(first, second) {
+  return first.left < second.right
+    && first.right > second.left
+    && first.top < second.bottom
+    && first.bottom > second.top;
+}
+
+function getExpandedCollapseHandleRect() {
+  if (
+    dom.sessionView?.dataset.chatDock !== "right"
+    || dom.sessionView.classList.contains("session-view--chat-collapsed")
+  ) {
+    return null;
+  }
+
+  const handle = dom.collapseChatButton;
+  if (!handle || getComputedStyle(handle).display === "none") return null;
+  const rect = handle.getBoundingClientRect();
+  return rect.width > 0 && rect.height > 0 ? rect : null;
+}
+
 export function syncInsideChatPanelPlacement() {
   if (!dom.playerFrame || !dom.playerChat || !dom.playerChatToggleButton) return;
 
@@ -62,57 +83,81 @@ export function syncInsideChatPanelPlacement() {
     window.clearTimeout(placementCleanupTimer);
     placementCleanupTimer = 0;
   }
-  if (!isEligibleViewport()) {
-    clearPlacement();
-    return;
-  }
-
   // Medir siempre desde el estilo base evita que una rotación o un cambio de
   // ancho reutilice el left/height calculado para el viewport anterior.
   clearPlacement();
 
   const frameRect = dom.playerFrame.getBoundingClientRect();
   const buttonRect = dom.playerChatToggleButton.getBoundingClientRect();
-  if (frameRect.width <= 0 || frameRect.height <= 0 || buttonRect.width <= 0) return;
+  if (frameRect.width <= 0 || frameRect.height <= 0) return;
 
   const chatStyles = getComputedStyle(dom.playerChat);
   const maxHeight = Math.max(
     0,
     parseCssPixels(chatStyles.getPropertyValue("--player-chat-max-height"), 330),
   );
-  const naturalWidth = Math.max(0, dom.playerChat.getBoundingClientRect().width);
+  const naturalRect = dom.playerChat.getBoundingClientRect();
+  const naturalWidth = Math.max(0, naturalRect.width);
   const topInset = Math.max(0, parseCssPixels(chatStyles.top, 48));
   const bottomInset = Math.max(0, parseCssPixels(chatStyles.bottom, 8));
   const verticalSpace = frameRect.height - topInset - bottomInset;
+  const needsVerticalPlacement = isEligibleViewport()
+    && buttonRect.width > 0
+    && buttonRect.height > 0
+    && maxHeight > verticalSpace + 0.5;
 
-  // La composición vertical existente sigue siendo la preferida si puede
-  // alojar el tamaño máximo. Solo se cambia de eje cuando realmente no entra.
-  if (maxHeight <= verticalSpace + 0.5) return;
+  // Con espacio suficiente se conserva la posición vertical base. Si el alto
+  // no entra, se busca el lateral con más lugar alrededor del botón interno.
+  let left = naturalRect.left - frameRect.left;
+  let top = naturalRect.top - frameRect.top;
+  let panelWidth = naturalRect.width;
+  let panelHeight = naturalRect.height;
 
-  const frameButtonLeft = buttonRect.left - frameRect.left;
-  const frameButtonRight = buttonRect.right - frameRect.left;
-  const leftSpace = frameButtonLeft - BUTTON_GAP_PX - EDGE_GAP_PX;
-  const rightSpace = frameRect.width - frameButtonRight - BUTTON_GAP_PX - EDGE_GAP_PX;
-  const useLeftSide = leftSpace >= rightSpace;
-  const availableSideWidth = Math.max(0, useLeftSide ? leftSpace : rightSpace);
-  const panelWidth = Math.min(naturalWidth, availableSideWidth);
-  const panelHeight = Math.min(maxHeight, Math.max(0, frameRect.height - EDGE_GAP_PX * 2));
-  if (panelWidth <= 0 || panelHeight <= 0) return;
+  if (needsVerticalPlacement) {
+    const frameButtonLeft = buttonRect.left - frameRect.left;
+    const frameButtonRight = buttonRect.right - frameRect.left;
+    const leftSpace = frameButtonLeft - BUTTON_GAP_PX - EDGE_GAP_PX;
+    const rightSpace = frameRect.width - frameButtonRight - BUTTON_GAP_PX - EDGE_GAP_PX;
+    const useLeftSide = leftSpace >= rightSpace;
+    const availableSideWidth = Math.max(0, useLeftSide ? leftSpace : rightSpace);
+    panelWidth = Math.min(naturalWidth, availableSideWidth);
+    panelHeight = Math.min(maxHeight, Math.max(0, frameRect.height - EDGE_GAP_PX * 2));
+    if (panelWidth <= 0 || panelHeight <= 0) return;
 
-  const rawLeft = useLeftSide
-    ? frameButtonLeft - BUTTON_GAP_PX - panelWidth
-    : frameButtonRight + BUTTON_GAP_PX;
-  const left = clamp(
-    rawLeft,
-    EDGE_GAP_PX,
-    frameRect.width - EDGE_GAP_PX - panelWidth,
-  );
-  const rawTop = buttonRect.top - frameRect.top + buttonRect.height / 2 - panelHeight / 2;
-  const top = clamp(
-    rawTop,
-    EDGE_GAP_PX,
-    frameRect.height - EDGE_GAP_PX - panelHeight,
-  );
+    const rawLeft = useLeftSide
+      ? frameButtonLeft - BUTTON_GAP_PX - panelWidth
+      : frameButtonRight + BUTTON_GAP_PX;
+    left = clamp(
+      rawLeft,
+      EDGE_GAP_PX,
+      frameRect.width - EDGE_GAP_PX - panelWidth,
+    );
+    const rawTop = buttonRect.top - frameRect.top + buttonRect.height / 2 - panelHeight / 2;
+    top = clamp(
+      rawTop,
+      EDGE_GAP_PX,
+      frameRect.height - EDGE_GAP_PX - panelHeight,
+    );
+  }
+
+  const collapseHandleRect = getExpandedCollapseHandleRect();
+  const proposedRect = {
+    left: frameRect.left + left,
+    right: frameRect.left + left + panelWidth,
+    top: frameRect.top + top,
+    bottom: frameRect.top + top + panelHeight,
+  };
+
+  // En composiciones superpuestas, el chat interno se aparta de la flecha
+  // lateral solo cuando sus rectángulos realmente se cruzan.
+  if (collapseHandleRect && rectanglesOverlap(proposedRect, collapseHandleRect)) {
+    const availableRight = collapseHandleRect.left - frameRect.left - BUTTON_GAP_PX;
+    panelWidth = Math.min(panelWidth, Math.max(0, availableRight - EDGE_GAP_PX));
+    if (panelWidth <= 0) return;
+    left = availableRight - panelWidth;
+  } else if (!needsVerticalPlacement) {
+    return;
+  }
 
   dom.playerChat.setAttribute(PLACEMENT_ATTRIBUTE, PLACEMENT_VALUE);
   dom.playerChat.style.setProperty("--inside-chat-placement-top", `${Math.round(top)}px`);

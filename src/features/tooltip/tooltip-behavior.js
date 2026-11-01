@@ -191,7 +191,11 @@ export function showTooltip(context, reason = "unspecified") {
 function positionQuoteTooltip(anchor, tooltipRect) {
   const bubble = anchor.closest?.(".message__bubble") || anchor;
   const rect = bubble.getBoundingClientRect();
-  const gap = TOOLTIP_TAIL_HEIGHT_PX;
+  const anchorRect = anchor.getBoundingClientRect();
+  const quoteTailDepth = Number.parseFloat(
+    getComputedStyle(dom.tooltipLayer).getPropertyValue("--tooltip-quote-tail-depth"),
+  );
+  const gap = Number.isFinite(quoteTailDepth) ? quoteTailDepth : TOOLTIP_TAIL_HEIGHT_PX;
   const padding = TOOLTIP_VIEWPORT_PADDING;
   const maxLeft = Math.max(padding, window.innerWidth - tooltipRect.width - padding);
   const maxTop = Math.max(padding, window.innerHeight - tooltipRect.height - padding);
@@ -213,7 +217,7 @@ function positionQuoteTooltip(anchor, tooltipRect) {
 
   const rawLeft = side === "left" ? leftCandidate : rightCandidate;
   const left = Math.min(Math.max(rawLeft, padding), maxLeft);
-  const rawTop = rect.top + rect.height / 2 - tooltipRect.height / 2;
+  const rawTop = anchorRect.top + anchorRect.height / 2 - tooltipRect.height / 2;
   const top = Math.min(Math.max(rawTop, padding), maxTop);
 
   dom.tooltipLayer.style.top = `${top}px`;

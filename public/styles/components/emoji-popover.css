@@ -1,4 +1,5 @@
 .emoji-popover {
+  --emoji-popover-width: 228px;
   --emoji-popover-background: rgb(29, 36, 40);
   --emoji-popover-border: rgb(59, 65, 69);
   --emoji-popover-border-width: 1px;
@@ -23,7 +24,7 @@
   position: fixed;
   z-index: 9000;
   display: block;
-  width: 228px;
+  width: var(--emoji-popover-width);
   max-width: calc(100vw - 16px);
   gap: 2px;
   border: 0;
@@ -77,6 +78,13 @@
 .app-shell:fullscreen .emoji-popover__track {
   position: relative;
   z-index: 1;
+}
+
+/* En fullscreen el picker pasa a ser hijo del chat, cuyas reglas de cortina
+   fijan el ancho de sus hijos. Debe conservar su propio ancho compacto. */
+:root body.page-context--fullscreen .app-shell .session-view .chat-area > .emoji-popover {
+  width: var(--emoji-popover-width);
+  max-width: calc(100vw - 16px);
 }
 
 .emoji-popover .emoji-popover__option {

@@ -195,7 +195,7 @@ function applyStandaloneTimeLayout(bubble, content, timeAnchor) {
   timeAnchor.style.float = "none";
   timeAnchor.style.order = "1";
   timeAnchor.style.display = "flex";
-  timeAnchor.style.width = "100%";
+  timeAnchor.style.width = timeAnchor.closest(".message__time-row") ? "auto" : "100%";
   timeAnchor.style.height = "auto";
   timeAnchor.style.marginLeft = "0";
   timeAnchor.style.marginTop = `${STANDALONE_TIME_GAP_PX}px`;

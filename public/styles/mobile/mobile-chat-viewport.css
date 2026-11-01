@@ -48,14 +48,15 @@
   }
 
   body:not(.page-context--lobby) .session-view--chat-overlay[data-chat-dock="right"] .chat-area > .message-form {
-    width: calc(var(--app-viewport-width, 100vw) - 36px);
+    left: 18px;
+    right: 18px;
+    width: auto;
   }
 
   body:not(.page-context--lobby) .session-view--chat-collapsed.session-view--chat-overlay[data-chat-dock="right"] .chat-area {
     width: 100%;
     flex-basis: 100%;
     clip-path: inset(0 0 0 100%);
-    opacity: 0;
     pointer-events: none;
   }
 

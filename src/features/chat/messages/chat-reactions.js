@@ -13,7 +13,8 @@ function bindReactionHoverTracking() {
     if (event.pointerType === "touch") return;
 
     const pointerTarget = document.elementFromPoint(event.clientX, event.clientY);
-    const isOverMessageText = Boolean(pointerTarget?.closest?.(".message__bubble, .message__meta"));
+    const isOverMessageText = Boolean(pointerTarget?.closest?.(".message__bubble, .message__meta"))
+      && !pointerTarget?.closest?.(".message__time-row");
     if (isOverMessageText) {
       document.querySelectorAll(".message--reaction-zone-hover").forEach((item) => {
         item.classList.remove("message--reaction-zone-hover");

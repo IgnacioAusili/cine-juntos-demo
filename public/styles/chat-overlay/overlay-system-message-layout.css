@@ -156,23 +156,23 @@
 /* La tarjeta de hora de un emoji solo debe conservar el mismo contraste que
    la burbuja equivalente cuando el chat interno usa panel u overlay flotante. */
 .player-frame[data-chat-style="panel"] .chat-message-list.chat-message-list--overlay .message.message--mine .message__bubble--emoji-only .message__time-anchor {
-  border-color: rgba(255, 255, 255, 0.08);
-  background: rgba(47, 184, 164, 0.32);
+  border-color: rgba(47, 184, 164, 0.2);
+  background: rgba(47, 184, 164, 0.12);
 }
 
 .player-frame[data-chat-style="panel"] .chat-message-list.chat-message-list--overlay .message:not(.message--mine) .message__bubble--emoji-only .message__time-anchor {
-  border-color: rgba(255, 255, 255, 0.08);
-  background: rgba(240, 140, 58, 0.26);
+  border-color: rgba(240, 140, 58, 0.16);
+  background: rgba(240, 140, 58, 0.08);
 }
 
 .player-frame[data-chat-style="float"] .chat-message-list.chat-message-list--overlay .message.message--mine .message__bubble--emoji-only .message__time-anchor {
-  border-color: rgba(255, 255, 255, 0.08);
-  background: rgba(47, 184, 164, 0.24);
+  border-color: rgba(47, 184, 164, 0.2);
+  background: rgba(47, 184, 164, 0.12);
 }
 
 .player-frame[data-chat-style="float"] .chat-message-list.chat-message-list--overlay .message:not(.message--mine) .message__bubble--emoji-only .message__time-anchor {
-  border-color: rgba(255, 255, 255, 0.08);
-  background: rgba(240, 140, 58, 0.2);
+  border-color: rgba(240, 140, 58, 0.16);
+  background: rgba(240, 140, 58, 0.08);
 }
 
 .player-frame[data-chat-style="panel"] #overlayMessages .message__system-group-toggle:hover,

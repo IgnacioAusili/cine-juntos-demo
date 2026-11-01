@@ -17,6 +17,12 @@
   pointer-events: auto;
 }
 
+.chat-area .message-form.message-form--over-limit .message-form__input-wrapper .icon-button--send,
+.player-frame .message-form.message-form--overlay.message-form--over-limit .message-form__input-wrapper .icon-button--send {
+  color: var(--muted-2);
+  filter: none;
+}
+
 .message-form.message-form--over-limit .icon-button--send:hover,.message-form.message-form--overlay.message-form--over-limit .icon-button--send:hover {
   transform: none;
 }

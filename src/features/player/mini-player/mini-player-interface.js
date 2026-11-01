@@ -272,6 +272,7 @@ function createInteractiveMirror(source, targetDocument) {
     }
     markProxyControls(element, keepIds);
     copyControlState(source, element);
+    copyVolumeProgressPresentation(source, element);
     if (source === dom.playerBottomActions || source === dom.playerCenterActions) {
       copyDynamicButtonPresentation(source, element);
     }
@@ -302,6 +303,7 @@ function createInteractiveMirror(source, targetDocument) {
     copyControlState(source, element);
     copyPlayerTimeLabels(source, element);
     copySeekProgressPresentation(source, element);
+    copyVolumeProgressPresentation(source, element);
     if (source === dom.playerBottomActions || source === dom.playerCenterActions) {
       copyDynamicButtonPresentation(source, element);
     }
@@ -361,6 +363,18 @@ function copySeekProgressPresentation(source, element) {
     "--player-progress",
     sourceGroup.style.getPropertyValue("--player-progress") || "0%",
   );
+}
+
+function copyVolumeProgressPresentation(source, element) {
+  const sourceSlider = source.querySelector(".player-volume-group__slider");
+  const mirrorSlider = element.querySelector(".player-volume-group__slider");
+  if (!sourceSlider || !mirrorSlider) return;
+
+  const sourceInput = sourceSlider.querySelector(".player-volume-group__input");
+  const progress = sourceSlider.style.getPropertyValue("--volume-progress")
+    || sourceInput?.style.getPropertyValue("--volume-progress")
+    || `${Math.max(0, Math.min(1, Number(sourceInput?.value) || 0)) * 100}%`;
+  mirrorSlider.style.setProperty("--volume-progress", progress);
 }
 
 function copyDynamicButtonPresentation(source, element) {

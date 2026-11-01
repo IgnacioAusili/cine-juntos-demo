@@ -3,6 +3,10 @@ import { setInsideChatAutoExpandEnabled } from "../../chat/chat-layout.js";
 import { state } from "../../../core/state.js";
 import { wireMiniMessageReplies } from "./mini-player-chat-replies.js";
 import {
+  startSystemRollAnimations,
+  SYSTEM_ROLL_INCOMING_FACE_INDEX,
+} from "../../chat/system-messages/system-message-roll-visual.js";
+import {
   animateMiniSystemGroupTransition,
   mirroredSystemGroupStates,
   normalizeMiniSystemGroupState,
@@ -89,11 +93,13 @@ export function syncMirroredChatMessages(source, element) {
     .map((toggle) => toggle.getAttribute("aria-expanded"));
   const previousSourceStates = mirroredSystemGroupStates.get(element) || [];
   const nextSourceStates = [];
+  const sourceRolls = [...sourceMessages.querySelectorAll('.message__system-roll-drum')];
   mirrorMessages.innerHTML = sourceMessages.innerHTML;
   mirrorMessages.querySelectorAll(".message").forEach((item) => {
     extendMessageHitArea(item, mirrorMessages);
   });
   if (isInitialSync) normalizeMiniSystemGroupState(mirrorMessages);
+  replayActiveSystemMessageRolls(sourceRolls, mirrorMessages);
   wireMirrorChatScrollbar(element);
   wireMiniMessageReplies(sourceMessages, mirrorMessages, element);
 
@@ -114,6 +120,45 @@ export function syncMirroredChatMessages(source, element) {
     }
   });
   mirroredSystemGroupStates.set(element, nextSourceStates);
+}
+
+function replayActiveSystemMessageRolls(sourceDrums, mirrorMessages) {
+  const mirrorDrums = [...mirrorMessages.querySelectorAll('.message__system-roll-drum')];
+  sourceDrums.forEach((sourceDrum, index) => {
+    const sourceRotation = sourceDrum.getAnimations().find((animation) => (
+      animation.playState === "running"
+      || animation.playState === "paused"
+      || animation.playState === "pending"
+    ));
+    const mirrorDrum = mirrorDrums[index];
+    const stage = mirrorDrum?.closest('.message__system-roll-stage');
+    const faces = [...(mirrorDrum?.querySelectorAll('.message__system-roll-face') || [])];
+    const radius = Number.parseFloat(stage?.style.getPropertyValue("--system-roll-radius"));
+    const previousFace = faces[0];
+    const incomingFace = faces[SYSTEM_ROLL_INCOMING_FACE_INDEX];
+    if (!sourceRotation || !mirrorDrum || !previousFace || !incomingFace || !radius) return;
+
+    const mirrorAnimations = startSystemRollAnimations({
+      drum: mirrorDrum,
+      radius,
+      previousFace,
+      incomingFace,
+    });
+    syncAnimationTimeline(sourceRotation, mirrorAnimations.rotation);
+    const sourceFaces = [...sourceDrum.querySelectorAll('.message__system-roll-face')];
+    [sourceFaces[0], sourceFaces[SYSTEM_ROLL_INCOMING_FACE_INDEX]].forEach((sourceFace, index) => {
+      const sourceFade = sourceFace?.getAnimations()[0];
+      const mirrorFade = mirrorAnimations.faces[index];
+      if (sourceFade && mirrorFade) syncAnimationTimeline(sourceFade, mirrorFade);
+    });
+  });
+}
+
+function syncAnimationTimeline(sourceAnimation, mirrorAnimation) {
+  if (Number.isFinite(sourceAnimation.currentTime)) {
+    mirrorAnimation.currentTime = sourceAnimation.currentTime;
+  }
+  if (sourceAnimation.playState === "paused") mirrorAnimation.pause();
 }
 
 export function handleMiniChatInteraction(element, eventTarget) {

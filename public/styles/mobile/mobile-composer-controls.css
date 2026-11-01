@@ -60,14 +60,15 @@
 
   body:not(.page-context--lobby) .message-form.message-form--overlay .message-form__input-wrapper {
     width: 100%;
-    min-height: 30px;
+    min-height: var(--player-chat-composer-field-height);
     border-radius: 16px;
   }
 
   body:not(.page-context--lobby) .session-view[data-chat-dock] .player-frame .message-form.message-form--overlay .message-form__input-wrapper .message-form__rich-editor {
-    min-height: 30px;
+    height: var(--player-chat-composer-field-height);
+    min-height: var(--player-chat-composer-field-height);
     max-height: 66px;
-    padding-block: 5px;
+    padding-block: var(--player-chat-composer-field-padding-block);
     padding-right: 6px;
   }
 

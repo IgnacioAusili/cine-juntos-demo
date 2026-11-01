@@ -73,7 +73,13 @@ export function wireMiniPlayerChatPlacement(surface) {
     const rightEdge = contentLeft + contentWidth;
     const leftSpace = toggleRect.left - contentLeft - BUTTON_GAP_PX - EDGE_GAP_PX;
     const rightSpace = rightEdge - toggleRect.right - BUTTON_GAP_PX - EDGE_GAP_PX;
-    const useLeftSide = leftSpace >= rightSpace;
+    const toggleCenter = toggleRect.left + toggleRect.width / 2;
+    const prefersLeftSide = toggleCenter >= contentLeft + contentWidth / 2;
+    const preferredSideSpace = prefersLeftSide ? leftSpace : rightSpace;
+    const alternateSideSpace = prefersLeftSide ? rightSpace : leftSpace;
+    const useLeftSide = preferredSideSpace > 0
+      ? prefersLeftSide
+      : !prefersLeftSide && alternateSideSpace > 0;
     const availableSideWidth = Math.max(0, useLeftSide ? leftSpace : rightSpace);
     const panelWidth = Math.min(chatRect.width, availableSideWidth);
     const panelHeight = Math.min(

@@ -311,3 +311,12 @@ body:not(.page-context--lobby) .session-view:not(.session-view--chat-collapsed)[
   -webkit-appearance: none;
   appearance: none;
 }
+
+/* En la ventana normal compacta, quitar los gutters laterales e inferior;
+   conservar el superior para separar el encabezado. */
+@media (min-width: 681px) and (max-width: 900px) {
+  body:not(.page-context--lobby):not(.page-context--fullscreen) .app-shell:not(:fullscreen) {
+    padding-inline: 0;
+    padding-bottom: 0;
+  }
+}

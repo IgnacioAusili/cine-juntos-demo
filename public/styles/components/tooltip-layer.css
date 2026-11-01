@@ -9,8 +9,9 @@
   --tooltip-arrow-fill-color: rgba(8, 10, 12, 0.97);
   --tooltip-quote-background: rgba(8, 10, 12, 0.97);
   --tooltip-quote-border: rgba(255, 255, 255, 0.14);
-  --tooltip-quote-tail-depth: var(--tooltip-tail-height);
-  --tooltip-quote-tail-half-width: calc(var(--tooltip-tail-width) / 2);
+  --tooltip-quote-tail-width: 10px;
+  --tooltip-quote-tail-depth: 5px;
+  --tooltip-quote-tail-half-width: calc(var(--tooltip-quote-tail-width) / 2);
   --tooltip-quote-tail-inner-depth: calc(var(--tooltip-quote-tail-depth) - var(--tooltip-border-width));
   --tooltip-quote-tail-inner-half-width: calc(var(--tooltip-quote-tail-half-width) - var(--tooltip-border-width));
 }
@@ -32,9 +33,9 @@
   box-sizing: border-box;
   width: max-content;
   max-width: min(320px, calc(100vw - 16px));
-  padding: 6px 9px;
+  padding: 5px 8px;
   color: var(--text);
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 600;
   line-height: 1.25;
   overflow-wrap: anywhere;
@@ -49,9 +50,9 @@
 
 .tooltip-layer[data-tooltip-variant="quote"] {
   max-width: min(120px, calc(100vw - 16px));
-  padding: 3px 6px;
+  padding: 2px 5px;
   color: var(--text);
-  font-size: 0.68rem;
+  font-size: 0.66rem;
   line-height: 1.15;
   border: 1px solid var(--tooltip-quote-border);
   border-radius: var(--tooltip-radius, 12px);
@@ -73,7 +74,7 @@
 
 .tooltip-layer[data-tooltip-variant="quote"][data-placement="left"]::before {
   left: 100%;
-  border-left: 7px solid var(--tooltip-quote-border);
+  border-left: var(--tooltip-quote-tail-depth) solid var(--tooltip-quote-border);
 }
 
 .tooltip-layer[data-tooltip-variant="quote"][data-placement="left"]::after {
@@ -85,7 +86,7 @@
 
 .tooltip-layer[data-tooltip-variant="quote"][data-placement="right"]::before {
   right: 100%;
-  border-right: 7px solid var(--tooltip-quote-border);
+  border-right: var(--tooltip-quote-tail-depth) solid var(--tooltip-quote-border);
 }
 
 .tooltip-layer[data-tooltip-variant="quote"][data-placement="right"]::after {
@@ -154,9 +155,9 @@
   display: block;
   box-sizing: border-box;
   max-width: min(320px, calc(100vw - 16px));
-  padding: 6px 9px;
+  padding: 5px 8px;
   color: var(--text);
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 600;
   line-height: 1.25;
   overflow-wrap: anywhere;

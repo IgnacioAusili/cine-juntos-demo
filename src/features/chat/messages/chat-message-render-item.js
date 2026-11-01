@@ -3,7 +3,7 @@ import { state } from "../../../core/state.js";
 import { formatTime, formatClockTime } from "../../../core/utils.js";
 import { getPreviousRenderableMessage, getFirstRenderableMessage, removeContinuationAuthorName } from "./chat-message-flow.js";
 import { getSystemMessageText, normalizeOwnSystemBody, isEmojiOnlyText, countEmojiGlyphs } from "../system-messages/chat-system-message-text.js";
-import { getRenderableMessageImages, isStandaloneImageText, appendMessageMedia } from "./chat-message-media.js";
+import { getRenderableMessageImages, getStandaloneRemoteMediaKind, isStandaloneImageText, appendMessageMedia } from "./chat-message-media.js";
 import { extendMessageHitArea, wireMessageInteractions } from "./chat-message-interactions.js";
 import { appendMessageContent, truncateText } from "./chat-content-parser.js";
 import { isQuoteOnlyMessage } from "./chat-inline-formatting.js";
@@ -14,6 +14,7 @@ import { incrementScrollIndicator } from "./unread-counters.js";
 import { scheduleSystemMessageCollapse } from "../system-messages/system-message-groups.js";
 import { seekVideoToSeconds } from "./chat-timecode-links.js";
 import { createMessageReactionControls } from "./chat-reactions.js";
+import { createChatDateSeparator } from "./chat-date-separators.js";
 
 export function appendMessageNow(container, message, { animateSystemGroups = true, prepend = false } = {}) {
   const isMine = message.from === state.session.clientId;
@@ -27,6 +28,7 @@ export function appendMessageNow(container, message, { animateSystemGroups = tru
     ? getFirstRenderableMessage(container)
     : getPreviousRenderableMessage(container);
   const messageText = String(message?.text || "").trim();
+  const standaloneMediaKind = getStandaloneRemoteMediaKind(messageText);
   const messageImages = getRenderableMessageImages(message, messageText);
   const isContinuation = Boolean(
     !message.system &&
@@ -34,13 +36,21 @@ export function appendMessageNow(container, message, { animateSystemGroups = tru
     previousMessage?.dataset.authorId === authorKey,
   );
   const shouldRenderAuthorName = prepend || !isContinuation;
-  const hasRenderableText = Boolean(messageText) && !isStandaloneImageText(messageText);
+  const hasRenderableText = Boolean(messageText)
+    && !isStandaloneImageText(messageText)
+    && standaloneMediaKind !== "image"
+    && standaloneMediaKind !== "video";
   const hasReply = Boolean(
     message.replyTo?.text ||
     message.replyTo?.image ||
     (Array.isArray(message.replyTo?.images) && message.replyTo.images.length),
   );
-  const isMediaOnly = !message.system && Boolean(messageImages.length) && !hasReply && !hasRenderableText;
+  const isStandaloneVideo = !message.system && standaloneMediaKind === "video";
+  const isMediaOnly = !message.system
+    && Boolean(messageImages.length)
+    && !hasReply
+    && !hasRenderableText
+    && !isStandaloneVideo;
   const item = document.createElement("article");
   item.className = `message${isMine ? ' message--mine' : ""}${message.system ? ' message--system' : ""}`;
   item._chatMessage = message;
@@ -57,6 +67,7 @@ export function appendMessageNow(container, message, { animateSystemGroups = tru
   metaName.textContent = message.name || "Invitado";
 
   let tsBtn = null;
+  let reactionTimeAnchor = null;
   if (message.videoTimestamp != null && !message.system) {
     tsBtn = document.createElement("button");
     tsBtn.type = "button";
@@ -171,7 +182,7 @@ export function appendMessageNow(container, message, { animateSystemGroups = tru
         systemText.textContent = rawText;
       }
       content.append(systemText);
-    } else if (hasRenderableText) {
+    } else if (hasRenderableText || isStandaloneVideo) {
       appendMessageContent(replyTextRow || content, message.text);
     }
   }
@@ -236,7 +247,8 @@ export function appendMessageNow(container, message, { animateSystemGroups = tru
     time.className = 'message__time';
     time.textContent = formatTime(message.createdAt);
     timeAnchor.append(time);
-    item.append(timeAnchor);
+    reactionTimeAnchor = timeAnchor;
+    mediaRow.append(timeAnchor);
 
     const replyInput = container === dom.overlayMessages ? dom.overlayMessageInput : dom.messageInput;
     wireMessageInteractions(mediaStrip || mediaRow, message, hint, {
@@ -261,8 +273,13 @@ export function appendMessageNow(container, message, { animateSystemGroups = tru
     } else if (isQuoteOnly) {
       timeAnchor.classList.add('message__time-anchor--quote-only');
       bubble.append(timeAnchor);
+      reactionTimeAnchor = timeAnchor;
+    } else if (isStandaloneVideo) {
+      bubble.append(timeAnchor);
+      reactionTimeAnchor = timeAnchor;
     } else {
       bubble.insertBefore(timeAnchor, content);
+      if (isEmojiOnly) reactionTimeAnchor = timeAnchor;
     }
 
     const bubbleRow = document.createElement("div");
@@ -296,13 +313,23 @@ export function appendMessageNow(container, message, { animateSystemGroups = tru
   }
   const reactionTools = createMessageReactionControls(item);
   if (reactionTools) {
-    const reactionAnchor = isMediaOnly ? item.querySelector(".message__media-row") : bubble;
-    reactionAnchor?.append(reactionTools);
+    if (reactionTimeAnchor) {
+      item.classList.add("message--reaction-near-time");
+      const timeRow = document.createElement("div");
+      timeRow.className = "message__time-row";
+      reactionTimeAnchor.replaceWith(timeRow);
+      timeRow.append(reactionTools, reactionTimeAnchor);
+    } else {
+      bubble.append(reactionTools);
+    }
   }
+  const dateSeparator = createChatDateSeparator(message, previousMessage?._chatMessage);
   if (prepend) {
     container.prepend(item);
+    if (dateSeparator) container.insertBefore(dateSeparator, item);
     if (isContinuation) removeContinuationAuthorName(previousMessage);
   } else {
+    if (dateSeparator) container.append(dateSeparator);
     container.append(item);
     if (!message.system) {
       container.querySelector(".message--reaction-latest")?.classList.remove("message--reaction-latest");

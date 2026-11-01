@@ -159,8 +159,8 @@
   display: inline-block;
   font-family: var(--emoji-font-family);
   font-size: 1.4rem;
-  /* Evita que los extremos de los emojis queden fuera de su line box. */
-  line-height: 1.25;
+  /* Reduce el espacio vertical extra que agregaba la altura de línea. */
+  line-height: 1;
 }
 
 .chat-message-list.chat-message-list--overlay .message__bubble--emoji-only-compact .message__text {

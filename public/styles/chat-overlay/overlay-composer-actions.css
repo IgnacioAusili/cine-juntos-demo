@@ -9,6 +9,23 @@
   transform: none;
 }
 
+.message-form.message-form--overlay .message-form__input-wrapper .message-form__actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  align-self: center;
+  min-height: var(--player-chat-composer-field-height);
+}
+
+.message-form.message-form--overlay .message-form__input-wrapper[data-expanded="true"] .message-form__actions {
+  align-self: flex-end;
+}
+
+.message-form.message-form--overlay .message-form__input-wrapper .message-form__actions > .icon-button {
+  align-self: center !important;
+  margin-block: 0 !important;
+}
+
 .player-frame .message-form.message-form--overlay .message-form__input-wrapper .message-form__rich-editor {
   padding-right: 6px;
 }

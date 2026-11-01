@@ -120,14 +120,15 @@
 
   html.page-context--viewport-landscape body:not(.page-context--lobby) .player-frame .message-form.message-form--overlay .message-form__input-wrapper {
     width: 100%;
-    min-height: 30px;
+    min-height: var(--player-chat-composer-field-height);
     border-radius: 16px;
   }
 
   html.page-context--viewport-landscape body:not(.page-context--lobby) .session-view[data-chat-dock] .player-frame .message-form.message-form--overlay .message-form__input-wrapper .message-form__rich-editor {
-    min-height: 30px;
+    height: var(--player-chat-composer-field-height);
+    min-height: var(--player-chat-composer-field-height);
     max-height: 66px;
-    padding: 5px 6px;
+    padding: var(--player-chat-composer-field-padding-block) 6px;
   }
 
   html.page-context--viewport-landscape body:not(.page-context--lobby) .player-frame .message-form.message-form--overlay .message-form__input-wrapper .icon-button--emoji-trigger {

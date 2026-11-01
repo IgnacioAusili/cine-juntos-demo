@@ -50,8 +50,8 @@
   flex: 0 0 auto;
   height: auto;
   min-height: 0;
-  /* Mantiene la misma separación vertical que la tarjeta de hora del chat lateral. */
-  margin: 3px 0 0;
+  /* Acota el espacio reservado debajo del emoji. */
+  margin: 1px 0 0;
   shape-outside: none;
   align-items: center;
   justify-content: center;
@@ -80,6 +80,10 @@
   align-items: flex-start;
 }
 
+#overlayMessages .message.message--mine .message__bubble--quote-only {
+  align-items: flex-end;
+}
+
 #overlayMessages .message.message--mine .message__bubble--quote-only,
 #overlayMessages .message:not(.message--mine) .message__bubble--quote-only {
   border: 0;
@@ -95,7 +99,7 @@
   max-width: 100%;
 }
 
-#overlayMessages .message__bubble--quote-only > .message__time-anchor--quote-only {
+#overlayMessages .message__bubble--quote-only > .message__time-row > .message__time-anchor--quote-only {
   position: static;
   z-index: auto;
   float: none;
@@ -103,24 +107,23 @@
   flex: 0 0 auto;
   height: auto;
   min-height: 0;
-  align-self: flex-end;
-  margin: 3px 0 0;
+  align-self: center;
+  margin: 0;
   shape-outside: none;
   align-items: center;
   justify-content: center;
-  padding: 4px 6px 2px;
+  padding: 2px 6px 1px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 14px;
   background: rgba(9, 12, 14, 0.12);
 }
 
-#overlayMessages .message:not(.message--mine) .message__bubble--quote-only > .message__time-anchor--quote-only {
-  align-self: flex-start;
+#overlayMessages .message:not(.message--mine) .message__time-anchor--quote-only {
   border-color: rgba(240, 140, 58, 0.16);
   background: rgba(240, 140, 58, 0.08);
 }
 
-#overlayMessages .message.message--mine .message__bubble--quote-only > .message__time-anchor--quote-only {
+#overlayMessages .message.message--mine .message__time-anchor--quote-only {
   border-color: rgba(47, 184, 164, 0.2);
   background: rgba(47, 184, 164, 0.12);
 }
@@ -262,4 +265,9 @@
   align-self: center;
   max-width: 88%;
   margin: 3px auto 6px;
+}
+
+#overlayMessages .message--reaction-near-time .message__time-row > .message__time-anchor {
+  align-self: center;
+  margin-block: 0;
 }

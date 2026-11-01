@@ -1,5 +1,10 @@
 :root {
   --message-stream-item-spacing: 16px;
+  --chat-date-separator-block-start: 8px;
+  --chat-date-separator-block-end: 8px;
+  --chat-date-separator-font-size: 0.68rem;
+  --chat-date-separator-font-weight: 500;
+  --chat-date-separator-line-height: 1.35;
 }
 
 .message__video-ts,
@@ -22,6 +27,23 @@
     linear-gradient(180deg, rgba(8, 11, 13, 0.2), rgba(8, 11, 13, 0.08)),
     rgba(10, 13, 15, 0.34);
   padding: var(--chat-message-padding-block-start, 8px) 8px var(--chat-message-bottom-reserve, 132px);
+}
+
+.chat-date-separator {
+  margin-block: var(--chat-date-separator-block-start) var(--chat-date-separator-block-end);
+  color: var(--muted-2);
+  font-size: var(--chat-date-separator-font-size);
+  font-weight: var(--chat-date-separator-font-weight);
+  line-height: var(--chat-date-separator-line-height);
+  overflow: hidden;
+  text-align: center;
+  text-overflow: ellipsis;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.message:has(+ .chat-date-separator) {
+  margin-bottom: var(--chat-date-separator-block-start);
 }
 
 .message {
@@ -232,7 +254,7 @@
   display: inline-block;
   font-family: var(--emoji-font-family);
   font-size: 1.5rem;
-  line-height: 1.25;
+  line-height: 1;
 }
 
 .message__bubble--emoji-only-compact .message__text {

@@ -4,7 +4,7 @@ import { wireChatScrollbar, syncChatScrollbar, syncComposerScrollbar } from "./c
 
 const floatingComposerObservers = new WeakMap();
 
-const CHAT_MESSAGE_BOTTOM_GAP = 12;
+const CHAT_MESSAGE_BOTTOM_GAP = 18;
 
 const CHAT_OVERLAY_MESSAGE_BOTTOM_GAP = 4;
 
@@ -188,9 +188,15 @@ function observeComposerWidth(input) {
   input.dataset.composerWidthObserverBound = "true";
 
   const resize = () => autoResizeMessageInput(input);
+  const resizeAfterFullscreen = () => {
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(resize);
+    });
+  };
+  document.addEventListener("fullscreenchange", resizeAfterFullscreen, { passive: true });
+  window.addEventListener("chat-layout-settled", resize, { passive: true });
   if (typeof ResizeObserver !== "function") {
     window.addEventListener("resize", resize, { passive: true });
-    window.addEventListener("chat-layout-settled", resize, { passive: true });
     return;
   }
 

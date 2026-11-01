@@ -19,11 +19,14 @@
   --session-header-gap: var(--app-shell-gutter);
   --workspace-gap: 10px;
   --chat-handle-gap: 22px;
-  --chat-handle-gap-collapsed: 4px;
+  --chat-handle-gap-collapsed: 8px;
   --chat-panel-width: 320px;
   --right-chat-min-width: var(--chat-panel-width);
   --right-chat-min-player-width: var(--chat-panel-width);
-  --right-chat-overlay-max-width: 680px;
+  --right-chat-overlay-z-index: 10;
+  --right-chat-overlay-background: #14181c;
+  --right-chat-overlay-transition-duration: 350ms;
+  --right-chat-overlay-closed-clip: inset(0 0 0 100%);
   --bg-deep: #07090b;
   --bg-soft: #11151a;
   --amber: #f5a05a;

@@ -109,3 +109,12 @@
   transform: translateY(6px);
   pointer-events: none;
 }
+
+/* Los eventos de la superficie mini se propagan al reproductor que la
+   contiene. Mientras esa superficie esté activa, la barra principal conserva
+   su visibilidad independientemente del overlay local del mini reproductor. */
+.player-frame.mini-player-surface--active:not(.mini-player-surface) .player-frame__bottom-actions {
+  opacity: 1 !important;
+  transform: translateY(0);
+  pointer-events: auto;
+}

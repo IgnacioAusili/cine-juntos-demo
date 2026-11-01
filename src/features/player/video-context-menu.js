@@ -5,6 +5,7 @@ import { getRichEditorSelection, insertRichEditorText, setRichEditorSelection } 
 import { scrollToChatPosition, setExternalChatCollapsed } from "../chat/index.js";
 import { requestVideoDownload } from "./video-download.js";
 import { closeVideoLoadPopover, openVideoLoadPopover } from "./video-load-popover.js";
+import { appendToPlayerOverlayHost } from "./player-overlay-host.js";
 
 const LONG_PRESS_MS = 560;
 const POINTER_MOVE_LIMIT_PX = 12;
@@ -127,7 +128,7 @@ function openMenu(x, y) {
     event.preventDefault();
     closeContextMenu();
   });
-  document.body.append(menu);
+  appendToPlayerOverlayHost(menu);
   contextMenu = menu;
   placePopup(menu, x, y);
   installDismissListeners(closeContextMenu, menu);

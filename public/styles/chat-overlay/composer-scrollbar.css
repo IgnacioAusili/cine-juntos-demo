@@ -12,10 +12,9 @@
   right: 1px;
 }
 
-/* El ajuste óptico sube un píxel la línea sin cambiar el espacio total. */
+/* El padding simétrico centra la línea en el campo compacto. */
 .message-form.message-form--overlay .message-form__input-wrapper .message-form__rich-editor {
-  padding-top: 4px;
-  padding-bottom: 6px;
+  padding-block: var(--player-chat-composer-field-padding-block);
 }
 
 /* El editor conserva tres renglones visibles; desde ahí usa su scroll
@@ -27,8 +26,7 @@
 
 @media (max-width: 980px) {
   .message-form.message-form--overlay .message-form__input-wrapper .message-form__rich-editor {
-    padding-top: 4px;
-    padding-bottom: 6px;
+    padding-block: var(--player-chat-composer-field-padding-block);
   }
 
   .message-form.message-form--overlay .message-form__input-wrapper[data-expanded="true"] .message-form__rich-editor {

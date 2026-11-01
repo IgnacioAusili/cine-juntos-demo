@@ -2,11 +2,16 @@
   --player-chat-max-height: 330px;
   --player-chat-bottom-inset: 8px;
   --chat-composer-reserve: 92px;
+  --player-chat-layer: 12;
+  --player-chat-layer-over-collapse-handle: 13;
+  --player-chat-composer-field-height: 26px;
+  --player-chat-composer-field-padding-block: 3px;
+  --player-chat-composer-field-font-size: 0.84rem;
 }
 
 .player-chat {
   position: absolute;
-  z-index: 12;
+  z-index: var(--player-chat-layer);
   top: var(--inside-chat-top-offset, 48px);
   right: 24px;
   bottom: var(--player-chat-bottom-inset);
@@ -29,6 +34,21 @@
 .player-frame.u-chat-inside-open .player-chat {
   opacity: 1;
   pointer-events: auto;
+}
+
+/* El player crea una capa propia por su backdrop-filter. Cuando el dock
+   lateral está contraído, quitar esa capa del frame permite que el overlay
+   interno quede por encima de la flecha de expandir, sin elevar todo el video. */
+body:not(.page-context--lobby)
+  .session-view.session-view--chat-collapsed[data-chat-dock="right"]
+  .player-frame.u-chat-inside-open {
+  backdrop-filter: none;
+}
+
+body:not(.page-context--lobby)
+  .session-view.session-view--chat-collapsed[data-chat-dock="right"]
+  .player-frame.u-chat-inside-open .player-chat {
+  z-index: var(--player-chat-layer-over-collapse-handle);
 }
 
 /* En vertical, el módulo de layout mueve este panel al lateral del disparador

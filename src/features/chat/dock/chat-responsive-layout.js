@@ -91,18 +91,15 @@ export function syncResponsiveSessionLayout({ allowTransition = false } = {}) {
   }
 
   if (
-    document.body.classList.contains("page-context--fullscreen")
-    || document.fullscreenElement
-    || (
-      !allowTransition
-      && (
-        dom.sessionView.classList.contains("session-view--chat-layout-transitioning")
-        || dom.sessionView.classList.contains("session-view--chat-dock-switching")
-      )
+    !allowTransition
+    && (
+      dom.sessionView.classList.contains("session-view--chat-layout-transitioning")
+      || dom.sessionView.classList.contains("session-view--chat-dock-switching")
     )
   ) return;
 
-  const workspaceWidth = dom.workspace.getBoundingClientRect().width;
+  const workspaceRect = dom.workspace.getBoundingClientRect();
+  if (workspaceRect.width <= 0 || workspaceRect.height <= 0) return;
 
   const workspaceStyles = getComputedStyle(dom.workspace);
   const minChatWidth = readCssPixels(
@@ -113,17 +110,20 @@ export function syncResponsiveSessionLayout({ allowTransition = false } = {}) {
     dom.sessionView,
     "--right-chat-min-player-width",
   ) || minChatWidth;
-  const overlayMaxWidth = readCssPixels(
-    dom.sessionView,
-    "--right-chat-overlay-max-width",
-  );
+  const sessionToolbar = dom.sessionView.querySelector(".session-toolbar");
+  const toolbarStyle = sessionToolbar ? getComputedStyle(sessionToolbar) : null;
+  const toolbarHeight = sessionToolbar
+    && dom.workspace.contains(sessionToolbar)
+    && toolbarStyle.position !== "absolute"
+    && toolbarStyle.display !== "none"
+    ? sessionToolbar.getBoundingClientRect().height
+    : 0;
   const composition = resolveRightChatComposition({
-    availableWidth: workspaceWidth,
-    viewportWidth: window.innerWidth,
+    availableWidth: workspaceRect.width,
+    availableHeight: Math.max(0, workspaceRect.height - toolbarHeight),
     minChatWidth,
     minPlayerWidth,
     columnGap: Number.parseFloat(workspaceStyles.columnGap) || 0,
-    overlayMaxWidth,
   });
 
   setRightDockComposition(composition);
@@ -148,11 +148,16 @@ export function wireResponsiveSessionLayout(syncHandleOffset = () => {}) {
       scheduleResponsiveSessionLayoutMeasure,
     );
     responsiveSessionLayoutObserver.observe(dom.workspace);
+    const sessionToolbar = dom.sessionView.querySelector(".session-toolbar");
+    if (sessionToolbar) responsiveSessionLayoutObserver.observe(sessionToolbar);
   }
   window.addEventListener("resize", scheduleResponsiveSessionLayoutMeasure, {
     passive: true,
   });
   window.visualViewport?.addEventListener("resize", scheduleResponsiveSessionLayoutMeasure, {
+    passive: true,
+  });
+  document.addEventListener("fullscreenchange", scheduleResponsiveSessionLayoutMeasure, {
     passive: true,
   });
   window.addEventListener(

@@ -125,11 +125,12 @@
   }
 
   body:not(.page-context--lobby) .session-view--chat-overlay[data-chat-dock="right"] .chat-area > .message-form {
-    width: calc(var(--app-viewport-width, 100vw) - 36px);
+    left: 18px;
+    right: 18px;
+    width: auto;
   }
 
-  /* La capa permanece sólida mientras avanza la cortina. Al terminar el
-     período de transición se aplica el estado colapsado normal de opacidad 0. */
+  /* La capa mantiene la opacidad; clip-path la oculta al completar la cortina. */
   body:not(.page-context--lobby) .session-view--chat-layout-transitioning.session-view--chat-overlay[data-chat-dock="right"] .chat-area {
     opacity: 1 !important;
   }
@@ -158,7 +159,6 @@
     width: 100%;
     flex-basis: 100%;
     clip-path: inset(0 0 0 100%);
-    opacity: 0;
     pointer-events: none;
   }
 

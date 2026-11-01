@@ -1,3 +1,5 @@
+import { appendToPlayerOverlayHost } from "./player-overlay-host.js";
+
 const VIEWPORT_GUTTER_PX = 10;
 
 let loadPopover = null;
@@ -56,7 +58,7 @@ export function openVideoLoadPopover(x, y, onAccept) {
     }, 0);
   });
 
-  document.body.append(popup);
+  appendToPlayerOverlayHost(popup);
   loadPopover = popup;
   placePopover(popup, x, y);
   installDismissListeners(popup);

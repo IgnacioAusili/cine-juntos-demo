@@ -4,7 +4,7 @@ import { configureExternalChatCollapseOperations, lockChatScrollSnapDuringProgra
 export { setExternalChatCollapsed, forceExternalChatCollapsed, restoreExternalChatCollapsed } from "./chat-external-collapse.js";
 import { configureChatDockController, setChatDock, getBottomDockVideoScrollTop } from "./dock/chat-dock-controller.js";
 export { setChatDock } from "./dock/chat-dock-controller.js";
-import { isMobilePortraitChatViewport, isMobileLandscapeRightDock, isMobileLandscapeFullscreenBottomDock, isMobilePortraitRightDock, isRightChatViewportOverlay } from "./dock/chat-layout-breakpoints.js";
+import { isMobilePortraitChatViewport, isMobileLandscapeFullscreenBottomDock, isRightChatViewportOverlay } from "./dock/chat-layout-breakpoints.js";
 import { syncInsideChatPanelOffset, syncExternalChatCollapseHandleOffset, updateCollapseButton } from "./dock/chat-collapse-handles.js";
 export { syncInsideChatPanelOffset, syncExternalChatCollapseHandleOffset, updateCollapseButton } from "./dock/chat-collapse-handles.js";
 import { configureChatVisibilityOperations, clearChatAutoCollapseTimer as clearAutoCollapseTimer, setInsideChatVisible, setInsideChatAutoExpandEnabled, setExternalChatAutoExpandEnabled, scheduleInsideChatAutoCollapse, scheduleExternalChatAutoCollapse, cancelExternalChatAutoCollapse, completeAutoOpenedChatResponse, syncChatAutoExpandControls } from "./dock/chat-visibility.js";
@@ -156,14 +156,7 @@ function setCollapseHandleTransitioning(
     && dom.sessionView?.dataset.chatDock === "right"
     && !isRightChatViewportOverlay()
   ) {
-    const rightDockUsesViewportWidth = isMobilePortraitRightDock()
-      || isMobileLandscapeRightDock();
-    messageForm?.style.setProperty(
-      "width",
-      rightDockUsesViewportWidth
-        ? "calc(var(--app-viewport-width, 100vw) - 36px)"
-        : "calc(var(--chat-panel-width) - 37px)",
-    );
+    messageForm?.style.setProperty("width", "calc(100% - 36px)");
   }
   if (!isTransitioning) return;
 

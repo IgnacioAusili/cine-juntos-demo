@@ -1,0 +1,38 @@
+body:not(.page-context--lobby)
+  .session-view--chat-overlay[data-chat-dock="right"] .chat-area {
+  position: absolute;
+  z-index: var(--right-chat-overlay-z-index);
+  grid-area: 1 / 1 / -1 / -1;
+  inset: 0;
+  width: auto;
+  max-width: none;
+  height: auto;
+  flex: none;
+  transform: none;
+  clip-path: inset(0);
+  overflow: hidden;
+  background: var(--right-chat-overlay-background);
+  transition: clip-path var(--right-chat-overlay-transition-duration) cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: clip-path;
+}
+
+.session-view--chat-overlay[data-chat-dock="right"] .chat-area > * {
+  width: auto;
+  max-width: none;
+}
+
+.session-view--chat-overlay[data-chat-dock="right"] .chat-area > .message-form {
+  left: var(--app-shell-gutter);
+  right: var(--app-shell-gutter);
+  width: auto;
+}
+
+body:not(.page-context--lobby)
+  .session-view--chat-overlay.session-view--chat-collapsed[data-chat-dock="right"] .chat-area {
+  /* Mantener la caja completa permite que clip-path revele y oculte la cortina. */
+  width: auto;
+  flex: none;
+  clip-path: var(--right-chat-overlay-closed-clip);
+  opacity: 1;
+  pointer-events: none;
+}

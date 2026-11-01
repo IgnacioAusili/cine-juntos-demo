@@ -6,6 +6,7 @@ export function normalizeMiniSystemGroupState(container) {
     const targets = [systemMessage, ...systemMessage.querySelectorAll("*")];
     targets.forEach((target) => {
       target.classList.remove('u-transitioning');
+      if (target.closest('.message__system-roll-stage')) return;
       target.getAnimations?.().forEach((animation) => animation.cancel());
       target.style.removeProperty("opacity");
       target.style.removeProperty("transform");

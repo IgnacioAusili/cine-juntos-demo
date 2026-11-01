@@ -114,7 +114,7 @@
   opacity: 0.72;
 }
 
-.message__media-strip-shell:hover > .composer-scrollbar--horizontal {
+.message__media-strip-shell[data-scrollbar-visible="true"]:hover > .composer-scrollbar--horizontal {
   opacity: 1;
 }
 
@@ -142,15 +142,18 @@
   align-items: flex-start;
 }
 
-.message--media-only .message__media-row,
-.message.message--mine.message--media-only .message__media-row {
-  align-self: stretch;
-  width: 100%;
+.message--media-only .message__media-row {
+  align-self: flex-start;
+  width: fit-content;
   max-width: 100%;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
 }
 
 .message.message--mine.message--media-only .message__media-row {
-  justify-content: flex-end;
+  align-self: flex-end;
+  justify-content: flex-start;
 }
 
 .message__media-strip--standalone .message__media-link {

@@ -12,6 +12,7 @@
 }
 
 .message-form {
+  --chat-composer-single-line-height: 32px;
   position: absolute;
   left: 18px;
   right: 18px;
@@ -170,6 +171,13 @@
   line-height: 20px;
 }
 
+.session-view .chat-area > .message-form
+  .message-form__input-wrapper:not([data-expanded="true"]) #messageInput {
+  height: var(--chat-composer-single-line-height) !important;
+  min-height: var(--chat-composer-single-line-height);
+  padding-block: 6px;
+}
+
 @media (min-width: 681px) {
   .message-form .message-form__input-wrapper {
     padding-left: 4px;
@@ -188,15 +196,6 @@
      crece al pasar a multilinea. */
   .message-form .message-form__input-wrapper[data-expanded="true"] .message-form__rich-editor {
     padding-block: 3px;
-  }
-
-  /* Ambos docks usan la misma altura de una línea; el autoajuste multilinea
-     sigue controlando el campo cuando el contenido crece. */
-  .session-view .chat-area > .message-form
-    .message-form__input-wrapper:not([data-expanded="true"]) #messageInput {
-    height: 32px !important;
-    min-height: 32px;
-    padding-block: 6px;
   }
 
   .session-view[data-chat-dock] .chat-area > .message-form
@@ -218,12 +217,6 @@
 }
 
 @media (max-width: 680px) {
-  .message-form .message-form__input-wrapper:not([data-expanded="true"]) #messageInput {
-    /* La caja móvil mide al menos 36px: 20px de línea más 8px por lado la
-       centra de forma consistente en los motores móviles y de escritorio. */
-    padding-block: 8px;
-  }
-
   .message-form:not(.message-form--overlay) .message-form__input-wrapper[data-expanded="true"] .message-form__rich-editor {
     padding-block: 8px;
   }

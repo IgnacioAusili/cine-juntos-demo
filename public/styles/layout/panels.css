@@ -82,6 +82,7 @@
   border-top: 0;
   border-left: 1px solid var(--glass-border-strong);
   border-radius: 0 0 var(--radius-md) var(--radius-md);
+  overflow-anchor: none;
 }
 
 /* Evita que el preview de respuesta amplie una columna de chat angosta. */
@@ -96,8 +97,8 @@
 }
 
 .session-view[data-chat-dock="right"] .chat-area > .message-form {
-  width: calc(var(--chat-panel-width) - 36px);
-  right: auto;
+  width: auto;
+  right: 18px;
 }
 
 .session-view.session-view--chat-collapsed .chat-area {
