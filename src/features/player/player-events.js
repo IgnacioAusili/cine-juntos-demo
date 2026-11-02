@@ -25,15 +25,15 @@ export function wirePlayerCoreEvents() {
   });
 
   dom.playerPlayButton?.addEventListener("click", () => {
-    togglePlaybackFromControls("button");
+    togglePlaybackFromControls();
   });
 
   dom.playerBackButton?.addEventListener("click", () => {
-    seekVideoBy(-10, "control");
+    seekVideoBy(-10);
   });
 
   dom.playerForwardButton?.addEventListener("click", () => {
-    seekVideoBy(10, "control");
+    seekVideoBy(10);
   });
 
   dom.playerSeekInput?.addEventListener("input", () => {
@@ -275,6 +275,6 @@ export function wirePlayerCoreEvents() {
   });
 
   return {
-    togglePlayback: () => togglePlaybackFromControls("video"),
+    togglePlayback: () => togglePlaybackFromControls(),
   };
 }

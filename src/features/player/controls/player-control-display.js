@@ -83,37 +83,23 @@ export function renderPlayerControls(forceSliderSync = false, controls) {
   }
 
   if (dom.playerPlayButton) {
-    const playButtonCoolingDown = controls.isPlayButtonCoolingDown();
     dom.playerPlayButton.disabled = !hasMedia;
-    if (playButtonCoolingDown) dom.playerPlayButton.setAttribute("aria-disabled", "true");
-    else dom.playerPlayButton.removeAttribute("aria-disabled");
-    dom.playerPlayButton.classList.toggle('video-control-button--cooldown-disabled', playButtonCoolingDown);
+    dom.playerPlayButton.removeAttribute("aria-disabled");
+    dom.playerPlayButton.classList.remove('video-control-button--cooldown-disabled');
+    delete dom.playerPlayButton.dataset.playButtonCooldown;
     const isEnded = dom.videoPlayer.ended;
     const isPaused = dom.videoPlayer.paused && !isEnded;
     const nextIcon = isEnded ? "rotate-ccw" : isPaused ? "play" : "pause";
-    const cooldownSeconds = Math.max(
-      1,
-      Math.ceil((Number(state.player.playButtonCooldownUntil || 0) - Date.now()) / 1000),
-    );
-    if (playButtonCoolingDown) {
-      if (dom.playerPlayButton.dataset.playButtonCooldown !== "true") {
-        dom.playerPlayButton.dataset.playButtonCooldown = "true";
-        dom.playerPlayButton.innerHTML = '<span class="video-control-button__cooldown" aria-hidden="true"></span>';
-      }
-      const counter = dom.playerPlayButton.querySelector('.video-control-button__cooldown');
-      if (counter) counter.textContent = String(cooldownSeconds);
-    } else if (dom.playerPlayButton.dataset.playButtonCooldown === "true") {
-      delete dom.playerPlayButton.dataset.playButtonCooldown;
-      dom.playerPlayButton.innerHTML = `<span data-lucide=\"${nextIcon}\"></span>`;
+    let icon = dom.playerPlayButton.querySelector("[data-lucide]");
+    if (!icon) {
+      dom.playerPlayButton.innerHTML = `<span data-lucide="${nextIcon}"></span>`;
       setControlIcon(dom.playerPlayButton, nextIcon);
+      icon = dom.playerPlayButton.querySelector("[data-lucide]");
     }
-    const icon = dom.playerPlayButton.querySelector("[data-lucide]");
-    const tooltip = playButtonCoolingDown
-      ? `Espera ${cooldownSeconds}s para usar el reproductor`
-      : withShortcutHint(
-        isEnded ? "Reiniciar video" : isPaused ? "Reproducir video" : "Pausar video",
-        "Espacio",
-      );
+    const tooltip = withShortcutHint(
+      isEnded ? "Reiniciar video" : isPaused ? "Reproducir video" : "Pausar video",
+      "Espacio",
+    );
     dom.playerPlayButton.dataset.tooltip = tooltip;
     dom.playerPlayButton.setAttribute("aria-label", tooltip);
     dom.playerPlayButton.removeAttribute("title");
@@ -126,19 +112,14 @@ export function renderPlayerControls(forceSliderSync = false, controls) {
   }
 
   const skipControlsDisabled = !hasMedia || duration <= 0;
-  const skipCoolingDown = controls.isSyncControlCoolingDown("seek");
-  const skipCooldownSeconds = controls.getSyncControlCooldownSeconds("seek");
   for (const control of [dom.playerBackButton, dom.playerForwardButton]) {
     if (!control) continue;
     control.disabled = skipControlsDisabled;
-    if (skipCoolingDown) control.setAttribute("aria-disabled", "true");
-    else control.removeAttribute("aria-disabled");
-    control.classList.toggle('video-control-button--cooldown-disabled', skipCoolingDown);
+    control.removeAttribute("aria-disabled");
+    control.classList.remove('video-control-button--cooldown-disabled');
     const direction = control === dom.playerBackButton ? "Retroceder 10 segundos" : "Avanzar 10 segundos";
     const shortcut = control === dom.playerBackButton ? "←" : "→";
-    const tooltip = skipCoolingDown
-      ? `Espera ${skipCooldownSeconds}s para usar este control`
-      : `${direction} (${shortcut})`;
+    const tooltip = `${direction} (${shortcut})`;
     control.dataset.tooltip = tooltip;
     control.setAttribute("aria-label", tooltip);
     control.removeAttribute("title");

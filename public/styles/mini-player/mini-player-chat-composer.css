@@ -117,6 +117,10 @@
   z-index: 20;
   right: 10px;
   bottom: 48px;
+  border: var(--emoji-popover-border-width) solid var(--emoji-popover-border);
+  border-radius: var(--emoji-popover-radius);
+  background: var(--emoji-popover-background);
+  box-shadow: var(--shadow-md);
 }
 
 .mini-player-surface .sync-status {

@@ -27,11 +27,6 @@ export function resetRoomPlayerState() {
   state.player.lastPlaybackIssueAnnouncementAt = 0;
   state.player.lastPlaybackIssueAnnouncementKey = "";
   state.player.remotePlaybackIssueCooldownUntil = 0;
-  window.clearInterval(state.player.playButtonCooldownTimeoutId);
-  state.player.lastUserPauseAt = 0;
-  state.player.playButtonPressTimes = [];
-  state.player.playButtonCooldownUntil = 0;
-  state.player.playButtonCooldownTimeoutId = null;
   if (state.player.playbackRecoveryTimeoutId) {
     window.clearTimeout(state.player.playbackRecoveryTimeoutId);
   }

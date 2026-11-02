@@ -3,11 +3,10 @@ import {
 } from "../../core/dom.js";
 import { state } from "../../core/state.js";
 import { configureRateSelectMenu, initializeRateSelectMenu } from "./controls/player-rate-menu.js";
-import { hideSeekTooltip, updateSeekTooltipForValue } from "./controls/player-seek-tooltip-view.js";
+import { hideSeekTooltip } from "./controls/player-seek-tooltip-view.js";
 import { seekTooltipState } from "./controls/player-seek-tooltip-state.js";
-import { renderPlayerControls, showPlaybackGestureIndicator, updateSeekVisuals } from "./controls/player-control-display.js";
 import { setVideoStatus } from "./player-video-source.js";
-import { getFiniteDuration, hasLoadedMediaSource, clearSlowLoadPromptTracking } from "./player-media.js";
+import { clearSlowLoadPromptTracking } from "./player-media.js";
 import { playerRuntimeState } from "./player-runtime-state.js";
 import { resetSyncControlCooldown, readPersistedVolume, syncPlayerControls } from "./controls/player-control-actions.js";
 
@@ -21,7 +20,6 @@ export function initializePlayer() {
   playerRuntimeState.pendingVideoActivityAnnouncement = false;
   state.ui.seekDragActive = false;
   dom.playerFrame?.classList.remove('player-frame--seek-control-dragging');
-  resetSyncControlCooldown("seek");
   resetSyncControlCooldown("rate");
   seekTooltipState.pointerId = null;
   hideSeekTooltip();
@@ -83,11 +81,6 @@ export function wireMobilePlayerControlPlacement() {
   });
   mobileQuery.addEventListener?.("change", syncPlacement);
   window.addEventListener("resize", syncPlacement, { passive: true });
-}
-
-function isMobileCenterControlsActive() {
-  return window.matchMedia(MOBILE_PLAYER_CONTROLS_QUERY).matches
-    && Boolean(dom.playerCenterActions?.contains(dom.playerPlayButton));
 }
 
 function applyPlayerControlStyle(style) {

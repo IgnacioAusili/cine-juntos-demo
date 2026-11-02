@@ -1,6 +1,7 @@
 import { extendMessageHitArea } from "../../chat/messages/chat-message-interactions.js";
 import { setInsideChatAutoExpandEnabled } from "../../chat/chat-layout.js";
 import { state } from "../../../core/state.js";
+import { traceMiniPlayer } from "./mini-player-debug.js";
 import { wireMiniMessageReplies } from "./mini-player-chat-replies.js";
 import {
   startSystemRollAnimations,
@@ -42,11 +43,51 @@ export function submitMirrorChat(source, element) {
   const mirrorInput = getMirrorChatInput(element);
   const sourceInput = source.querySelector("#overlayMessageInput");
   const sourceForm = source.querySelector("#overlayMessageForm");
-  if (!mirrorInput || !sourceInput || !sourceForm) return;
+  if (!mirrorInput || !sourceInput || !sourceForm) {
+    traceMiniPlayer("chat-submit-failed", {
+      hasMirrorInput: Boolean(mirrorInput),
+      hasSourceInput: Boolean(sourceInput),
+      hasSourceForm: Boolean(sourceForm),
+    });
+    return;
+  }
+  const submittedLength = String(mirrorInput.value || "").length;
+  traceMiniPlayer("chat-submit-forward", {
+    submittedLength,
+    mirrorInputDisabled: mirrorInput.disabled,
+    sourceInputDisabled: sourceInput.disabled,
+    sourceFormId: sourceForm.id || null,
+    sourceInputValid: sourceInput.validity?.valid ?? null,
+    sourceInputValidationMessage: sourceInput.validationMessage || "",
+  });
+  let sourceSubmitEventSeen = false;
+  sourceForm.addEventListener("submit", (event) => {
+    sourceSubmitEventSeen = true;
+    queueMicrotask(() => traceMiniPlayer("chat-source-submit-event", {
+      isTrusted: event.isTrusted,
+      defaultPrevented: event.defaultPrevented,
+      submittedLength,
+    }));
+  }, { capture: true, once: true });
   sourceInput.value = mirrorInput.value;
   sourceInput.dispatchEvent(new Event("input", { bubbles: true }));
   mirrorInput.value = "";
-  sourceForm.requestSubmit();
+  try {
+    sourceForm.requestSubmit();
+    traceMiniPlayer("chat-request-submit-returned", {
+      submittedLength,
+      sourceSubmitEventSeen,
+      sourceValueLengthAfter: String(sourceInput.value || "").length,
+      mirrorValueLengthAfter: String(mirrorInput.value || "").length,
+    });
+  } catch (error) {
+    traceMiniPlayer("chat-request-submit-threw", {
+      submittedLength,
+      errorName: error?.name || "Error",
+      errorMessage: error?.message || String(error),
+    });
+    throw error;
+  }
 }
 
 export function getMirrorChatDraft(source, element) {

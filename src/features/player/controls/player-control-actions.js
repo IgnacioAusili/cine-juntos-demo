@@ -3,21 +3,17 @@ import { state, logEvent } from "../../../core/state.js";
 import { formatSeconds } from "../../../core/utils.js";
 import { setInsideChatVisible } from "../../chat/index.js";
 import { togglePageFullscreen } from "../fullscreen/fullscreen.js";
-import { publishState } from "../player-sync-logic.js";
 import { getFiniteDuration, hasLoadedMediaSource } from "../player-media.js";
-import { hideSeekTooltip, updateSeekTooltipForValue } from "./player-seek-tooltip-view.js";
+import { updateSeekTooltipForValue } from "./player-seek-tooltip-view.js";
 import { renderPlayerControls, showPlaybackGestureIndicator, updateSeekVisuals } from "./player-control-display.js";
 import { playerRuntimeState } from "../player-runtime-state.js";
+import { traceMiniPlayer } from "../mini-player/mini-player-debug.js";
 
 const PLAYER_VOLUME_STORAGE_KEY = "cine-juntos-player-volume";
-const PLAY_BUTTON_BURST_WINDOW_MS = 1000;
-const PLAY_BUTTON_BURST_LIMIT = 4;
-const PLAY_BUTTON_COOLDOWN_MS = 30000;
 const COOLDOWN_REFRESH_INTERVAL_MS = 250;
-const SYNC_CONTROL_BURST_WINDOW_MS = PLAY_BUTTON_BURST_WINDOW_MS;
-const SYNC_CONTROL_BURST_LIMIT = PLAY_BUTTON_BURST_LIMIT;
+const RATE_CONTROL_BURST_WINDOW_MS = 1000;
 const RATE_CONTROL_BURST_LIMIT = 3;
-const SYNC_CONTROL_COOLDOWN_MS = PLAY_BUTTON_COOLDOWN_MS;
+const SYNC_CONTROL_COOLDOWN_MS = 30000;
 const KEYBOARD_SEEK_STEP_SECONDS = 10;
 const KEYBOARD_VOLUME_STEP = 0.05;
 const MOBILE_PLAYER_CONTROLS_QUERY = "(max-width: 980px) and (hover: none) and (pointer: coarse)";
@@ -27,63 +23,44 @@ function isMobileCenterControlsActive() {
     && Boolean(dom.playerCenterActions?.contains(dom.playerPlayButton));
 }
 
-export function togglePlaybackFromControls(source = "keyboard") {
+export function togglePlaybackFromControls(source = "main-player") {
   const hasMedia = hasLoadedMediaSource();
-  if (!hasMedia) return;
-
-  const now = Date.now();
-  const isUserToggle = source === "button" || source === "keyboard" || source === "video";
-  if (isUserToggle) {
-    if (isPlayButtonCoolingDown(now)) return;
-    state.player.playButtonPressTimes = (state.player.playButtonPressTimes || [])
-      .filter((pressedAt) => now - pressedAt <= PLAY_BUTTON_BURST_WINDOW_MS);
-    state.player.playButtonPressTimes.push(now);
+  if (!hasMedia) {
+    if (source === "mini-player") traceMiniPlayer("playback-ignored-no-media", { source });
+    return;
   }
 
-  const wasPlaying = !dom.videoPlayer.paused && !dom.videoPlayer.ended;
-  if (isUserToggle && wasPlaying) {
-    // Solo una pausa iniciada por una interacción directa del usuario puede activar el bloqueo.
-    state.player.lastUserPauseAt = now;
+  if (source === "mini-player") {
+    traceMiniPlayer("playback-toggle-request", { source });
   }
+
+  const requestPlay = () => {
+    const playPromise = dom.videoPlayer.play();
+    if (source === "mini-player") {
+      Promise.resolve(playPromise)
+        .then(() => traceMiniPlayer("play-promise-resolved", { source }))
+        .catch((error) => traceMiniPlayer("play-promise-rejected", {
+          source,
+          errorName: error?.name || "Error",
+          errorMessage: error?.message || String(error),
+        }));
+    } else {
+      playPromise?.catch(() => {});
+    }
+  };
 
   if (dom.videoPlayer.ended) {
     dom.videoPlayer.currentTime = 0;
-    dom.videoPlayer.play().catch(() => {});
+    requestPlay();
     if (!isMobileCenterControlsActive()) showPlaybackGestureIndicator("pause");
   } else if (dom.videoPlayer.paused) {
-    dom.videoPlayer.play().catch(() => {});
+    requestPlay();
     if (!isMobileCenterControlsActive()) showPlaybackGestureIndicator("pause");
   } else {
     dom.videoPlayer.pause();
     if (!isMobileCenterControlsActive()) showPlaybackGestureIndicator("play");
   }
-
-  if (
-    isUserToggle &&
-    state.player.playButtonPressTimes.length >= PLAY_BUTTON_BURST_LIMIT &&
-    now - Number(state.player.lastUserPauseAt || 0) <= PLAY_BUTTON_BURST_WINDOW_MS
-  ) {
-    activatePlayButtonCooldown(now);
-  }
-}
-
-function isPlayButtonCoolingDown(now = Date.now()) {
-  return now < Number(state.player.playButtonCooldownUntil || 0);
-}
-
-function activatePlayButtonCooldown(now = Date.now()) {
-  state.player.playButtonCooldownUntil = now + PLAY_BUTTON_COOLDOWN_MS;
-  state.player.playButtonPressTimes = [];
-  window.clearInterval(state.player.playButtonCooldownTimeoutId);
-  state.player.playButtonCooldownTimeoutId = window.setInterval(() => {
-    if (!isPlayButtonCoolingDown()) {
-      state.player.playButtonCooldownUntil = 0;
-      window.clearInterval(state.player.playButtonCooldownTimeoutId);
-      state.player.playButtonCooldownTimeoutId = null;
-    }
-    syncPlayerControls();
-  }, COOLDOWN_REFRESH_INTERVAL_MS);
-  syncPlayerControls();
+  if (source === "mini-player") traceMiniPlayer("playback-toggle-dispatched", { source });
 }
 
 function getSyncControlCooldownState(kind) {
@@ -108,11 +85,10 @@ function getSyncControlCooldownSeconds(kind, now = Date.now()) {
 export function registerSyncControlPress(kind, now = Date.now()) {
   const { pressTimesKey } = getSyncControlCooldownState(kind);
   const pressTimes = (state.player[pressTimesKey] || [])
-    .filter((pressedAt) => now - pressedAt <= SYNC_CONTROL_BURST_WINDOW_MS);
+    .filter((pressedAt) => now - pressedAt <= RATE_CONTROL_BURST_WINDOW_MS);
   pressTimes.push(now);
   state.player[pressTimesKey] = pressTimes;
-  const burstLimit = kind === "rate" ? RATE_CONTROL_BURST_LIMIT : SYNC_CONTROL_BURST_LIMIT;
-  if (pressTimes.length >= burstLimit) {
+  if (pressTimes.length >= RATE_CONTROL_BURST_LIMIT) {
     activateSyncControlCooldown(kind, now);
   }
 }
@@ -181,13 +157,13 @@ export function handleGlobalPlayerKeydown(event) {
 
   if (key === "ArrowLeft") {
     event.preventDefault();
-    seekVideoBy(-KEYBOARD_SEEK_STEP_SECONDS, "keyboard");
+    seekVideoBy(-KEYBOARD_SEEK_STEP_SECONDS);
     return;
   }
 
   if (key === "ArrowRight") {
     event.preventDefault();
-    seekVideoBy(KEYBOARD_SEEK_STEP_SECONDS, "keyboard");
+    seekVideoBy(KEYBOARD_SEEK_STEP_SECONDS);
     return;
   }
 
@@ -210,11 +186,7 @@ function isEditableTarget(element) {
   );
 }
 
-export function seekVideoBy(deltaSeconds, source = "control") {
-  if (source === "control" || source === "keyboard") {
-    if (isSyncControlCoolingDown("seek")) return;
-    registerSyncControlPress("seek");
-  }
+export function seekVideoBy(deltaSeconds, source = "main-player") {
   const duration = getFiniteDuration();
   const currentTime = Number.isFinite(dom.videoPlayer.currentTime)
     ? Math.max(0, dom.videoPlayer.currentTime)
@@ -223,9 +195,17 @@ export function seekVideoBy(deltaSeconds, source = "control") {
     ? Math.min(duration, Math.max(0, currentTime + deltaSeconds))
     : Math.max(0, currentTime + deltaSeconds);
 
-  if (nextTime === currentTime) return;
+  if (nextTime === currentTime) {
+    if (source === "mini-player") {
+      traceMiniPlayer("seek-ignored-at-boundary", { source, deltaSeconds, duration, currentTime });
+    }
+    return;
+  }
 
   dom.videoPlayer.currentTime = nextTime;
+  if (source === "mini-player") {
+    traceMiniPlayer("seek-dispatched", { source, deltaSeconds, duration, previousTime: currentTime, targetTime: nextTime });
+  }
   syncPlayerControls(true);
 }
 
@@ -289,7 +269,6 @@ export function commitSeekPosition() {
 
 export function syncPlayerControls(forceSliderSync = false) {
   return renderPlayerControls(forceSliderSync, {
-    isPlayButtonCoolingDown,
     isSyncControlCoolingDown,
     getSyncControlCooldownSeconds,
     isMobileCenterControlsActive,

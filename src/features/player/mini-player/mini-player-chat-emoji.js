@@ -1,5 +1,6 @@
 import { focusChatInput } from "../../chat/composer/chat-input-focus.js";
 import { getRichEditorSelection, insertRichEditorText } from "../../chat/composer/chat-rich-editor.js";
+import { traceMiniPlayer } from "./mini-player-debug.js";
 
 const EMOJI_POPOVER_TAIL_INSET_PX = 12;
 const EMOJI_POPOVER_TRANSITION_MS = 150;
@@ -13,10 +14,17 @@ function getMirrorChatInput(element) { return element.querySelector("#overlayMes
 export function toggleMiniEmojiPicker(element) {
   const surface = element.closest(".mini-player-surface");
   const input = getMirrorChatInput(element);
-  if (!surface || !input) return;
+  if (!surface || !input) {
+    traceMiniPlayer("emoji-toggle-failed", { hasSurface: Boolean(surface), hasInput: Boolean(input) });
+    return;
+  }
 
   const popover = getMiniEmojiPopover(surface);
   if (!popover.hidden) {
+    traceMiniPlayer("emoji-popover-close-request", {
+      optionCount: popover.querySelectorAll(".emoji-popover__option").length,
+      hasTrack: Boolean(popover.querySelector(".emoji-popover__track")),
+    });
     hideMiniEmojiPopover(popover);
     return;
   }
@@ -57,6 +65,30 @@ export function toggleMiniEmojiPicker(element) {
   if (!isMobileChatLayout()) {
     requestAnimationFrame(() => focusChatInput(input, selectionStart, selectionEnd));
   }
+  const track = popover.querySelector(".emoji-popover__track");
+  const rect = popover.getBoundingClientRect();
+  traceMiniPlayer("emoji-popover-opened", {
+    hidden: popover.hidden,
+    className: popover.className,
+    optionCount: popover.querySelectorAll(".emoji-popover__option").length,
+    hasTrack: Boolean(track),
+    trackClientWidth: track?.clientWidth ?? null,
+    trackScrollWidth: track?.scrollWidth ?? null,
+    bounds: { x: Math.round(rect.x), y: Math.round(rect.y), width: Math.round(rect.width), height: Math.round(rect.height) },
+    background: window.getComputedStyle(popover).backgroundColor,
+  });
+  window.requestAnimationFrame(() => {
+    if (popover.hidden || popover.classList.contains('emoji-popover--closing')) return;
+    const renderedRect = popover.getBoundingClientRect();
+    traceMiniPlayer("emoji-popover-render-frame", {
+      hidden: popover.hidden,
+      className: popover.className,
+      optionCount: popover.querySelectorAll(".emoji-popover__option").length,
+      trackClientWidth: track?.clientWidth ?? null,
+      trackScrollWidth: track?.scrollWidth ?? null,
+      bounds: { x: Math.round(renderedRect.x), y: Math.round(renderedRect.y), width: Math.round(renderedRect.width), height: Math.round(renderedRect.height) },
+    });
+  });
 }
 
 function hideMiniEmojiPopover(popover) {
@@ -87,10 +119,15 @@ function getMiniEmojiPopover(surface) {
   fog.className = 'emoji-popover__fog';
   fog.setAttribute("aria-hidden", "true");
   popover.append(fog);
-  const sourceOptions = document.querySelector("#emojiPopover")?.children || [];
-  [...sourceOptions].filter((option) => option.classList.contains('emoji-popover__option')).forEach((option) => popover.append(
-    surface.ownerDocument.importNode(option, true),
-  ));
+  const sourcePopover = document.querySelector("#emojiPopover");
+  const sourceTrack = sourcePopover?.querySelector(".emoji-popover__track");
+  if (sourceTrack) {
+    popover.classList.toggle(
+      "emoji-popover--paged",
+      sourcePopover.classList.contains("emoji-popover--paged"),
+    );
+    popover.append(surface.ownerDocument.importNode(sourceTrack, true));
+  }
   popover.addEventListener("mousedown", (event) => event.preventDefault());
   popover.addEventListener("click", (event) => insertMiniEmoji(surface, event.target));
   surface.append(popover);
@@ -100,7 +137,15 @@ function getMiniEmojiPopover(surface) {
 function insertMiniEmoji(surface, target) {
   const option = target.closest?.('.emoji-popover__option');
   const input = surface.querySelector("#overlayMessageInput, [data-proxy-for=\"overlayMessageInput\"]");
-  if (!option || !input) return;
+  if (!option || !input) {
+    traceMiniPlayer("emoji-insert-failed", { hasOption: Boolean(option), hasInput: Boolean(input) });
+    return;
+  }
+  traceMiniPlayer("emoji-selected", {
+    emoji: option.textContent,
+    inputKind: input.isContentEditable ? "contenteditable" : input.type || input.tagName.toLowerCase(),
+    inputLengthBefore: input.isContentEditable ? input.textContent.length : input.value.length,
+  });
 
   if (input.isContentEditable) {
     insertRichEditorText(input, option.textContent, miniEmojiSelections.get(surface));

@@ -1,4 +1,5 @@
 import { dom } from "../../../core/dom.js";
+import { state } from "../../../core/state.js";
 import {
   getMirrorChatDraft,
   handleMiniChatInteraction,
@@ -22,8 +23,12 @@ import { setInsideChatAutoExpandEnabled } from "../../chat/chat-layout.js";
 import { wireMiniPlayerShortcuts } from "./mini-player-shortcuts.js";
 import { wireTouchHover } from "../../../core/touch-interactions.js";
 import { installRichEditor } from "../../chat/composer/chat-rich-editor.js";
+import { seekVideoBy, togglePlaybackFromControls } from "../controls/player-control-actions.js";
+import { traceMiniPlayer, getMiniPlayerVideoSnapshot } from "./mini-player-debug.js";
 
 const VIDEO_EVENTS = ["play", "pause", "ended", "timeupdate", "seeked", "ratechange", "volumechange"];
+const TRACE_VIDEO_EVENTS = ["play", "playing", "pause", "waiting", "stalled", "canplay", "seeking", "seeked", "ended", "error", "timeupdate"];
+const TRACE_SURFACE_DOM_EVENTS = ["pointerdown", "pointerup", "pointercancel", "click"];
 const PROXY_CONTROL_SELECTOR = "button, input:not([data-player-scroll-indicator]), select, textarea, [contenteditable='true']";
 
 export function movePlayerInterface(surface, options = {}) {
@@ -49,6 +54,31 @@ export function movePlayerInterface(surface, options = {}) {
     includeChat ? dom.playerChat : null,
   ].filter(Boolean).map((source) => createInteractiveMirror(source, surface.ownerDocument));
   mirrors.forEach(({ element }) => surface.append(element));
+  traceMiniPlayer("surface-open", {
+    includeChat,
+    includeChatToggle,
+    pictureInPictureDocument: surface.ownerDocument !== document,
+    mirrorSources: mirrors.map(({ source }) => source.id || source.className),
+  });
+  const traceSurfaceDomEvent = (event) => {
+    if (!surface.contains(event.target)) return;
+    const interactiveTarget = event.target.closest?.("button, input, select, textarea, [contenteditable='true']");
+    traceMiniPlayer("surface-event-capture", {
+      event: event.type,
+      isTrusted: event.isTrusted,
+      target: describeTraceTarget(event.target),
+      interactiveTarget: describeTraceTarget(interactiveTarget),
+      defaultPrevented: event.defaultPrevented,
+      eventPhase: event.eventPhase,
+      button: event.button ?? null,
+      buttons: event.buttons ?? null,
+      pointerId: event.pointerId ?? null,
+      pointerType: event.pointerType ?? null,
+    });
+  };
+  TRACE_SURFACE_DOM_EVENTS.forEach((eventName) => (
+    surface.ownerDocument.addEventListener(eventName, traceSurfaceDomEvent, true)
+  ));
   // Los espejos se sincronizan una primera vez antes de insertarse. Repetir
   // el de acciones después de anexarlo permite aplicar el estado propio del
   // mini reproductor al botón de chat (sin copiar el estado del principal).
@@ -74,10 +104,29 @@ export function movePlayerInterface(surface, options = {}) {
     .filter(({ source }) => source !== dom.playerChat)
     .forEach(({ syncState }) => syncState());
   VIDEO_EVENTS.forEach((eventName) => dom.videoPlayer.addEventListener(eventName, syncMirrors));
+  let lastTimeUpdateTraceAt = 0;
+  const traceVideoEvent = (event) => {
+    if (event.type === "timeupdate") {
+      const now = Date.now();
+      if (now - lastTimeUpdateTraceAt < 1000) return;
+      lastTimeUpdateTraceAt = now;
+    }
+    traceMiniPlayer("video-event", {
+      event: event.type,
+      mediaErrorCode: dom.videoPlayer.error?.code ?? null,
+      ...getMiniPlayerVideoSnapshot(),
+    });
+  };
+  TRACE_VIDEO_EVENTS.forEach((eventName) => dom.videoPlayer.addEventListener(eventName, traceVideoEvent));
 
   return {
     restore() {
+      traceMiniPlayer("surface-close");
+      TRACE_SURFACE_DOM_EVENTS.forEach((eventName) => (
+        surface.ownerDocument.removeEventListener(eventName, traceSurfaceDomEvent, true)
+      ));
       VIDEO_EVENTS.forEach((eventName) => dom.videoPlayer.removeEventListener(eventName, syncMirrors));
+      TRACE_VIDEO_EVENTS.forEach((eventName) => dom.videoPlayer.removeEventListener(eventName, traceVideoEvent));
       mirrors.forEach(({ restore }) => restore());
       playerChatMirror?.removeEventListener("click", handleMiniAutoExpandClick);
       removeShortcuts();
@@ -109,18 +158,166 @@ function createInteractiveMirror(source, targetDocument) {
   });
   let isSyncing = false;
   let initialMiniSystemStateNormalized = false;
+  let seekDragPointerId = null;
+  const pendingControlPointers = new Map();
+  let lastHandledPointerAction = null;
+  const ownerWindow = element.ownerDocument.defaultView;
+
+  // En la ventana PiP observada llegan pointerdown/up de los botones, pero no
+  // se genera click; activar en pointerup y deduplicar click cuando sí aparezca.
+  const handleMiniControlPointerDown = (event) => {
+    if (!event.isTrusted || event.button !== 0 || event.isPrimary === false) return;
+    if (!element.contains(event.target)) return;
+    const target = getSourceControl(source, event.target);
+    const action = getMiniPlayerControlAction(target);
+    if (!action || target.disabled) return;
+    pendingControlPointers.set(event.pointerId, { target, action });
+    traceMiniPlayer("mini-control-pointerdown", {
+      action,
+      pointerId: event.pointerId,
+      pointerType: event.pointerType,
+      controlId: target.id,
+      target: describeTraceTarget(event.target),
+    });
+  };
+
+  const handleMiniControlPointerUp = (event) => {
+    const pending = pendingControlPointers.get(event.pointerId);
+    if (!pending) return;
+    pendingControlPointers.delete(event.pointerId);
+    const releasedTarget = getSourceControl(source, event.target);
+    if (!event.isTrusted || releasedTarget !== pending.target || pending.target.disabled) {
+      traceMiniPlayer("mini-control-pointerup-cancelled", {
+        action: pending.action,
+        pointerId: event.pointerId,
+        isTrusted: event.isTrusted,
+        releasedControlId: releasedTarget?.id || null,
+        expectedControlId: pending.target.id,
+      });
+      return;
+    }
+
+    lastHandledPointerAction = {
+      target: pending.target,
+      timestamp: Date.now(),
+      pointerId: event.pointerId,
+    };
+    traceMiniPlayer("mini-control-pointerup-action", {
+      action: pending.action,
+      pointerId: event.pointerId,
+      pointerType: event.pointerType,
+      controlId: pending.target.id,
+      defaultPrevented: event.defaultPrevented,
+    });
+    runMiniPlayerControlAction(pending.target, "pointerup");
+    requestAnimationFrame(() => {
+      syncState();
+      traceMiniPlayer("control-sync-after-pointerup", {
+        controlId: pending.target.id,
+        mirrorSeekValue: element.querySelector('[data-proxy-for="playerSeekInput"], #playerSeekInput')?.value ?? null,
+        mirrorTimeLabel: element.querySelector('[data-proxy-for="playerCurrentTime"], #playerCurrentTime')?.textContent ?? null,
+      });
+    });
+  };
+
+  const handleMiniControlPointerCancel = (event) => {
+    const pending = pendingControlPointers.get(event.pointerId);
+    if (!pending) return;
+    pendingControlPointers.delete(event.pointerId);
+    traceMiniPlayer("mini-control-pointer-cancel", {
+      action: pending.action,
+      pointerId: event.pointerId,
+      controlId: pending.target.id,
+    });
+  };
+
+  ownerWindow?.addEventListener("pointerdown", handleMiniControlPointerDown, true);
+  ownerWindow?.addEventListener("pointerup", handleMiniControlPointerUp, true);
+  ownerWindow?.addEventListener("pointercancel", handleMiniControlPointerCancel, true);
+
+  const handleMiniSeekPointerDown = (event) => {
+    if (source !== dom.playerBottomActions) return;
+    const target = getSourceControl(source, event.target);
+    traceMiniPlayer("seek-pointer-down", {
+      pointerId: event.pointerId,
+      pointerType: event.pointerType,
+      target: describeTraceTarget(event.target),
+      mappedControl: describeTraceTarget(target),
+      disabled: target?.disabled ?? null,
+    });
+    if (target !== dom.playerSeekInput || target.disabled) return;
+    seekDragPointerId = event.pointerId;
+    state.ui.seekDragActive = true;
+    dom.playerFrame?.classList.add("player-frame--seek-control-dragging");
+    traceMiniPlayer("seek-drag-start", { pointerId: event.pointerId });
+  };
+
+  const handleMiniSeekPointerEnd = (event) => {
+    if (
+      source !== dom.playerBottomActions
+      || seekDragPointerId === null
+      || event.pointerId !== seekDragPointerId
+    ) return;
+
+    traceMiniPlayer("seek-drag-end", { pointerId: event.pointerId, event: event.type });
+    seekDragPointerId = null;
+    state.ui.seekDragActive = false;
+    dom.playerFrame?.classList.remove("player-frame--seek-control-dragging");
+    syncState();
+  };
 
   // El overlay del mini reproductor es una superficie independiente. Se
   // clona al abrirse, pero no vuelve a copiar cambios del reproductor normal.
   const observesSource = true;
   let removeTouchVolumeHovers = [];
 
+  const handleMirrorClickCapture = (event) => {
+    const proxy = event.target.closest?.("[data-proxy-index], [data-proxy-for]");
+    traceMiniPlayer("mirror-click-capture", {
+      source: source.id || source.className,
+      isTrusted: event.isTrusted,
+      target: describeTraceTarget(event.target),
+      proxyIndex: proxy?.dataset.proxyIndex ?? null,
+      proxyFor: proxy?.dataset.proxyFor ?? null,
+      mappedControl: describeTraceTarget(getSourceControl(source, event.target)),
+      defaultPrevented: event.defaultPrevented,
+    });
+  };
+  element.addEventListener("click", handleMirrorClickCapture, true);
+
   element.addEventListener("click", (event) => {
-    if (event.target.matches?.("input, select, textarea, [contenteditable='true']")) return;
+    const mappedTarget = getSourceControl(source, event.target);
+    const proxy = event.target.closest?.("[data-proxy-index], [data-proxy-for]");
+    traceMiniPlayer("mirror-click", {
+      source: source.id || source.className,
+      isTrusted: event.isTrusted,
+      eventTarget: describeTraceTarget(event.target),
+      proxyIndex: proxy?.dataset.proxyIndex ?? null,
+      proxyFor: proxy?.dataset.proxyFor ?? null,
+      mappedControl: describeTraceTarget(mappedTarget),
+      mappedControlDisabled: mappedTarget?.disabled ?? null,
+      clickDetail: event.detail,
+    });
+    if (event.detail > 0 && lastHandledPointerAction) {
+      const wasHandledByPointer = getSourceControl(source, event.target) === lastHandledPointerAction.target
+        && Date.now() - lastHandledPointerAction.timestamp <= 750;
+      lastHandledPointerAction = null;
+      if (wasHandledByPointer) {
+        traceMiniPlayer("mirror-click-skipped-after-pointer-action", {
+          controlId: mappedTarget?.id || null,
+        });
+        return;
+      }
+    }
+    if (event.target.matches?.("input, select, textarea, [contenteditable='true']")) {
+      traceMiniPlayer("mirror-click-ignored", { reason: "direct-input-target", source: source.id || source.className });
+      return;
+    }
     if (
       source === dom.playerChat
       && event.target.closest?.("#insideChatAutoExpandSwitch, [data-proxy-for=\"insideChatAutoExpandSwitch\"]")
     ) {
+      traceMiniPlayer("mirror-click-ignored", { reason: "chat-auto-expand-handled-elsewhere" });
       return;
     }
     if (source === dom.playerChat && event.target.closest?.('.message__system-group-toggle')) {
@@ -129,37 +326,65 @@ function createInteractiveMirror(source, targetDocument) {
       mirrorToggle.setAttribute("aria-expanded", String(expanded));
       setMiniSystemGroupVisibility(mirrorToggle, expanded);
       animateMiniSystemGroupTransition(mirrorToggle, expanded);
+      traceMiniPlayer("system-group-toggle", { expanded });
       return;
     }
-    const target = getSourceControl(source, event.target);
-    if (!target || target.disabled) return;
+    const target = mappedTarget;
+    if (!target || target.disabled) {
+      traceMiniPlayer("mirror-click-ignored", {
+        reason: !target ? "source-control-not-found" : "source-control-disabled",
+        source: source.id || source.className,
+      });
+      return;
+    }
     event.preventDefault();
     if (target.id === "playerChatToggleButton") {
+      traceMiniPlayer("chat-overlay-toggle", { activeBefore: element.closest(".mini-player-surface")?.classList.contains("u-chat-inside-open") ?? null });
       toggleMiniChatOverlay(element.closest(".mini-player-surface"));
       return;
     }
     if (isOverlayEmojiButton(source, target)) {
+      traceMiniPlayer("emoji-button-route", { controlId: target.id });
       toggleMiniEmojiPicker(element);
       return;
     }
     if (isOverlayMessageSubmit(source, target)) {
+      traceMiniPlayer("chat-send-button-route", { controlId: target.id });
       submitMirrorChat(source, element);
       return;
     }
     if (source === dom.playerChat) {
+      traceMiniPlayer("chat-control-route", { controlId: target.id || target.tagName });
       handleMiniChatInteraction(element, event.target);
       return;
     }
-    target.click();
+    // Ejecutar la reproducción desde el clic de PiP conserva la activación del
+    // usuario; reenviar un `.click()` al documento principal la vuelve sintética.
+    if (getMiniPlayerControlAction(target)) {
+      runMiniPlayerControlAction(target, "click");
+    } else {
+      traceMiniPlayer("control-route", { action: "forward-click", controlId: target.id || target.tagName });
+      target.click();
+    }
     requestAnimationFrame(() => {
       if (source === dom.playerBottomActions || source === dom.playerCenterActions) syncState();
       else sync();
+      traceMiniPlayer("control-sync-after-click", {
+        controlId: target.id || target.tagName,
+        mirrorSeekValue: element.querySelector('[data-proxy-for="playerSeekInput"], #playerSeekInput')?.value ?? null,
+        mirrorTimeLabel: element.querySelector('[data-proxy-for="playerCurrentTime"], #playerCurrentTime')?.textContent ?? null,
+      });
     });
   });
+
+  element.addEventListener("pointerdown", handleMiniSeekPointerDown);
+  ownerWindow?.addEventListener("pointerup", handleMiniSeekPointerEnd);
+  ownerWindow?.addEventListener("pointercancel", handleMiniSeekPointerEnd);
 
   element.addEventListener("submit", (event) => {
     if (source !== dom.playerChat) return;
     event.preventDefault();
+    traceMiniPlayer("chat-form-submit-event", { isTrusted: event.isTrusted, source: source.id });
     submitMirrorChat(source, element);
   });
 
@@ -167,6 +392,13 @@ function createInteractiveMirror(source, targetDocument) {
     element.addEventListener(eventName, (event) => {
       const target = getSourceControl(source, event.target);
       if (!target) return;
+      traceMiniPlayer("mirror-value-forward", {
+        event: eventName,
+        source: source.id || source.className,
+        controlId: target.id || target.tagName,
+        valueLength: isOverlayMessageInput(source, target) ? String(event.target.value || "").length : null,
+        value: target.type === "range" ? event.target.value : undefined,
+      });
       if (isOverlayMessageInput(source, target)) {
         target.value = event.target.value;
         target.dispatchEvent(new Event(eventName, { bubbles: true }));
@@ -250,9 +482,39 @@ function createInteractiveMirror(source, targetDocument) {
     restore() {
       observer.disconnect();
       removeTouchVolumeHovers.forEach((removeTouchHover) => removeTouchHover());
+      element.removeEventListener("click", handleMirrorClickCapture, true);
+      element.removeEventListener("pointerdown", handleMiniSeekPointerDown);
+      ownerWindow?.removeEventListener("pointerdown", handleMiniControlPointerDown, true);
+      ownerWindow?.removeEventListener("pointerup", handleMiniControlPointerUp, true);
+      ownerWindow?.removeEventListener("pointercancel", handleMiniControlPointerCancel, true);
+      pendingControlPointers.clear();
+      lastHandledPointerAction = null;
+      ownerWindow?.removeEventListener("pointerup", handleMiniSeekPointerEnd);
+      ownerWindow?.removeEventListener("pointercancel", handleMiniSeekPointerEnd);
+      if (seekDragPointerId !== null) {
+        seekDragPointerId = null;
+        state.ui.seekDragActive = false;
+        dom.playerFrame?.classList.remove("player-frame--seek-control-dragging");
+      }
       element.remove();
     },
   };
+
+  function getMiniPlayerControlAction(target) {
+    if (target === dom.playerPlayButton) return "toggle-playback";
+    if (target === dom.playerBackButton) return "seek-back";
+    if (target === dom.playerForwardButton) return "seek-forward";
+    return null;
+  }
+
+  function runMiniPlayerControlAction(target, trigger) {
+    const action = getMiniPlayerControlAction(target);
+    if (!action) return;
+    traceMiniPlayer("control-route", { action, controlId: target.id, trigger });
+    if (action === "toggle-playback") togglePlaybackFromControls("mini-player");
+    else if (action === "seek-back") seekVideoBy(-10, "mini-player");
+    else seekVideoBy(10, "mini-player");
+  }
 
   function sync() {
     if (isSyncing || isRangeBeingDragged(element)) return;
@@ -396,20 +658,36 @@ function copyDynamicButtonPresentation(source, element) {
     } else {
       mirrorButton.removeAttribute("data-tooltip");
     }
-    if (sourceButton.hasAttribute("data-play-button-cooldown")) {
-      mirrorButton.setAttribute("data-play-button-cooldown", "true");
-    } else {
-      mirrorButton.removeAttribute("data-play-button-cooldown");
-    }
   });
 
 }
 
 function getSourceControl(source, target) {
   if (!target?.closest) return null;
-  const proxy = target.closest("[data-proxy-index]");
+  const proxy = target.closest("[data-proxy-index], [data-proxy-for]");
   if (!proxy) return null;
-  return source.querySelectorAll(PROXY_CONTROL_SELECTOR)[Number(proxy.dataset.proxyIndex)] || null;
+
+  const sourceId = proxy.dataset.proxyFor || proxy.id;
+  if (sourceId) {
+    const identifiedControl = [...source.querySelectorAll(PROXY_CONTROL_SELECTOR)]
+      .find((control) => control.id === sourceId);
+    if (identifiedControl) return identifiedControl;
+  }
+
+  const proxyIndex = Number(proxy.dataset.proxyIndex);
+  if (!Number.isInteger(proxyIndex) || proxyIndex < 0) return null;
+  return source.querySelectorAll(PROXY_CONTROL_SELECTOR)[proxyIndex] || null;
+}
+
+function describeTraceTarget(target) {
+  if (!target) return null;
+  return {
+    tag: target.tagName?.toLowerCase() || null,
+    id: target.id || null,
+    className: typeof target.className === "string" ? target.className : null,
+    type: target.type || null,
+    disabled: typeof target.disabled === "boolean" ? target.disabled : null,
+  };
 }
 
 function isRangeBeingDragged(element) {
