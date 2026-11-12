@@ -162,7 +162,7 @@
     );
     margin-right: 0;
     --about-dialog-card-top-padding: 26px;
-    --about-dialog-fixed-header-vertical-padding: 13px;
+    --about-dialog-fixed-header-vertical-padding: 8px;
     padding: var(--about-dialog-card-top-padding) 20px 24px;
     padding-right: 28px;
     touch-action: pan-y;
@@ -226,7 +226,7 @@
   }
 
   .about-dialog__intro {
-    margin-block: 22px 20px;
+    margin-block: 0 20px;
     font-size: 0.94rem;
     line-height: 1.6;
   }

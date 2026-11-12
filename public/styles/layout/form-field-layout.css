@@ -86,6 +86,12 @@
   margin-bottom: 5px;
 }
 
+.session-toolbar__input-shell {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
 .o-field .help-button {
   width: 22px;
   height: 22px;
@@ -99,11 +105,12 @@
 }
 
 .session-toolbar__body input {
-  width: calc(100% - 8px);
-  margin-inline: 4px;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
   min-width: 0;
   min-height: 36px;
-  padding: 0 12px;
+  padding: 0 42px 0 12px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 6px;
   background: rgba(6, 8, 10, 0.4);
@@ -113,6 +120,43 @@
   outline: none;
   box-shadow: none;
   transition: border-color 0.2s, background 0.2s;
+}
+
+.video-hosting-help-button {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-end: 8px;
+  display: grid;
+  width: 28px;
+  height: 28px;
+  min-height: 28px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted-2);
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
+}
+
+.video-hosting-help-button svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+
+.video-hosting-help-button:hover,
+.video-hosting-help-button:focus-visible {
+  border-color: var(--glass-border-strong);
+  background: var(--glass-highlight);
+  color: var(--text);
+}
+
+.video-hosting-help-button:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
 }
 
 .session-toolbar__body input::placeholder {

@@ -6,6 +6,7 @@ import { wirePlayerCoreEvents } from "./player-events.js";
 import { configurePlayerMediaPort } from "./player-sync-logic.js";
 import { wirePlayerControlLayouts } from "./controls/player-controls-layout.js";
 import { wirePlayerVolumeLayouts } from "./controls/player-volume-layout.js";
+import { wireVideoHostingDialog } from "./video-hosting-dialog.js";
 
 export { initializePlayer } from "./player.js";
 export {
@@ -32,4 +33,5 @@ export function wirePlayerEvents() {
   wireFullscreenEvents(playerInteractions);
   wirePlayerControlLayouts();
   wirePlayerVolumeLayouts();
+  wireVideoHostingDialog();
 }

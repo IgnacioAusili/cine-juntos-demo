@@ -8,8 +8,20 @@ import { resetLobbyTicketPlacement, syncLobbyTicketStubWidth, syncLobbyTitlePlac
 export function syncLobbyContentCenter() {
   lobbyCenterFrame = 0;
   if (!document.body.classList.contains('page-context--lobby')) return;
-  // El teclado de la barra de direcciones cambia el viewport del navegador,
-  // pero no debe disparar la compresión dinámica del boleto ni del lobby.
+  // El teclado virtual reduce el viewport y puede activar reglas de poca
+  // altura. Durante ese estado, el contenido vuelve al flujo natural en vez
+  // de recentrarse contra el espacio que deja el teclado.
+  if (document.body.dataset.lobbyKeyboardOpen === "true") {
+    const screen = document.querySelector("#lobbyScreen");
+    screen?.querySelector(".lobby-screen__hero")?.style.removeProperty("translate");
+    screen?.querySelector(".lobby-screen__ticket")?.style.removeProperty("translate");
+    screen?.querySelector(".lobby-screen__app-invite")?.style.removeProperty(
+      "--lobby-app-invite-center-shift",
+    );
+    return;
+  }
+
+  // El teclado de la barra de direcciones no debe comprimir el lienzo.
   if (
     document.body.dataset.lobbyBrowserKeyboardOpen === "true"
     && document.body.dataset.lobbyBrowserKeyboardInitializing !== "true"

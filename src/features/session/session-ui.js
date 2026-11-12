@@ -5,6 +5,7 @@ export { initializeAboutDialog } from "./session-about-dialog.js";
 export { showErrorDialog, showLoadReplaceDialog, showSlowLoadDialog, showResumeVideoDialog } from "./session-dialogs.js";
 import { state, logEvent } from "../../core/state.js";
 import { refreshLayoutMetrics } from "../layout/index.js";
+import { syncResponsiveSessionLayout } from "../chat/dock/chat-responsive-layout.js";
 import { resetRoomEntryButtons } from "../room/room-input.js";
 
 const ROOM_ENTRY_VIDEO_FOCUS_TIMEOUT_MS = 8000;
@@ -134,6 +135,7 @@ export function showSession() {
   dom.sessionView.hidden = false;
   document.body.classList.remove('page-context--lobby');
   refreshLayoutMetrics();
+  syncResponsiveSessionLayout();
 }
 
 export function setHostBadge(visible) {

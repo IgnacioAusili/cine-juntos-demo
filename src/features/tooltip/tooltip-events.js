@@ -170,7 +170,7 @@ export function wireTooltipEvents() {
     const isMobileTooltipButton = context.anchor.classList?.contains("help-button")
       || isPresenceTooltipContext(context)
       || isStatusTooltipContext(context);
-    if (window.matchMedia("(max-width: 680px)").matches && isMobileTooltipButton) {
+    if (isTouchPointer(event) && isMobileTooltipButton) {
       if (state.ui.tooltipTarget === context.anchor && !dom.tooltipLayer.hidden) {
         if (dom.tooltipLayer.style.visibility === "hidden") {
           // Los toques durante la entrada no deben cerrar el tooltip antes de verlo.

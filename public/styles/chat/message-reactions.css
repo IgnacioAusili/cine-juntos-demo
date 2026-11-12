@@ -4,7 +4,7 @@
   --reaction-time-row-gap: 12px;
   --reaction-time-row-chip-reserve: 34px;
   --reaction-time-row-compact-size: 18px;
-  --reaction-time-row-emoji-offset: 1px;
+  --reaction-time-row-emoji-offset: 3px;
   --reaction-time-row-quote-offset: 0px;
   --reaction-time-row-order: 2;
 }

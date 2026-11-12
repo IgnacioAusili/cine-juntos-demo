@@ -1,7 +1,7 @@
 /* Este contenedor agrupa marca e ícono solo en la variante apaisada; en las
    demás composiciones, sus hijos siguen participando del grid existente. */
 @media (max-width: 680px) and (max-height: 500px) and (orientation: landscape) {
-  body.page-context--lobby[data-lobby-layout="columns"] .lobby-screen__grid {
+  body.page-context--lobby[data-lobby-viewport-orientation="landscape"][data-lobby-layout="columns"] .lobby-screen__grid {
     --lobby-phone-landscape-hero-width: 100%;
     --lobby-phone-landscape-title-size: clamp(2.65rem, 7vw, 3rem);
     --lobby-phone-landscape-title-fit-max-rem: 3;
@@ -10,7 +10,7 @@
     --lobby-phone-landscape-description-line-height: 1.35;
   }
 
-  body.page-context--lobby[data-lobby-layout="columns"] .lobby-screen__title-icon {
+  body.page-context--lobby[data-lobby-viewport-orientation="landscape"][data-lobby-layout="columns"] .lobby-screen__title-icon {
     --lobby-title-icon-scale: 0.78;
     --lobby-title-icon-min-size-px: 40px;
   }
@@ -24,12 +24,12 @@
    el flujo dinámico decide si las dos columnas caben en el grid medido. */
 @media (min-width: 681px) and (max-height: 500px) and (orientation: landscape) {
   /* El cálculo necesita estos mínimos incluso antes de pasar a columnas. */
-  body.page-context--lobby[data-lobby-layout="columns"] .lobby-screen__grid {
+  body.page-context--lobby[data-lobby-viewport-orientation="landscape"][data-lobby-layout="columns"] .lobby-screen__grid {
     --lobby-columns-min-hero-inline-size: 240px;
     --lobby-columns-min-ticket-inline-size: 320px;
   }
 
-  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__grid {
+  body.page-context--lobby[data-lobby-viewport-orientation="landscape"][data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__grid {
     --lobby-ticket-track-size: clamp(320px, 43.5vw, 370px);
     --lobby-landscape-ticket-track-gap: 10px;
     --lobby-landscape-ticket-body-gap: 12px;
@@ -43,11 +43,11 @@
   }
 
   /* El ancho y la densidad del boleto se adaptan a cualquier viewport apaisado. */
-  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__ticket {
+  body.page-context--lobby[data-lobby-viewport-orientation="landscape"][data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__ticket {
     width: calc(var(--lobby-ticket-track-size) - var(--lobby-landscape-ticket-track-gap));
   }
 
-  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__ticket-body {
+  body.page-context--lobby[data-lobby-viewport-orientation="landscape"][data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__ticket-body {
     gap: var(--lobby-landscape-ticket-body-gap);
     padding:
       var(--lobby-landscape-ticket-padding-top)
@@ -55,21 +55,21 @@
       var(--lobby-landscape-ticket-padding-bottom);
   }
 
-  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__ticket-head {
+  body.page-context--lobby[data-lobby-viewport-orientation="landscape"][data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__ticket-head {
     padding-bottom: var(--lobby-landscape-ticket-head-padding);
   }
 
-  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__fields {
+  body.page-context--lobby[data-lobby-viewport-orientation="landscape"][data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__fields {
     gap: var(--lobby-landscape-ticket-fields-gap);
   }
 
-  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__fields input:is([type="text"], [type="search"]) {
+  body.page-context--lobby[data-lobby-viewport-orientation="landscape"][data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__fields input:is([type="text"], [type="search"]) {
     height: var(--lobby-landscape-ticket-control-height);
     min-height: var(--lobby-landscape-ticket-control-height);
     line-height: var(--lobby-landscape-ticket-control-height);
   }
 
-  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__actions > .button {
+  body.page-context--lobby[data-lobby-viewport-orientation="landscape"][data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__actions > .button {
     min-height: var(--lobby-landscape-ticket-action-height);
   }
 }
@@ -78,16 +78,16 @@
    boleto. Sin la lista de prestaciones, ambas columnas quedan centradas en
    el espacio vertical disponible. */
 @media (min-width: 681px) and (max-height: 500px) and (orientation: landscape) {
-  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__grid {
+  body.page-context--lobby[data-lobby-viewport-orientation="landscape"][data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__grid {
     align-items: center;
   }
 
-  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__hero,
-  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__ticket {
+  body.page-context--lobby[data-lobby-viewport-orientation="landscape"][data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__hero,
+  body.page-context--lobby[data-lobby-viewport-orientation="landscape"][data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__ticket {
     align-self: center;
   }
 
-  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__hero {
+  body.page-context--lobby[data-lobby-viewport-orientation="landscape"][data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__hero {
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
       "brand"
@@ -98,7 +98,7 @@
     text-align: center;
   }
 
-  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__brand {
+  body.page-context--lobby[data-lobby-viewport-orientation="landscape"][data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__brand {
     --lobby-title-icon-title-gap: clamp(8px, 1.8vh, 12px);
     position: relative;
     grid-area: brand;
@@ -111,7 +111,7 @@
     max-width: 100%;
   }
 
-  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__title-icon {
+  body.page-context--lobby[data-lobby-viewport-orientation="landscape"][data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__title-icon {
     --lobby-title-icon-scale: 0.78;
     --lobby-title-icon-min-size-px: 40px;
     position: absolute;
@@ -120,7 +120,7 @@
     translate: -50% 0;
   }
 
-  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__title {
+  body.page-context--lobby[data-lobby-viewport-orientation="landscape"][data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__title {
     --lobby-title-fit-max-rem: 3.6;
     display: flex;
     flex-direction: row;
@@ -134,12 +134,12 @@
     text-align: left;
   }
 
-  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__title-line {
+  body.page-context--lobby[data-lobby-viewport-orientation="landscape"][data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__title-line {
     flex: 0 0 auto;
     white-space: nowrap;
   }
 
-  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__features {
+  body.page-context--lobby[data-lobby-viewport-orientation="landscape"][data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__features {
     display: none;
   }
 }
@@ -149,14 +149,14 @@
    Bajar los mínimos permite conservar hero y boleto en columnas cuando ambos
    caben en el ancho real; si no caben, el flujo dinámico sigue apilándolos. */
 @media (max-width: 680px) and (max-height: 500px) and (orientation: landscape) {
-  body.page-context--lobby[data-lobby-layout="columns"] .lobby-screen__grid {
+  body.page-context--lobby[data-lobby-viewport-orientation="landscape"][data-lobby-layout="columns"] .lobby-screen__grid {
     --lobby-columns-min-hero-inline-size: 260px;
     --lobby-ticket-track-size: clamp(260px, calc(40vw + 38px), 310px);
     --lobby-columns-min-ticket-inline-size: 260px;
     --lobby-grid-column-gap: 8px;
   }
 
-  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__grid {
+  body.page-context--lobby[data-lobby-viewport-orientation="landscape"][data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__grid {
     grid-template-columns:
       minmax(0, 1fr)
       minmax(var(--lobby-columns-min-ticket-inline-size), 0.9fr);
@@ -165,7 +165,7 @@
     row-gap: 8px;
   }
 
-  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__hero {
+  body.page-context--lobby[data-lobby-viewport-orientation="landscape"][data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__hero {
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
       "brand"
@@ -175,7 +175,7 @@
     text-align: center;
   }
 
-  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__brand {
+  body.page-context--lobby[data-lobby-viewport-orientation="landscape"][data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__brand {
     grid-area: brand;
     display: flex;
     flex-direction: column;
@@ -186,7 +186,7 @@
     max-width: 100%;
   }
 
-  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__title-icon {
+  body.page-context--lobby[data-lobby-viewport-orientation="landscape"][data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__title-icon {
     flex: 0 0 auto;
     width: var(--lobby-phone-landscape-title-icon-size);
     height: var(--lobby-phone-landscape-title-icon-size);
@@ -194,7 +194,7 @@
     min-height: var(--lobby-phone-landscape-title-icon-size);
   }
 
-  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__title {
+  body.page-context--lobby[data-lobby-viewport-orientation="landscape"][data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__title {
     --lobby-title-fit-max-rem: var(--lobby-phone-landscape-title-fit-max-rem);
     display: flex;
     flex-direction: row;
@@ -208,39 +208,39 @@
     text-align: left;
   }
 
-  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__title-line {
+  body.page-context--lobby[data-lobby-viewport-orientation="landscape"][data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__title-line {
     flex: 0 0 auto;
     white-space: nowrap;
   }
 
-  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__features {
+  body.page-context--lobby[data-lobby-viewport-orientation="landscape"][data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__features {
     display: none;
   }
 
-  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__ticket {
+  body.page-context--lobby[data-lobby-viewport-orientation="landscape"][data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__ticket {
     width: min(var(--lobby-ticket-track-size), 100%);
     justify-self: center;
   }
 
-  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__hero {
+  body.page-context--lobby[data-lobby-viewport-orientation="landscape"][data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__hero {
     width: var(--lobby-phone-landscape-hero-width);
   }
 
-  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__description {
+  body.page-context--lobby[data-lobby-viewport-orientation="landscape"][data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__description {
     font-size: var(--lobby-phone-landscape-description-size);
     line-height: var(--lobby-phone-landscape-description-line-height);
   }
 }
 
 @media (max-width: 680px) and (max-height: 500px) and (orientation: landscape) {
-  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__actions {
+  body.page-context--lobby[data-lobby-viewport-orientation="landscape"][data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__actions {
     grid-template-columns: minmax(0, 1fr);
     justify-items: center;
     row-gap: 10px;
     margin-block-end: 12px;
   }
 
-  body.page-context--lobby[data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__actions > .button {
+  body.page-context--lobby[data-lobby-viewport-orientation="landscape"][data-lobby-layout="columns"][data-lobby-flow="columns"] .lobby-screen__actions > .button {
     width: min(260px, calc(100% - clamp(8px, 3vw, 20px)));
     height: 36px;
     min-height: 36px;

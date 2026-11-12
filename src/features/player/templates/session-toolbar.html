@@ -2,28 +2,31 @@
               <div class="session-toolbar__body">
                 <div class="session-toolbar__field">
                   <span class="session-toolbar__label-row">
-                        <span class="session-toolbar__label">Enlace del video</span>
-                    <button
-                      class="help-button"
-                      type="button"
-                      aria-label="Ayuda sobre el enlace del video"
-                    >
-                      <span
-                        data-lucide="circle-help"
-                        data-tooltip="Enlace directo a un video MP4, WebM o similar"
-                      ></span>
-                    </button>
+                    <span class="session-toolbar__label">Enlace del video</span>
                   </span>
-                  <input
-                    id="videoUrlInput"
-                    type="search"
-                    inputmode="url"
-                    autocomplete="off"
-                    spellcheck="false"
-                    data-bwignore="true"
-                    data-lpignore="true"
-                    placeholder="https://servidor.com/video.mp4"
-                  />
+                  <div class="session-toolbar__input-shell">
+                    <input
+                      id="videoUrlInput"
+                      type="search"
+                      inputmode="url"
+                      autocomplete="off"
+                      spellcheck="false"
+                      data-bwignore="true"
+                      data-lpignore="true"
+                      placeholder="https://servidor.com/video.mp4"
+                    />
+                    <button
+                      id="videoHostingHelpButton"
+                      class="video-hosting-help-button"
+                      type="button"
+                      aria-label="Cómo alojar y compartir un video"
+                      aria-haspopup="dialog"
+                      aria-controls="videoHostingDialog"
+                      title="Cómo alojar y compartir un video"
+                    >
+                      <span data-lucide="circle-help" aria-hidden="true"></span>
+                    </button>
+                  </div>
                 </div>
                 <button
                   class="button   button--primary"

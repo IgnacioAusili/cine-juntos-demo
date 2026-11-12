@@ -29,14 +29,39 @@ function applyVariant(select, value) {
   if (select) select.value = nextValue;
 }
 
+function syncLobbyViewportOrientation(force = false) {
+  const body = document.body;
+  if (
+    !force
+    && (
+      body.dataset.lobbyInputFocused === "true"
+      || body.dataset.lobbyKeyboardOpen === "true"
+    )
+  ) return;
+
+  body.dataset.lobbyViewportOrientation = window.matchMedia("(orientation: landscape)").matches
+    ? "landscape"
+    : "portrait";
+}
+
 export function wireLobbyLayoutVariants() {
   const select = document.querySelector("#lobbyLayoutVariant");
   applyVariant(select, getSavedVariant());
+  syncLobbyViewportOrientation();
 
   const screen = document.querySelector("#lobbyScreen");
   if (screen) {
     wireLobbyMarqueeContent(screen);
-    window.addEventListener("resize", scheduleLobbyContentCenter, { passive: true });
+    window.addEventListener("resize", () => {
+      syncLobbyViewportOrientation();
+      scheduleLobbyContentCenter();
+    }, { passive: true });
+    const handleOrientationChange = () => {
+      syncLobbyViewportOrientation(true);
+      scheduleLobbyContentCenter();
+    };
+    window.addEventListener("orientationchange", handleOrientationChange, { passive: true });
+    window.screen.orientation?.addEventListener?.("change", handleOrientationChange);
 
     if (typeof MutationObserver === "function") {
       let wasLobbyVisible = document.body.classList.contains('page-context--lobby');

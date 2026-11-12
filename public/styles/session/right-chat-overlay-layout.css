@@ -21,6 +21,15 @@ body:not(.page-context--lobby)
   max-width: none;
 }
 
+/* El botón de contraer vive sobre el encabezado en el chat que ocupa el video.
+   Reservar su carril desde el inicio evita que la primera medición desplace
+   los controles cuando el handle queda anclado al header. */
+body:not(.page-context--lobby)
+  .session-view--chat-overlay:not(.session-view--chat-collapsed)[data-chat-dock="right"] .chat-tools {
+  box-sizing: border-box;
+  padding-inline-start: 38px;
+}
+
 .session-view--chat-overlay[data-chat-dock="right"] .chat-area > .message-form {
   left: var(--app-shell-gutter);
   right: var(--app-shell-gutter);

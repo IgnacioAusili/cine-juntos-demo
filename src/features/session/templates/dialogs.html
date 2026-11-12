@@ -66,6 +66,59 @@
     </dialog>
 
     <dialog
+      id="videoHostingDialog"
+      class="app-dialog   player-dialog   player-dialog--video-hosting"
+      aria-modal="true"
+      aria-labelledby="videoHostingDialogTitle"
+      aria-describedby="videoHostingDialogIntro"
+    >
+      <div class="player-dialog__card">
+        <div class="video-hosting-dialog__fixed-header">
+          <div class="player-dialog__header">
+            <span class="o-dialog-title-icon" aria-hidden="true" data-lucide="circle-help"></span>
+            <h2 id="videoHostingDialogTitle">Cómo alojar y compartir un video</h2>
+          </div>
+          <button id="closeVideoHostingDialogButton" type="button" class="o-dialog-close" aria-label="Cerrar información" data-tooltip="Cerrar (Esc)">
+            <span data-lucide="x" aria-hidden="true"></span>
+          </button>
+        </div>
+        <div class="video-hosting-dialog__content">
+          <p id="videoHostingDialogIntro" class="video-hosting-dialog__intro">
+            Cine Juntos necesita un enlace HTTPS directo a un archivo de video accesible para las personas de la sala. Acepta MP4, WebM, Ogg, MOV y M4V; el enlace debe abrir el archivo, no una página de reproducción.
+          </p>
+          <section class="video-hosting-dialog__section" aria-labelledby="videoHostingStepsTitle">
+            <h3 id="videoHostingStepsTitle">Cómo prepararlo</h3>
+            <ol>
+              <li>Subí el archivo a un servicio de almacenamiento, a una plataforma de video o a tu propio servidor.</li>
+              <li>Obtené un enlace HTTPS directo al archivo y compartí uno que las personas de la sala puedan abrir. Si el enlace es temporal, pueden usarlo mientras siga vigente.</li>
+              <li>Pegá el enlace en este campo y cargalo en la sala.</li>
+            </ol>
+          </section>
+          <section class="video-hosting-dialog__section" aria-labelledby="videoHostingServicesTitle">
+            <h3 id="videoHostingServicesTitle">Opciones para alojarlo</h3>
+            <ul>
+              <li><strong>Almacenamiento + enlace directo:</strong> servicios como Cloudflare R2, Amazon S3 o Backblaze B2. Configurá el acceso al archivo y compartí su URL; algunos permiten servirlo mediante una CDN.</li>
+              <li><strong>Tu propio servidor:</strong> podés subir el video a tu hosting web, VPS o servidor personal y publicar un enlace HTTPS directo. Tené en cuenta el espacio disponible y el ancho de banda para quienes lo reproduzcan.</li>
+              <li><strong>Hosting de video:</strong> Bunny Stream, Cloudflare Stream o Vimeo procesan y reproducen videos. Sus enlaces de página o reproductor no sirven en este campo: necesitás que el servicio ofrezca un enlace directo a un archivo compatible.</li>
+            </ul>
+            <div class="video-hosting-dialog__links">
+              <a href="https://developers.cloudflare.com/r2/buckets/public-buckets/" target="_blank" rel="noopener noreferrer">Guía de acceso público de R2</a>
+              <a href="https://developers.cloudflare.com/stream/viewing-videos/download-videos/" target="_blank" rel="noopener noreferrer">Enlaces MP4 de Cloudflare Stream</a>
+              <a href="https://docs.bunny.net/docs/stream/mp4-downloads" target="_blank" rel="noopener noreferrer">Descargas MP4 de Bunny Stream</a>
+              <a href="https://help.vimeo.com/hc/en-us/articles/12426150952593-How-to-access-my-video-s-direct-links" target="_blank" rel="noopener noreferrer">Enlaces directos de Vimeo</a>
+            </div>
+          </section>
+          <p class="video-hosting-dialog__note">
+            Los enlaces normales de YouTube, Google Drive o las páginas de Vimeo suelen llevar a un reproductor, no al archivo. Si el enlace es temporal, alcanza con que esté vigente cuando lo use la sala.
+          </p>
+          <div class="player-dialog__actions">
+            <button id="closeVideoHostingDialogActionButton" type="button" class="button   button--primary">Entendido</button>
+          </div>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog
       id="aboutDialog"
       class="app-dialog   about-dialog"
       aria-modal="true"

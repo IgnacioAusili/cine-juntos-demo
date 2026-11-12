@@ -33,12 +33,14 @@ export function syncSingleColumnContentGap(grid, ticket, footer) {
 function centerHeroInAvailableSpace(hero, availableTop, availableBottom) {
   const heroRect = hero.getBoundingClientRect();
   const availableHeight = availableBottom - availableTop;
-  if (availableHeight < heroRect.height) return;
+  if (availableHeight <= 0) return;
 
   const minimumShift = availableTop - heroRect.top;
   const maximumShift = availableBottom - heroRect.bottom;
   const centeredShift = (availableTop + availableBottom - heroRect.top - heroRect.bottom) / 2;
-  const shift = Math.min(maximumShift, Math.max(minimumShift, centeredShift));
+  const shift = availableHeight >= heroRect.height
+    ? Math.min(maximumShift, Math.max(minimumShift, centeredShift))
+    : maximumShift;
 
   if (Number.isFinite(shift)) {
     hero.style.setProperty("translate", `0px ${shift.toFixed(2)}px`);
