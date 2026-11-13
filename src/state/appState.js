@@ -1,4 +1,5 @@
 import { dom } from "../core/dom.js";
+import { isDebugMode } from "../core/debug-mode.js";
 import {
   EXAMPLE_VIDEO_URL,
   makeGuestName,
@@ -56,8 +57,9 @@ export const sessionState = {
   knownMembers: null,
   hostRoomCode: sessionStorage.getItem("cine-juntos-host-room") || "",
   terminalLogsEnabled:
-    Boolean(window.CINE_JUNTOS_TERMINAL_LOGS) ||
-    new URLSearchParams(window.location.search).get("terminalLogs") === "1",
+    isDebugMode()
+    && (Boolean(window.CINE_JUNTOS_TERMINAL_LOGS)
+      || new URLSearchParams(window.location.search).get("terminalLogs") === "1"),
 };
 
 export const playerState = {
@@ -193,6 +195,8 @@ export function makeMemberPayload() {
 }
 
 export function logEvent(kind, message) {
+  if (!isDebugMode()) return;
+
   const now = new Date();
   const time = now.toLocaleTimeString("es-AR", {
     hour: "2-digit",
@@ -200,8 +204,15 @@ export function logEvent(kind, message) {
     second: "2-digit",
   });
   const line = `[${time}] [${kind}] ${message}`;
+  let droppedOldest = false;
   clientLogBuffer.push(line);
-  if (clientLogBuffer.length > CLIENT_LOG_LIMIT) clientLogBuffer.shift();
+  if (clientLogBuffer.length > CLIENT_LOG_LIMIT) {
+    clientLogBuffer.shift();
+    droppedOldest = true;
+  }
+  window.dispatchEvent(new CustomEvent("cine:client-log", {
+    detail: { line, droppedOldest },
+  }));
   console.info(line);
   sendTerminalLog({
     at: now.toISOString(),
@@ -221,7 +232,7 @@ export function clearClientLog() {
 }
 
 function sendTerminalLog(payload) {
-  if (!state.session.terminalLogsEnabled) return;
+  if (!isDebugMode() || !state.session.terminalLogsEnabled) return;
 
   const body = JSON.stringify(payload);
   if (navigator.sendBeacon) {
@@ -238,7 +249,7 @@ function sendTerminalLog(payload) {
 }
 
 export function detectTerminalLogEndpoint() {
-  if (state.session.terminalLogsEnabled || window.location.protocol === "file:") return;
+  if (!isDebugMode() || state.session.terminalLogsEnabled || window.location.protocol === "file:") return;
 
   fetch("/__client-log-ready", { cache: "no-store" })
     .then((response) => {

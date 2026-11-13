@@ -7,8 +7,9 @@ const root = path.resolve(__dirname, "..");
 const portArgIndex = process.argv.indexOf("--port");
 const port = Number(process.env.PORT || (portArgIndex >= 0 ? process.argv[portArgIndex + 1] : 8080));
 
+let routeBaseCspHash;
 try {
-  buildHtml();
+  ({ routeBaseCspHash } = buildHtml());
 } catch (error) {
   console.error(`No se pudo preparar index.html: ${error.message}`);
   process.exit(1);
@@ -16,8 +17,8 @@ try {
 
 const csp = [
   "default-src 'self'",
-  "script-src 'self' https://unpkg.com https://www.gstatic.com https://apis.google.com https://cinecompartidopagina-default-rtdb.firebaseio.com https://*.firebaseio.com https://*.firebasedatabase.app",
-  "script-src-elem 'self' https://unpkg.com https://www.gstatic.com https://apis.google.com https://cinecompartidopagina-default-rtdb.firebaseio.com https://*.firebaseio.com https://*.firebasedatabase.app",
+  `script-src 'self' ${routeBaseCspHash} https://unpkg.com https://www.gstatic.com https://apis.google.com https://cinecompartidopagina-default-rtdb.firebaseio.com https://*.firebaseio.com https://*.firebasedatabase.app`,
+  `script-src-elem 'self' ${routeBaseCspHash} https://unpkg.com https://www.gstatic.com https://apis.google.com https://cinecompartidopagina-default-rtdb.firebaseio.com https://*.firebaseio.com https://*.firebasedatabase.app`,
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "style-src-elem 'self' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com data:",
@@ -117,7 +118,12 @@ const server = http.createServer(async (req, res) => {
   }
 
   // Las rutas de testeo son rutas virtuales de la SPA.
-  if (url.pathname.startsWith("/test/dialog/") || url.pathname.startsWith("/test/player/")) {
+  const isTestRoute = /^\/test\/(?:dialog|player)\/[^/]+\/?$/.test(url.pathname);
+  let testRouteBaseHref = "";
+  if (isTestRoute) {
+    const routeDirectoryDepth = url.pathname.split("/").filter(Boolean).length
+      - (url.pathname.endsWith("/") ? 0 : 1);
+    testRouteBaseHref = "../".repeat(routeDirectoryDepth);
     url.pathname = "/index.html";
   }
 
@@ -142,12 +148,20 @@ const server = http.createServer(async (req, res) => {
     res.end();
     return;
   }
+  if (testRouteBaseHref) {
+    const html = fs.readFileSync(resolved, "utf8").replace(
+      /(<base\s+href=")\.\/("\s*\/?>)/,
+      `$1${testRouteBaseHref}$2`,
+    );
+    res.end(html);
+    return;
+  }
   fs.createReadStream(resolved).pipe(res);
 });
 
 server.listen(port, () => {
   console.log(`Cine Juntos dev server: http://localhost:${port}`);
-  console.log("Client logs enabled in this terminal.");
+  console.log("Client logs require DEBUG_MODE = true in src/core/debug-mode.js.");
 });
 
 let htmlBuildTimer;

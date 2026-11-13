@@ -125,7 +125,7 @@
 .video-hosting-help-button {
   position: absolute;
   inset-block-start: 50%;
-  inset-inline-end: 8px;
+  inset-inline-end: 4px;
   display: grid;
   width: 28px;
   height: 28px;
@@ -141,20 +141,37 @@
   transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
 }
 
+.video-hosting-help-button::before {
+  position: absolute;
+  inset: 2px;
+  border: 1px solid transparent;
+  border-radius: inherit;
+  background: transparent;
+  content: "";
+  pointer-events: none;
+  transition: background 140ms ease, border-color 140ms ease;
+}
+
 .video-hosting-help-button svg {
   display: block;
   width: 16px;
   height: 16px;
 }
 
-.video-hosting-help-button:hover,
-.video-hosting-help-button:focus-visible {
-  border-color: var(--glass-border-strong);
-  background: var(--glass-highlight);
+.video-hosting-help-button:hover {
+  border-color: transparent;
+  background: transparent;
   color: var(--text);
 }
 
+.video-hosting-help-button:hover::before {
+  border-color: var(--glass-border-strong);
+  background: var(--glass-highlight);
+}
+
 .video-hosting-help-button:focus-visible {
+  border-color: var(--glass-border-strong);
+  background: var(--glass-highlight);
   outline: 2px solid var(--teal);
   outline-offset: 2px;
 }

@@ -1,4 +1,5 @@
 import { dom } from "../../core/dom.js";
+import { isDebugMode } from "../../core/debug-mode.js";
 import { logEvent } from "../../core/state.js";
 import { collectMobileKeyboardSnapshot } from "./mobile-keyboard-diagnostics-snapshot.js";
 
@@ -38,7 +39,7 @@ function handleViewportEvent(reason) {
 }
 
 export function wireMobileKeyboardDiagnostics() {
-  if (!dom.sessionView || !dom.messageInput) return;
+  if (!isDebugMode() || !dom.sessionView || !dom.messageInput) return;
 
   writeSnapshot("init");
   [dom.messageInput, dom.overlayMessageInput].filter(Boolean).forEach((input) => {
@@ -51,7 +52,10 @@ export function wireMobileKeyboardDiagnostics() {
   window.addEventListener("orientationchange", () => scheduleSnapshot("window:orientationchange"), { passive: true });
   window.addEventListener("scroll", handleScroll, { passive: true, capture: true });
   window.addEventListener("pageshow", () => scheduleSnapshot("window:pageshow"), { passive: true });
-  document.addEventListener("visibilitychange", () => scheduleSnapshot(`document:visibility-${document.visibilityState}`), { passive: true });
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") return;
+    scheduleSnapshot(`document:visibility-${document.visibilityState}`);
+  }, { passive: true });
   window.visualViewport?.addEventListener("resize", () => handleViewportEvent("visualViewport:resize"), { passive: true });
   window.visualViewport?.addEventListener("scroll", () => handleViewportEvent("visualViewport:scroll"), { passive: true });
   navigator.virtualKeyboard?.addEventListener?.("geometrychange", () => scheduleSnapshot("virtualKeyboard:geometrychange"), { passive: true });

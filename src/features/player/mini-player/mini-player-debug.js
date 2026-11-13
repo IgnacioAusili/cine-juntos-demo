@@ -1,4 +1,5 @@
 import { dom } from "../../../core/dom.js";
+import { isDebugMode } from "../../../core/debug-mode.js";
 
 export const MINI_PLAYER_DEBUG_TAG = "[MINI_PLAYER_TRACE]";
 
@@ -33,6 +34,8 @@ export function getMiniPlayerVideoSnapshot() {
 }
 
 export function traceMiniPlayer(eventName, details = {}) {
+  if (!isDebugMode()) return;
+
   const payload = {
     timestamp: new Date().toISOString(),
     ...getMiniPlayerVideoSnapshot(),

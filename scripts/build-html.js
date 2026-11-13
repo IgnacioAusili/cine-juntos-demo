@@ -1,5 +1,6 @@
 const fs = require("node:fs");
 const path = require("node:path");
+const crypto = require("node:crypto");
 
 const projectRoot = path.resolve(__dirname, "..");
 const sourceRoot = path.join(projectRoot, "src");
@@ -64,13 +65,19 @@ function expandHtml(filePath, stack, sources) {
 function buildHtml({ check = false } = {}) {
   validateSourceLineCounts();
   const sources = new Set();
-  const html = expandHtml(templatePath, [], sources);
+  const expandedHtml = expandHtml(templatePath, [], sources);
+  const routeBaseScript = expandedHtml.match(/<script id="route-base-path">([\s\S]*?)<\/script>/)?.[1];
+  if (!routeBaseScript) throw new Error("No se encontró el script route-base-path para la política CSP.");
+  const routeBaseCspHash = `'sha256-${crypto.createHash("sha256").update(routeBaseScript).digest("base64")}'`;
+  const cspPlaceholder = "__ROUTE_BASE_CSP_HASH__";
+  if (!expandedHtml.includes(cspPlaceholder)) throw new Error("Falta el marcador CSP de route-base-path.");
+  const html = expandedHtml.replaceAll(cspPlaceholder, routeBaseCspHash);
   const current = fs.existsSync(outputPath) ? fs.readFileSync(outputPath, "utf8") : null;
   const changed = current !== html;
 
-  if (check) return { changed, lines: countLines(html), sources: [...sources] };
+  if (check) return { changed, lines: countLines(html), sources: [...sources], routeBaseCspHash };
   if (changed) fs.writeFileSync(outputPath, html, "utf8");
-  return { changed, lines: countLines(html), sources: [...sources] };
+  return { changed, lines: countLines(html), sources: [...sources], routeBaseCspHash };
 }
 
 if (require.main === module) {

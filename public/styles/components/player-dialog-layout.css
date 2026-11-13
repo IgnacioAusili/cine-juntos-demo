@@ -1,9 +1,57 @@
 
 
 .player-dialog[open] {
+  position: fixed;
+  top: var(--player-dialog-top, 0px);
+  right: auto;
+  bottom: auto;
+  left: var(--player-dialog-left, 0px);
+  width: var(--player-dialog-width);
+  height: var(--player-dialog-height);
+  min-height: 0;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+  background: var(--player-dialog-overlay-color);
+  backdrop-filter: blur(var(--player-dialog-overlay-blur));
+  box-shadow: none;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.player-dialog[open]::backdrop {
+  background: transparent;
+  backdrop-filter: none;
+}
+
+.player-dialog[open] > .player-dialog__card {
+  max-width: var(--player-dialog-card-max-width);
+  max-height: var(--player-dialog-card-max-height);
+}
+
+.player-dialog--compact:not(.player-dialog--video-hosting) > .player-dialog__card {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--app-shell-gutter);
+}
+
+.player-dialog--compact:not(.player-dialog--video-hosting) .player-dialog__header {
+  gap: var(--app-shell-gutter);
+  margin-bottom: var(--app-shell-gutter);
+}
+
+.player-dialog--compact:not(.player-dialog--video-hosting) .player-dialog__message {
+  margin-bottom: var(--app-shell-gutter);
+}
+
+.player-dialog--compact.player-dialog--confirm-load .player-dialog__confirm-checkbox {
+  margin: 0 0 var(--app-shell-gutter);
 }
 
 .player-dialog--video-hosting {
@@ -24,6 +72,18 @@
   max-height: calc(100dvh - 32px);
   overflow: hidden;
   padding: 0;
+}
+
+.player-dialog--video-hosting .o-dialog-title-icon {
+  color: var(--teal);
+}
+
+.player-dialog--video-hosting .player-dialog__actions .button.button--primary:hover {
+  background: linear-gradient(180deg, #f5a15f, var(--amber));
+  box-shadow:
+    0 0 0 1px rgba(240, 140, 58, 0.24),
+    0 8px 20px rgba(240, 140, 58, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
 }
 
 .video-hosting-dialog__fixed-header {
@@ -123,12 +183,39 @@
   color: var(--text);
 }
 
+.video-hosting-dialog__section li a {
+  color: var(--teal);
+  text-underline-offset: 3px;
+}
+
+.video-hosting-dialog__section li a:hover,
+.video-hosting-dialog__section li a:focus-visible {
+  color: var(--text);
+}
+
 .video-hosting-dialog__note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
   margin: 18px 0 20px;
   padding: 10px 12px;
   border: 1px solid var(--amber-glow-soft);
   border-radius: 8px;
   background: var(--amber-glow-soft);
+}
+
+.video-hosting-dialog__note-icon {
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  color: var(--amber);
+}
+
+.video-hosting-dialog__note-icon svg {
+  display: block;
+  width: 18px;
+  height: 18px;
 }
 
 @media (max-width: 680px) {
@@ -172,15 +259,49 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: rgba(0, 0, 0, 0.36);
-  backdrop-filter: blur(8px);
+  background: var(--player-dialog-overlay-color);
+  backdrop-filter: blur(var(--player-dialog-overlay-blur));
   z-index: 18;
   box-sizing: border-box;
+}
+
+.player-inline-dialog--compact {
+  padding: var(--app-shell-gutter);
+}
+
+.player-inline-dialog--compact .player-inline-dialog__card {
+  max-height: var(--player-inline-dialog-card-max-height);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--app-shell-gutter);
+}
+
+.player-inline-dialog--compact .player-dialog__header {
+  gap: var(--app-shell-gutter);
+  margin-bottom: var(--app-shell-gutter);
+}
+
+.player-inline-dialog--compact .player-dialog__message {
+  margin-bottom: var(--app-shell-gutter);
 }
 
 .app-dialog::backdrop {
   background: rgba(4, 5, 6, 0.72);
   backdrop-filter: blur(8px);
+}
+
+html.video-hosting-dialog-open,
+html.video-hosting-dialog-open body {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+html.video-hosting-dialog-open body {
+  position: fixed;
+  inset-inline: 0;
+  top: var(--video-hosting-dialog-scroll-offset, 0px);
+  bottom: 0;
+  height: auto;
 }
 
 .o-dialog-close {

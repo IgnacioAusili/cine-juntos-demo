@@ -1,17 +1,17 @@
-    <dialog id="mobileDebugDialog" class="app-dialog   mobile-debug-dialog" aria-labelledby="mobileDebugTitle">
-      <div class="mobile-debug-dialog__card">
-        <button id="mobileDebugCloseButton" type="button" class="o-dialog-close" aria-label="Cerrar">
+    <dialog id="debugPanelDialog" class="app-dialog   debug-panel" aria-labelledby="debugPanelTitle">
+      <div class="debug-panel__card">
+        <button id="debugPanelCloseButton" type="button" class="o-dialog-close" aria-label="Cerrar">
           <span data-lucide="x" aria-hidden="true"></span>
         </button>
-        <h2 id="mobileDebugTitle">Registros de la página</h2>
-        <div class="mobile-debug-dialog__filter">
-          <label class="mobile-debug-dialog__filter-label" for="mobileDebugFilter">Filtrar</label>
-          <span class="mobile-debug-dialog__filter-control">
-            <input id="mobileDebugFilter" type="search" placeholder="Buscar..." autocomplete="off" />
+        <h2 id="debugPanelTitle">Registros de la página</h2>
+        <div class="debug-panel__filter">
+          <label class="debug-panel__filter-label" for="debugPanelFilter">Filtrar</label>
+          <span class="debug-panel__filter-control">
+            <input id="debugPanelFilter" type="search" placeholder="Buscar..." autocomplete="off" />
             <button
-              id="mobileDebugFilterClearButton"
+              id="debugPanelFilterClearButton"
               type="button"
-              class="mobile-debug-dialog__filter-clear"
+              class="debug-panel__filter-clear"
               aria-label="Cancelar filtro"
               title="Cancelar filtro"
               hidden
@@ -20,25 +20,25 @@
             </button>
           </span>
         </div>
-        <pre id="mobileDebugLog" class="mobile-debug-dialog__log" role="log" aria-live="off" tabindex="0" aria-label="Registros de la página"></pre>
+        <pre id="debugPanelLog" class="debug-panel__log" role="log" aria-live="off" tabindex="0" aria-label="Registros de la página"></pre>
         <div class="o-dialog-actions">
+          <button id="debugPanelClearButton" type="button" class="button   debug-panel__clear-button">Eliminar</button>
+          <button id="debugPanelShareButton" type="button" class="button">Compartir</button>
           <button
-            id="mobileDebugCopyButton"
+            id="debugPanelCopyButton"
             type="button"
-            class="button   button--primary   mobile-debug-dialog__copy-button"
+            class="button   button--primary   debug-panel__copy-button"
             data-copy-state="idle"
             aria-label="Copiar"
           >
-            <span class="mobile-debug-dialog__copy-label">Copiar</span>
-            <span class="mobile-debug-dialog__copy-status   mobile-debug-dialog__copy-success" aria-hidden="true">
+            <span class="debug-panel__copy-label">Copiar</span>
+            <span class="debug-panel__copy-status   debug-panel__copy-success" aria-hidden="true">
               <span data-lucide="check"></span>
             </span>
-            <span class="mobile-debug-dialog__copy-status   mobile-debug-dialog__copy-error" aria-hidden="true">
+            <span class="debug-panel__copy-status   debug-panel__copy-error" aria-hidden="true">
               <span data-lucide="x"></span>
             </span>
           </button>
-          <button id="mobileDebugShareButton" type="button" class="button">Compartir</button>
-          <button id="mobileDebugClearButton" type="button" class="button">Eliminar</button>
         </div>
       </div>
     </dialog>
@@ -84,21 +84,21 @@
         </div>
         <div class="video-hosting-dialog__content">
           <p id="videoHostingDialogIntro" class="video-hosting-dialog__intro">
-            Cine Juntos necesita un enlace HTTPS directo a un archivo de video accesible para las personas de la sala. Acepta MP4, WebM, Ogg, MOV y M4V; el enlace debe abrir el archivo, no una página de reproducción.
+            Para poder cargar un video, se necesita un enlace HTTPS directo a un archivo de video, el mismo debes verificar que sea accesible para las demás personas de la sala. Acepta MP4, WebM, Ogg, MOV y M4V; el enlace debe abrir el archivo, no una página de reproducción.
           </p>
           <section class="video-hosting-dialog__section" aria-labelledby="videoHostingStepsTitle">
             <h3 id="videoHostingStepsTitle">Cómo prepararlo</h3>
             <ol>
               <li>Subí el archivo a un servicio de almacenamiento, a una plataforma de video o a tu propio servidor.</li>
-              <li>Obtené un enlace HTTPS directo al archivo y compartí uno que las personas de la sala puedan abrir. Si el enlace es temporal, pueden usarlo mientras siga vigente.</li>
+              <li>Debería darte un enlace HTTPS directo al archivo. Verificá que las personas de la sala también puedan abrirlo y ver el video.</li>
               <li>Pegá el enlace en este campo y cargalo en la sala.</li>
             </ol>
           </section>
           <section class="video-hosting-dialog__section" aria-labelledby="videoHostingServicesTitle">
             <h3 id="videoHostingServicesTitle">Opciones para alojarlo</h3>
             <ul>
-              <li><strong>Almacenamiento + enlace directo:</strong> servicios como Cloudflare R2, Amazon S3 o Backblaze B2. Configurá el acceso al archivo y compartí su URL; algunos permiten servirlo mediante una CDN.</li>
-              <li><strong>Tu propio servidor:</strong> podés subir el video a tu hosting web, VPS o servidor personal y publicar un enlace HTTPS directo. Tené en cuenta el espacio disponible y el ancho de banda para quienes lo reproduzcan.</li>
+              <li><strong>Almacenamiento + enlace directo:</strong> Servicios como Cloudflare R2, Amazon S3 o Backblaze B2. Configurá el acceso al archivo y compartí su URL; algunos permiten servirlo mediante una CDN.</li>
+              <li><strong>Tu propio servidor:</strong> Podés subir el video a tu hosting web, VPS o servidor personal y publicar un enlace HTTPS directo. Como alternativa, podés usar <a href="https://github.com/IgnacioAusili/VideoPuente" target="_blank" rel="noopener noreferrer">VideoPuente</a>, una aplicación de mi autoría que comparte un video de tu equipo mediante un enlace HTTPS; mantenela activa mientras lo ven. <a href="https://github.com/IgnacioAusili/VideoPuente/releases" target="_blank" rel="noopener noreferrer">Descargala acá</a>.</li>
               <li><strong>Hosting de video:</strong> Bunny Stream, Cloudflare Stream o Vimeo procesan y reproducen videos. Sus enlaces de página o reproductor no sirven en este campo: necesitás que el servicio ofrezca un enlace directo a un archivo compatible.</li>
             </ul>
             <div class="video-hosting-dialog__links">
@@ -109,7 +109,8 @@
             </div>
           </section>
           <p class="video-hosting-dialog__note">
-            Los enlaces normales de YouTube, Google Drive o las páginas de Vimeo suelen llevar a un reproductor, no al archivo. Si el enlace es temporal, alcanza con que esté vigente cuando lo use la sala.
+            <span class="video-hosting-dialog__note-icon" data-lucide="triangle-alert" aria-hidden="true"></span>
+            <span>Los enlaces normales de YouTube, Google Drive o las páginas de Vimeo suelen llevar a un reproductor, no al archivo.</span>
           </p>
           <div class="player-dialog__actions">
             <button id="closeVideoHostingDialogActionButton" type="button" class="button   button--primary">Entendido</button>
@@ -140,7 +141,7 @@
         </div>
         <div class="about-dialog__content">
           <div id="aboutDialogDescription" class="about-dialog__intro">
-            <p class="about-dialog__description-lead">Cine Juntos es un proyecto de código abierto (open source) concebido como una base con el propósito de facilitar la visualización sincronizada de contenido entre múltiples usuarios de forma cómoda y sencilla. Para ello, permite crear salas a las que se accede mediante un código de invitación. Cada sala cuenta con un reproductor y un chat, y permite elegir el contenido que se desea ver y cargarlo en el reproductor. La reproducción se sincroniza entre todos los usuarios, incluidas funciones como reproducir, pausar y cambiar la velocidad, entre otras.</p>
+            <p class="about-dialog__description-lead">Proyecto de código abierto (open source) que funciona como una base de plataforma con el propósito de facilitar la visualización sincronizada/compartida de contenido entre varios usuarios de manera sencilla y cómoda. Para ello, consta de la función de crear salas a las que se accede mediante un código de invitación. Cada sala cuenta con un chat y un reproductor, desde el cual se permite elegir el contenido que se desea ver vía una URL. La reproducción del contenido tiene una sincronización entre todos los usuarios, de manera tal, que lo que hace un usuario se refleja en los demás usuarios, incluidas funciones como reproducir, pausar y cambiar la velocidad, entre otras.</p>
             <div class="about-dialog__disclosure">
               <button class="about-dialog__disclosure-toggle" type="button" aria-expanded="false" aria-controls="aboutDialogDescriptionRest">
                 <span class="about-dialog__disclosure-label   about-dialog__disclosure-label-more">Mostrar la descripción completa</span>
@@ -149,7 +150,7 @@
                 </span>
               </button>
               <div id="aboutDialogDescriptionRest" class="about-dialog__disclosure-content" hidden tabindex="-1">
-                <p>Esta página funciona como una demostración funcional del proyecto. No incorpora publicidad ni impone restricciones propias, más allá de las limitaciones de los servicios utilizados. El proyecto puede modificarse, adaptarse y alojarse libremente según las necesidades de quienes quieran utilizarlo.</p>
+                <p>Esta página funciona como una demostración funcional del proyecto. No incorpora publicidad ni impone restricciones propias, más allá de las limitaciones de los servicios que utiliza.</p>
               </div>
             </div>
           </div>

@@ -4,6 +4,7 @@ import "../public/firebase-config.js";
 import {
   dom,
 } from "./core/dom.js";
+import { initializeDebugMode } from "./core/debug-mode.js";
 import {
   state,
   applyInitialDefaults,
@@ -54,13 +55,14 @@ import { wireMobileBottomChatHeader } from "./features/chat/dock/mobile-chat-hea
 import { wireMobileLandscapeVideoSnap } from "./features/player/mobile-landscape-video-snap.js";
 import { joinRoom, wireRoomEvents } from "./features/room/index.js";
 import { wireTouchHover } from "./core/touch-interactions.js";
-import { installConsoleLogCapture, wireMobileDebugTools } from "./features/diagnostics/mobile-debug.js";
+import { installConsoleLogCapture, wireDebugPanelTools } from "./features/diagnostics/debug-panel.js";
 import { wireMobileKeyboardDiagnostics } from "./features/diagnostics/mobile-keyboard-diagnostics.js";
 import { openDialogTestRoute } from "./features/dialog-test-routes.js";
 import { wireLobbyLayoutVariants } from "./features/lobby/lobby-layout-variants.js";
 
 const requestedRoom = normalizeRoomCode(new URLSearchParams(window.location.search).get("room") || "");
 
+initializeDebugMode();
 installConsoleLogCapture();
 wireLobbyAppInstall();
 
@@ -109,7 +111,7 @@ setChatDock(localStorage.getItem("cine-juntos-chat-dock") || "right", {
 });
 restoreExternalChatCollapsed();
 wireMobileBottomChatHeader();
-wireMobileDebugTools();
+wireDebugPanelTools();
 wireMobileKeyboardDiagnostics();
 syncChatAutoExpandControls();
 updateCollapseButton();

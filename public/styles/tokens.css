@@ -55,6 +55,9 @@
   --radius-lg: 16px;
   --radius-xl: 22px;
   --dialog-close-icon-size: 32px;
+  --player-dialog-overlay-color: rgba(0, 0, 0, 0.36);
+  --player-dialog-overlay-blur: 8px;
+  --player-dialog-card-inset: 16px;
   --text-soft: rgba(243, 245, 247, 0.78);
   --text-faint: rgba(243, 245, 247, 0.46);
   --text-font:

@@ -86,10 +86,6 @@
     align-items: stretch;
   }
 
-  .session-toolbar__body input {
-    width: calc(100% - 8px);
-  }
-
   .session-toolbar__body .button.button--primary {
     width: 100%;
     justify-content: center;

@@ -202,13 +202,17 @@
   isolation: isolate;
 }
 
+.message-form.message-form--overlay .message-form__input-wrapper .icon-button--emoji-trigger {
+  opacity: 1;
+}
+
 .message-form.message-form--overlay .message-form__input-wrapper[data-expanded="true"] .icon-button,.message-form.message-form--overlay .message-form__input-wrapper[data-expanded="true"] .icon-button--send {
   margin-top: 0;
 }
 
 .message-form.message-form--overlay .message-form__input-wrapper .icon-button--emoji-trigger:hover,.message-form.message-form--overlay .message-form__input-wrapper .icon-button--emoji-trigger.icon-button--emoji-picker-open {
   color: var(--text);
-  opacity: 0.82;
+  opacity: 1;
 }
 
 /* El composer real del reproductor replica el flujo del chat externo: los

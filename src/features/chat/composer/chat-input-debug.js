@@ -1,5 +1,6 @@
 import { dom } from "../../../core/dom.js";
-import { logEvent, state } from "../../../core/state.js";
+import { isDebugMode } from "../../../core/debug-mode.js";
+import { logEvent } from "../../../core/state.js";
 
 const MOBILE_CHAT_LAYOUT_QUERY = "(max-width: 980px)";
 
@@ -34,6 +35,7 @@ function getMobileInteractionSnapshot(input = null) {
 }
 
 export function logMobileInteraction(label, input = null, extra = {}) {
+  if (!isDebugMode()) return;
   if (
     input
     && (input !== dom.messageInput || dom.sessionView?.dataset.chatDock !== "bottom")

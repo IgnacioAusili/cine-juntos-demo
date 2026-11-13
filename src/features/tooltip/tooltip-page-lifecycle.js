@@ -6,64 +6,38 @@ let suppressRestoredFocusTooltip = false;
 let pageWasAway = false;
 let pointeroverResumeTimer = 0;
 
-function logPointerGuard(action, details = {}) {
-  console.log("[tooltip-pointer-guard]", action, {
-    timeMs: Math.round(performance.now()),
-    pageHidden: document.hidden,
-    pageWasAway,
-    pointeroverSuppressed: tooltipState.suppressRestoredPointerover,
-    focusSuppressed: suppressRestoredFocusTooltip,
-    ...details,
-  });
-}
-
-function handlePageLeave(reason) {
-  const alreadyAway = pageWasAway;
+function handlePageLeave() {
   pageWasAway = true;
   suppressRestoredFocusTooltip = true;
   tooltipState.suppressRestoredPointerover = true;
   window.clearTimeout(pointeroverResumeTimer);
   pointeroverResumeTimer = 0;
-  logPointerGuard("page-left", { reason, alreadyAway });
   hideTooltip(true);
 }
 
-function handlePageReturn(reason) {
-  if (document.hidden) {
-    logPointerGuard("return-event-deferred-hidden", { reason });
-    return;
-  }
+function handlePageReturn() {
+  if (document.hidden) return;
 
-  if (!pageWasAway) {
-    logPointerGuard("return-event-without-prior-leave", { reason });
-    return;
-  }
+  if (!pageWasAway) return;
 
   pageWasAway = false;
-  logPointerGuard("pointerover-suppression-start", {
-    reason,
-    durationMs: RESTORED_POINTEROVER_SUPPRESSION_MS,
-  });
   pointeroverResumeTimer = window.setTimeout(() => {
     tooltipState.suppressRestoredPointerover = false;
     pointeroverResumeTimer = 0;
-    logPointerGuard("pointerover-suppression-end", { reason: "timeout" });
   }, RESTORED_POINTEROVER_SUPPRESSION_MS);
 }
 
-function resumeFocusTooltips(reason) {
-  const wasSuppressed = suppressRestoredFocusTooltip;
+function resumeFocusTooltips() {
   suppressRestoredFocusTooltip = false;
-  if (wasSuppressed) logPointerGuard("focus-suppression-end", { reason });
 }
 
-window.addEventListener("blur", () => handlePageLeave("window-blur"));
-window.addEventListener("pagehide", () => handlePageLeave("pagehide"));
-window.addEventListener("focus", () => handlePageReturn("window-focus"));
-window.addEventListener("pageshow", () => handlePageReturn("pageshow"));
+window.addEventListener("blur", handlePageLeave);
+window.addEventListener("pagehide", handlePageLeave);
+window.addEventListener("focus", handlePageReturn);
+window.addEventListener("pageshow", handlePageReturn);
 document.addEventListener("visibilitychange", () => {
-  if (document.hidden) handlePageLeave("visibility-hidden");
-  else handlePageReturn("visibility-visible");
+  if (document.hidden) handlePageLeave();
+  else handlePageReturn();
 });
 
 // Algunos navegadores restauran el foco DOM al volver a la pestaña y emiten
@@ -75,8 +49,8 @@ document.addEventListener("focusin", (event) => {
 }, true);
 
 document.addEventListener("keydown", (event) => {
-  if (event.isTrusted) resumeFocusTooltips("keydown");
+  if (event.isTrusted) resumeFocusTooltips();
 }, true);
 document.addEventListener("pointerdown", (event) => {
-  if (event.isTrusted) resumeFocusTooltips("pointerdown");
+  if (event.isTrusted) resumeFocusTooltips();
 }, true);

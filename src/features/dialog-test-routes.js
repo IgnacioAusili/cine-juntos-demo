@@ -1,6 +1,7 @@
 import {
   dom,
 } from "../core/dom.js";
+import { isDebugMode } from "../core/debug-mode.js";
 import {
   showErrorDialog,
   showLoadReplaceDialog,
@@ -17,7 +18,7 @@ export const DIALOG_TEST_ROUTES = Object.freeze({
   "slow-load": "La carga del video está tardando",
   "confirm-load": "Cargar otro video",
   resume: "Retomar reproducción",
-  "mobile-debug": "Registros de la página",
+  "debug-panel": "Registros de la página",
   "image-lightbox": "Visor de imagen",
 });
 
@@ -36,6 +37,8 @@ function getPlayerTestName() {
 }
 
 export function openDialogTestRoute() {
+  if (!isDebugMode()) return;
+
   const playerTestName = getPlayerTestName();
   if (playerTestName === "loading") {
     showSession();
@@ -54,12 +57,15 @@ export function openDialogTestRoute() {
       dom.aboutButton?.click();
       break;
     case "error":
+      showSession();
       showErrorDialog("Este es un error de reproducción de prueba.");
       break;
     case "slow-load":
+      showSession();
       void showSlowLoadDialog("Este diálogo simula una carga de video lenta.");
       break;
     case "confirm-load":
+      showSession();
       void showLoadReplaceDialog("Este diálogo simula la carga de otro video.");
       break;
     case "resume":
@@ -68,9 +74,9 @@ export function openDialogTestRoute() {
         'Este video ya lo has reproducido antes en <span class="player-dialog__resume-time">1:23</span> ¿Quieres retomar desde ahí?',
       );
       break;
-    case "mobile-debug":
-      dom.mobileDebugDialog?.showModal();
-      dom.mobileDebugCloseButton?.focus();
+    case "debug-panel":
+      dom.debugPanelDialog?.showModal();
+      dom.debugPanelCloseButton?.focus();
       break;
     case "image-lightbox":
       openLightboxForTest();

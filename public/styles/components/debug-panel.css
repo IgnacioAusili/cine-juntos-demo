@@ -1,0 +1,354 @@
+
+
+.debug-panel {
+  width: min(1100px, calc(100% - 12px));
+  max-width: 1100px;
+  height: min(96dvh, 900px);
+  max-height: calc(100dvh - 12px);
+  box-sizing: border-box;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--glass-border-strong);
+  border-radius: 14px;
+  background: #111619;
+}
+
+html.debug-panel-open,
+body.debug-panel-open {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+.debug-panel::backdrop {
+  overscroll-behavior: none;
+  touch-action: none;
+}
+
+.debug-panel__button {
+  position: fixed;
+  top: max(8px, env(safe-area-inset-top, 0px));
+  left: calc(max(6px, var(--app-shell-gutter, 10px) - 4px) + env(safe-area-inset-left, 0px));
+  z-index: 10001;
+  display: grid;
+  width: 28px;
+  min-width: 28px;
+  height: 28px;
+  min-height: 28px;
+  padding: 0;
+  border: 1px solid rgba(255, 193, 7, 0.5);
+  border-radius: 6px;
+  background: rgba(55, 40, 14, 0.96);
+  color: #ffe69a;
+  place-items: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32);
+  cursor: pointer;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    color 150ms ease,
+    transform 150ms ease;
+}
+
+.debug-panel__button svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2;
+}
+
+.debug-panel__button:hover,
+.debug-panel__button:focus-visible {
+  border-color: rgba(255, 193, 7, 0.85);
+  background: rgba(88, 64, 20, 0.98);
+  color: #fff2bf;
+  box-shadow: 0 0 0 2px rgba(255, 193, 7, 0.16), 0 8px 24px rgba(0, 0, 0, 0.38);
+  transform: scale(1.08);
+}
+
+.debug-panel__button:focus-visible {
+  outline: 2px solid rgba(255, 214, 102, 0.9);
+  outline-offset: 2px;
+}
+
+.debug-panel__card {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+  flex-direction: column;
+  padding: 24px 24px 10px;
+}
+
+.debug-panel .o-dialog-close:hover,
+.debug-panel .o-dialog-close:focus-visible {
+  color: #ff4f5f;
+}
+
+.debug-panel__card h2 {
+  flex: 0 0 auto;
+  margin: -9px 28px 16px 0;
+  color: var(--text);
+  font-size: 1.2rem;
+  font-weight: 750;
+  letter-spacing: 0.01em;
+  text-shadow:
+    0 0 8px rgba(126, 240, 171, 0.22),
+    0 0 18px rgba(47, 184, 164, 0.16);
+}
+
+.debug-panel__filter {
+  display: grid;
+  flex: 0 0 auto;
+  gap: 6px;
+  margin-bottom: 10px;
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.debug-panel__filter-label {
+  color: inherit;
+  font: inherit;
+}
+
+.debug-panel__filter-control {
+  position: relative;
+  display: block;
+  transform: translateX(3px);
+}
+
+.debug-panel__filter input {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 36px;
+  padding: 8px 36px 8px 10px;
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 400;
+  letter-spacing: normal;
+  text-align: center;
+  text-transform: none;
+}
+
+.debug-panel__filter input::-webkit-search-cancel-button {
+  appearance: none;
+  display: none;
+}
+
+.debug-panel__filter input:focus,
+.debug-panel__filter input:focus-visible {
+  background: var(--panel);
+  border-color: #2fb8a4;
+  box-shadow: none;
+  outline: none;
+}
+
+.debug-panel__filter-clear {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.48);
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: color 150ms ease, background 150ms ease;
+}
+
+.debug-panel__filter-clear svg {
+  width: 16px;
+  height: 16px;
+  stroke-width: 2.3;
+}
+
+.debug-panel__filter input::placeholder {
+  color: rgba(170, 179, 188, 0.5);
+  font-weight: 400;
+  opacity: 1;
+  transition: opacity 140ms ease;
+}
+
+.debug-panel__filter input:focus::placeholder {
+  color: transparent;
+  opacity: 0;
+}
+
+.debug-panel__filter input:focus-visible {
+  outline: none;
+}
+
+.debug-panel__card .debug-panel__log {
+  display: block;
+  width: 100%;
+  min-height: 0;
+  max-height: none;
+  box-sizing: border-box;
+  flex: 1 1 auto;
+  margin: 0;
+  padding: 12px;
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  background: #080b0d;
+  color: #d9f5ef;
+  font: 0.72rem/1.45 ui-monospace, SFMono-Regular, Consolas, monospace;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-color: rgba(255, 255, 255, 0.28) transparent;
+  scrollbar-width: thin;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.debug-panel__log mark {
+  border-radius: 3px;
+  background: rgba(47, 184, 164, 0.62);
+  color: #e8fffb;
+  font-weight: 700;
+}
+
+.debug-panel__log-entry {
+  display: block;
+  padding-bottom: 0.85em;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+  margin-bottom: 0.85em;
+}
+
+.debug-panel__log-entry:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.debug-panel__log::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.debug-panel__log::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.debug-panel__log::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.debug-panel__log::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.debug-panel__card .o-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+.debug-panel__clear-button {
+  color: rgba(255, 158, 168, 0.88);
+}
+
+.debug-panel__clear-button:hover,
+.debug-panel__clear-button:focus-visible {
+  border-color: rgba(255, 137, 151, 0.52);
+  background: rgba(255, 112, 128, 0.1);
+  color: #ffb2ba;
+}
+
+.button.button--primary.debug-panel__copy-button {
+  position: relative;
+  min-width: 92px;
+  border-color: rgba(240, 140, 58, 0.32);
+  background: linear-gradient(180deg, #df9a66, #cf7c42);
+  box-shadow:
+    0 0 0 1px rgba(240, 140, 58, 0.12),
+    0 6px 16px rgba(240, 140, 58, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+.debug-panel__copy-label,
+.debug-panel__copy-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    opacity 180ms ease,
+    transform 180ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.debug-panel__copy-label {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.debug-panel__copy-status {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.62) rotate(-8deg);
+}
+
+.debug-panel__copy-status svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 2.5;
+}
+
+.debug-panel__copy-success {
+  color: #7ef0ab;
+}
+
+.debug-panel__copy-error {
+  color: #ff6973;
+}
+
+.debug-panel__copy-button[data-copy-state="success"] .debug-panel__copy-label,
+.debug-panel__copy-button[data-copy-state="error"] .debug-panel__copy-label {
+  opacity: 0;
+  transform: scale(0.72);
+}
+
+.debug-panel__copy-button[data-copy-state="success"] .debug-panel__copy-success,
+.debug-panel__copy-button[data-copy-state="error"] .debug-panel__copy-error {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+}
+
+.debug-panel__filter-clear:hover,
+.debug-panel__filter-clear:focus-visible {
+  background: rgba(255, 79, 95, 0.12);
+  color: #ff4f5f;
+  outline: none;
+}
+
+.button.button--primary.debug-panel__copy-button:hover {
+  background: linear-gradient(180deg, #e7a574, #d4884c);
+  box-shadow:
+    0 0 0 1px rgba(240, 140, 58, 0.18),
+    0 8px 20px rgba(240, 140, 58, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+@media (max-width: 680px) {
+  .debug-panel__card {
+    padding: 20px 12px 6px;
+  }
+}
+
+\n

@@ -1,4 +1,5 @@
 import { dom } from "../../../core/dom.js";
+import { isDebugMode } from "../../../core/debug-mode.js";
 import { getDisplayName, logEvent, state } from "../../../core/state.js";
 import { autoResizeMessageInput, handlePasteEvent, hideEmojiPicker, normalizeEmojiShortcodesInput, repositionEmojiPicker, submitMessageFrom, toggleEmojiPicker, updateCharCounter, wireComposerScrollbar } from "./chat-input.js";
 import { setReplyTarget } from "../messages/chat-reply.js";
@@ -28,7 +29,7 @@ export function wireChatComposerEvents() {
     emojiSelections.set(dom.overlayEmojiButton, getRichEditorSelection(dom.overlayMessageInput));
   });
 dom.messageEmojiButton.addEventListener("click", () => {
-  if (dom.sessionView?.dataset.chatDock === "bottom") {
+  if (isDebugMode() && dom.sessionView?.dataset.chatDock === "bottom") {
     logEvent("mobile-keyboard-debug", `emoji:trigger-click ${JSON.stringify({ button: dom.messageEmojiButton.id, activeElement: document.activeElement?.id || document.activeElement?.tagName || null, inputFocused: document.activeElement === dom.messageInput })}`);
   }
   toggleEmojiPicker(dom.messageInput, dom.messageEmojiButton, emojiSelections.get(dom.messageEmojiButton));
@@ -150,7 +151,7 @@ dom.messageMenu.addEventListener("click", (event) => {
 
 dom.messageForm.addEventListener("submit", (event) => {
   event.preventDefault();
-  if (dom.sessionView?.dataset.chatDock === "bottom") {
+  if (isDebugMode() && dom.sessionView?.dataset.chatDock === "bottom") {
     logEvent("mobile-keyboard-debug", `submit:event ${JSON.stringify({ form: dom.messageForm.id, submitter: event.submitter?.id || null, activeElement: document.activeElement?.id || document.activeElement?.tagName || null, source: "main-form" })}`);
   }
   submitMessageFrom(dom.messageInput);
@@ -208,7 +209,7 @@ dom.overlayMessageForm.addEventListener("submit", (event) => {
     }
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
-      if (input === dom.messageInput && dom.sessionView?.dataset.chatDock === "bottom") {
+      if (isDebugMode() && input === dom.messageInput && dom.sessionView?.dataset.chatDock === "bottom") {
         logEvent("mobile-keyboard-debug", `submit:enter ${JSON.stringify({ input: input.id, activeElement: document.activeElement?.id || document.activeElement?.tagName || null, isComposing: event.isComposing, valueLength: input.value.length })}`);
       }
       submitMessageFrom(input);

@@ -18,11 +18,13 @@ node scripts/dev-server.js --port 8080
 
 Abrir `http://localhost:8080`. El servidor genera `index.html` al iniciar y lo vuelve a generar cuando se guarda una fuente HTML.
 
+El modo debug se controla con la variable `DEBUG_MODE` en `src/core/debug-mode.js`. Ponerla en `true` y recargar habilita las rutas `/test/dialog/...`, `/test/player/...`, el botón `Logs` y los registros de diagnóstico. Por ejemplo, con el modo activado, `http://localhost:8080/test/dialog/resume` abre el diálogo de reanudación dentro del reproductor. Mantener `DEBUG_MODE` en `false` para el uso normal y la publicación.
+
 El marcado se edita en `src/index.template.html` y en los parciales `src/features/<feature>/templates/*.html`. `scripts/build-html.js` ensambla esos parciales; después Vite agrupa el HTML, CSS y JavaScript y genera nombres de recursos con hash de contenido. Para publicar, ejecutar `npm run build` y subir el contenido de `dist/`. GitHub Pages lo hace automáticamente desde su workflow; en Cloudflare Pages, usar `npm run build` como comando y `dist` como directorio de salida.
 
 El hash de cada recurso depende de su contenido: si el favicon u otro icono no cambia, conserva el mismo nombre entre builds. Las fuentes de Google se sirven desde Google Fonts y no se renombran en el build local.
 
-Con `scripts/dev-server.js`, los logs del cliente se imprimen en la terminal que corre el servidor. En GitHub Pages o Cloudflare Pages no hay una terminal del dispositivo disponible, asi que los logs quedan en la consola del navegador.
+Con `scripts/dev-server.js`, los logs del cliente se imprimen en la terminal que corre el servidor cuando la página está en modo debug. En GitHub Pages o Cloudflare Pages no hay una terminal del dispositivo disponible, así que en ese modo los logs quedan en la consola del navegador.
 
 Sin Firebase configurado, la app usa modo local para probar dos pestanas del mismo navegador. Si preferis un servidor basico sin logs de terminal, tambien funciona:
 

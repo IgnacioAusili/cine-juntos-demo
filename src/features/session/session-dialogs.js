@@ -1,4 +1,5 @@
 import { dom } from "../../core/dom.js";
+import { showPlayerDialog } from "./player-dialog-position.js";
 
 let errorDialogInitialized = false;
 let confirmLoadDialogInitialized = false;
@@ -10,6 +11,45 @@ let pendingSlowLoadDialogResolver = null;
 let pendingResumeVideoDialogResolver = null;
 let pendingVideoDownloadDialogResolver = null;
 let pendingVideoDownloadFilename = "video";
+let resumeVideoDialogResizeObserver = null;
+let resumeVideoDialogResizeEventsWired = false;
+
+const RESUME_DIALOG_COMPACT_CLASS = "player-inline-dialog--compact";
+
+function getResumeDialogAvailableHeight(popup) {
+  const style = getComputedStyle(popup);
+  const verticalPadding = (Number.parseFloat(style.paddingTop) || 0)
+    + (Number.parseFloat(style.paddingBottom) || 0);
+  return Math.max(0, popup.clientHeight - verticalPadding);
+}
+
+function syncResumeVideoDialogFit() {
+  const popup = dom.resumeVideoPopup;
+  const card = popup?.querySelector(".player-inline-dialog__card");
+  if (!popup || popup.hidden || !card) return;
+
+  popup.classList.remove(RESUME_DIALOG_COMPACT_CLASS);
+  popup.style.removeProperty("--player-inline-dialog-card-max-height");
+  if (card.getBoundingClientRect().height <= getResumeDialogAvailableHeight(popup) + 1) return;
+
+  popup.classList.add(RESUME_DIALOG_COMPACT_CLASS);
+  const availableHeight = getResumeDialogAvailableHeight(popup);
+  popup.style.setProperty("--player-inline-dialog-card-max-height", `${availableHeight}px`);
+}
+
+function wireResumeVideoDialogFit() {
+  if (resumeVideoDialogResizeEventsWired) return;
+  resumeVideoDialogResizeEventsWired = true;
+
+  if ("ResizeObserver" in window) {
+    resumeVideoDialogResizeObserver = new ResizeObserver(syncResumeVideoDialogFit);
+    [dom.playerFrame, dom.sessionView].filter(Boolean)
+      .forEach((element) => resumeVideoDialogResizeObserver.observe(element));
+  }
+
+  window.addEventListener("resize", syncResumeVideoDialogFit, { passive: true });
+  window.visualViewport?.addEventListener("resize", syncResumeVideoDialogFit, { passive: true });
+}
 
 export function showErrorDialog(message) {
   if (!dom.errorDialog) return;
@@ -31,7 +71,7 @@ export function showErrorDialog(message) {
     errorDialogInitialized = true;
   }
 
-  dom.errorDialog.showModal();
+  showPlayerDialog(dom.errorDialog);
 }
 
 export function showLoadReplaceDialog(message, options = {}) {
@@ -66,7 +106,7 @@ export function showLoadReplaceDialog(message, options = {}) {
 
   return new Promise((resolve) => {
     pendingLoadDialogResolver = resolve;
-    dom.confirmLoadDialog.showModal();
+    showPlayerDialog(dom.confirmLoadDialog);
   });
 }
 
@@ -91,7 +131,7 @@ export function showSlowLoadDialog(message) {
 
   return new Promise((resolve) => {
     pendingSlowLoadDialogResolver = resolve;
-    dom.slowLoadDialog.showModal();
+    showPlayerDialog(dom.slowLoadDialog);
   });
 }
 
@@ -101,6 +141,7 @@ export function showResumeVideoDialog(message) {
   }
 
   initializeResumeVideoDialog();
+  wireResumeVideoDialogFit();
   dismissSlowLoadDialog();
   if (pendingResumeVideoDialogResolver) {
     pendingResumeVideoDialogResolver(false);
@@ -117,6 +158,7 @@ export function showResumeVideoDialog(message) {
   return new Promise((resolve) => {
     pendingResumeVideoDialogResolver = resolve;
     dom.resumeVideoPopup.hidden = false;
+    syncResumeVideoDialogFit();
     window.setTimeout(() => {
       dom.cancelResumeVideoDialogButton?.focus();
     }, 0);
@@ -136,7 +178,7 @@ export function showVideoDownloadDialog(filename) {
 
   return new Promise((resolve) => {
     pendingVideoDownloadDialogResolver = resolve;
-    dom.videoDownloadDialog.showModal();
+    showPlayerDialog(dom.videoDownloadDialog);
     dom.cancelVideoDownloadButton?.focus();
   });
 }
@@ -286,6 +328,8 @@ function dismissSlowLoadDialog() {
 function dismissResumeVideoDialog() {
   if (dom.resumeVideoPopup) {
     dom.resumeVideoPopup.hidden = true;
+    dom.resumeVideoPopup.classList.remove(RESUME_DIALOG_COMPACT_CLASS);
+    dom.resumeVideoPopup.style.removeProperty("--player-inline-dialog-card-max-height");
   }
 }
 
