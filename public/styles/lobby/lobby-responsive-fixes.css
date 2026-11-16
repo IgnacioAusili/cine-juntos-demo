@@ -116,8 +116,6 @@
   }
 
   body.page-context--lobby .lobby-screen__about-button {
-    width: 38px;
-    height: 38px;
     transform: translateY(6px);
   }
 

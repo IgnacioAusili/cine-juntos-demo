@@ -33,6 +33,14 @@
   line-height: var(--rf-copy-line-height);
 }
 
+.room-firebase-access__share-title {
+  font-size: var(--rf-share-title-size);
+}
+
+.room-firebase-access__share-copy {
+  font-size: var(--rf-share-copy-size);
+}
+
 .room-firebase-access__share-copy code,
 .room-firebase-access__info-copy code {
   padding: var(--rf-size-1px) var(--rf-size-5px);
@@ -54,6 +62,7 @@
 
 .room-firebase-access__privacy {
   color: var(--muted-2);
+  font-size: calc(var(--rf-copy-size) - 0.04rem);
 }
 
 .room-firebase-access__footer {
@@ -136,6 +145,10 @@
 }
 
 @media (max-width: 680px) {
+  .room-firebase-access {
+    --rf-dialog-width: calc(100vw - 16px);
+  }
+
   .room-firebase-access__info-grid {
     grid-template-columns: minmax(0, var(--rf-grid-unit));
   }

@@ -1,5 +1,5 @@
 .room-firebase-access {
-  --rf-dialog-width: min(720px, calc(100vw - 28px));
+  --rf-dialog-width: min(820px, calc(100vw - 32px));
   --rf-dialog-height: calc(100dvh - 28px);
   --rf-dialog-border: var(--rf-size-1px) solid var(--glass-border-strong);
   --rf-dialog-surface: radial-gradient(circle at 0 0, rgba(240, 140, 58, 0.12), transparent 38%), linear-gradient(155deg, #20272d, #101417 78%);
@@ -34,10 +34,11 @@
   --rf-size-0-83rem: 0.83rem;
   --rf-size-0-82rem: 0.82rem;
   --rf-size-0-78rem: 0.78rem;
+  --rf-share-title-size: 0.9rem;
+  --rf-share-copy-size: 0.8rem;
   --rf-size-1-25rem: 1.25rem;
   --rf-unit-one: 1;
   --rf-unit-half: 50%;
-  --rf-z-index-tooltip: 2;
   --rf-width-full: 100%;
   --rf-grid-unit: 1fr;
   --rf-line-icon: 1.8;

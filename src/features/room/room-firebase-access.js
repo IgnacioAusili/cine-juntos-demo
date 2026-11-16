@@ -11,6 +11,7 @@ const URL_OBFUSCATION_PREFIX = "o1.";
 const URL_CIPHER_SECRET = "cine-juntos.firebase-invitation.v1";
 const VERIFY_DEBOUNCE_MS = 900;
 const MIN_CONFIG_LENGTH = 20;
+const CONFIG_INPUT_HINT = "La conexión se comprobará automáticamente.";
 const dialog = document.querySelector("#firebaseAccessDialog");
 const tooltipLayer = document.querySelector("#tooltipLayer");
 const tooltipLayerHome = tooltipLayer?.parentElement;
@@ -21,8 +22,6 @@ const statusText = document.querySelector("#firebaseAccessStatusText");
 const submitButton = document.querySelector("#firebaseAccessSubmit");
 const localButton = document.querySelector("#firebaseAccessLocal");
 const scrollBody = dialog?.querySelector("#firebaseAccessBody");
-const scrollTrack = dialog?.querySelector("#firebaseAccessScrollbar");
-const scrollThumb = scrollTrack?.querySelector(".room-firebase-access__scrollbar-thumb");
 const baseConfig = window.CINE_JUNTOS_FIREBASE_CONFIG || {};
 let pendingEntry = null;
 let isVerifying = false;
@@ -31,7 +30,6 @@ let verifiedConfig = null;
 let validationTimer = 0;
 let validationAttempt = 0;
 let activeValidation = null;
-let scrollbarFrame = 0;
 
 function moveTooltipLayersIntoDialog() {
   if (tooltipLayer && tooltipLayer.parentElement !== dialog) dialog.append(tooltipLayer);
@@ -50,90 +48,6 @@ function restoreTooltipLayers() {
   const tooltipChrome = document.querySelector(".tooltip-layer__svg");
   if (tooltipChrome && tooltipChromeHome && tooltipChrome.parentElement !== tooltipChromeHome) {
     tooltipChromeHome.append(tooltipChrome);
-  }
-}
-
-function syncAccessScrollbar() {
-  if (!dialog?.open || !scrollBody || !scrollTrack || !scrollThumb) {
-    if (scrollTrack) scrollTrack.hidden = true;
-    return;
-  }
-
-  const maxScroll = Math.max(0, scrollBody.scrollHeight - scrollBody.clientHeight);
-  const bodyRect = scrollBody.getBoundingClientRect();
-  const card = dialog.querySelector(".room-firebase-access__card");
-  const cardRect = card.getBoundingClientRect();
-  const borderTop = Number.parseFloat(getComputedStyle(card).borderTopWidth) || 0;
-  scrollTrack.style.setProperty("--rf-scrollbar-top", `${bodyRect.top - cardRect.top - borderTop}px`);
-  scrollTrack.style.setProperty("--rf-scrollbar-height", `${scrollBody.clientHeight}px`);
-
-  if (maxScroll <= 1 || !scrollBody.clientHeight) {
-    scrollTrack.hidden = true;
-    return;
-  }
-
-  scrollTrack.hidden = false;
-  const trackHeight = scrollTrack.clientHeight;
-  const thumbHeight = Math.min(trackHeight, Math.max(28, trackHeight * scrollBody.clientHeight / scrollBody.scrollHeight));
-  const travel = Math.max(0, trackHeight - thumbHeight);
-  const progress = Math.min(1, Math.max(0, scrollBody.scrollTop / maxScroll));
-
-  scrollThumb.style.height = `${thumbHeight}px`;
-  scrollThumb.style.transform = `translate(-50%, ${travel * progress}px)`;
-  scrollTrack.setAttribute("aria-valuenow", String(Math.round(progress * 100)));
-  scrollTrack.setAttribute("aria-valuetext", `${Math.round(progress * 100)}% desplazado`);
-}
-
-function scheduleAccessScrollbarSync() {
-  if (scrollbarFrame) return;
-  scrollbarFrame = window.requestAnimationFrame(() => {
-    scrollbarFrame = 0;
-    syncAccessScrollbar();
-  });
-}
-
-function scrollAccessBodyFromPointer(event) {
-  const maxScroll = Math.max(0, scrollBody.scrollHeight - scrollBody.clientHeight);
-  const rect = scrollTrack.getBoundingClientRect();
-  const thumbHeight = scrollThumb.getBoundingClientRect().height;
-  const travel = rect.height - thumbHeight;
-  if (maxScroll <= 0 || travel <= 0) return;
-
-  const thumbTop = Math.min(travel, Math.max(0, event.clientY - rect.top - thumbHeight / 2));
-  scrollBody.scrollTop = (thumbTop / travel) * maxScroll;
-}
-
-if (scrollBody && scrollTrack && scrollThumb) {
-  scrollBody.addEventListener("scroll", scheduleAccessScrollbarSync, { passive: true });
-  scrollTrack.addEventListener("pointerdown", (event) => {
-    event.preventDefault();
-    scrollTrack.setPointerCapture(event.pointerId);
-    scrollAccessBodyFromPointer(event);
-  });
-  scrollTrack.addEventListener("pointermove", (event) => {
-    if (scrollTrack.hasPointerCapture(event.pointerId)) scrollAccessBodyFromPointer(event);
-  });
-  scrollTrack.addEventListener("keydown", (event) => {
-    const page = scrollBody.clientHeight;
-    const steps = {
-      ArrowDown: 40,
-      ArrowUp: -40,
-      PageDown: page,
-      PageUp: -page,
-      Home: -scrollBody.scrollTop,
-      End: scrollBody.scrollHeight - scrollBody.scrollTop,
-    };
-    if (!(event.key in steps)) return;
-    event.preventDefault();
-    scrollBody.scrollTop += steps[event.key];
-  });
-  window.addEventListener("resize", scheduleAccessScrollbarSync, { passive: true });
-  dialog.addEventListener("close", () => { scrollTrack.hidden = true; });
-
-  if (window.ResizeObserver) {
-    const scrollbarObserver = new ResizeObserver(scheduleAccessScrollbarSync);
-    [dialog.querySelector(".room-firebase-access__card"), scrollBody, ...scrollBody.children]
-      .forEach((element) => scrollbarObserver.observe(element));
   }
 }
 
@@ -162,9 +76,15 @@ function cancelValidation() {
   updateSubmitButton();
 }
 
-function parseConfig(value) {
+function looksLikeInviteLink(value) {
+  return /^(?:https?:\/\/|\/)/iu.test(value)
+    || value.includes(`${URL_PARAM}=`)
+    || value.includes("room=");
+}
+
+async function parseConfig(value) {
   const trimmed = String(value || "").trim();
-  if (!trimmed) throw new Error("Pegá una apiKey o el JSON de configuración completo de Firebase.");
+  if (!trimmed) throw new Error("Ingresá un dato de conexión.");
 
   let config;
   if (trimmed.startsWith("{")) {
@@ -173,6 +93,9 @@ function parseConfig(value) {
     } catch {
       throw new Error("La configuración JSON no tiene un formato válido.");
     }
+  } else if (looksLikeInviteLink(trimmed)) {
+    config = await getConfigFromInvite(trimmed);
+    if (!config) throw new Error("El enlace no incluye una configuración Firebase válida.");
   } else {
     config = { ...baseConfig, apiKey: trimmed };
   }
@@ -265,12 +188,11 @@ function openAccessDialog(entry, { initialConfig = null, message = "" } = {}) {
   cancelValidation();
   pendingEntry = entry;
   input.value = initialConfig ? JSON.stringify(initialConfig, null, 2) : "";
-  setValidationStatus(message ? "invalid" : "idle", message || "Pegá una apiKey o el JSON de configuración completo para comprobar la conexión.");
+  setValidationStatus(message ? "invalid" : "idle", message || CONFIG_INPUT_HINT);
   if (scrollBody) scrollBody.scrollTop = 0;
   hideTooltip(true);
   if (!dialog.open) dialog.showModal();
   moveTooltipLayersIntoDialog();
-  scheduleAccessScrollbarSync();
   window.setTimeout(() => input.focus({ preventScroll: true }), 0);
   if (!message && input.value.trim()) scheduleConfigVerification({ immediate: true });
 }
@@ -278,7 +200,12 @@ function openAccessDialog(entry, { initialConfig = null, message = "" } = {}) {
 async function getConfigFromInvite(value) {
   const text = String(value || "").trim();
   if (!text.includes("room=") && !text.includes(`${URL_PARAM}=`) && !text.includes("://")) return null;
-  const url = new URL(text, window.location.href);
+  let url;
+  try {
+    url = new URL(text, window.location.href);
+  } catch {
+    throw new Error("El enlace no incluye una configuración Firebase válida.");
+  }
   const encoded = url.searchParams.get(URL_PARAM);
   return encoded ? decodeConfig(encoded) : null;
 }
@@ -351,7 +278,7 @@ async function verifyInputValue(attempt, value) {
 
   let config;
   try {
-    config = parseConfig(value);
+    config = await parseConfig(value);
   } catch (error) {
     if (attempt === validationAttempt) {
       isVerifying = false;
@@ -359,6 +286,7 @@ async function verifyInputValue(attempt, value) {
     }
     return;
   }
+  if (attempt !== validationAttempt) return;
 
   const validation = verifyFirebaseConfig(config);
   activeValidation = validation;
@@ -386,7 +314,7 @@ function scheduleConfigVerification({ immediate = false } = {}) {
   cancelValidation();
   const value = input.value.trim();
   if (!value) {
-    setValidationStatus("idle", "Pegá una apiKey o el JSON de configuración completo para comprobar la conexión.");
+    setValidationStatus("idle", CONFIG_INPUT_HINT);
     return;
   }
   if (value.length < MIN_CONFIG_LENGTH) {
@@ -396,7 +324,7 @@ function scheduleConfigVerification({ immediate = false } = {}) {
 
   const attempt = validationAttempt;
   isVerifying = true;
-  setValidationStatus("checking", "Verificando acceso a Firebase y a Realtime Database…");
+  setValidationStatus("checking", "Comprobando la conexión…");
   validationTimer = window.setTimeout(() => {
     validationTimer = 0;
     void verifyInputValue(attempt, value);
@@ -474,5 +402,5 @@ dialog?.addEventListener("close", () => {
   restoreTooltipLayers();
   pendingEntry = null;
   cancelValidation();
-  setValidationStatus("idle", "Pegá una apiKey o el JSON de configuración completo para comprobar la conexión.");
+  setValidationStatus("idle", CONFIG_INPUT_HINT);
 });

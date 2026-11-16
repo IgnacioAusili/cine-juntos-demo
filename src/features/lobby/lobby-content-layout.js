@@ -2,8 +2,81 @@ let lobbyCenterFrame = 0;
 
 import { resetTitleFit, syncLobbyTitleFit, syncSingleColumnTitleGroup, resetSingleColumnTitleLift, resetSingleColumnTitleGroup, resetSingleColumnDescriptionWidth, syncLobbyTextDensity, syncLobbyTicketInlinePadding } from "./lobby-title-layout.js";
 import { syncSingleColumnDescriptionWidth, syncSingleColumnContentCenter, syncSingleColumnContentGap } from "./lobby-content-variants.js";
-import { resetLobbyTicketFit, syncColumnsTicketFit, syncSingleColumnTicketPlacement } from "./lobby-ticket-fit.js";
+import {
+  getLobbyColumnsAvailableHeight,
+  resetLobbyTicketFit,
+  syncColumnsTicketFit,
+  syncSingleColumnTicketPlacement,
+} from "./lobby-ticket-fit.js";
 import { resetLobbyTicketPlacement, syncLobbyTicketStubWidth, syncLobbyTitlePlacement } from "./lobby-ticket-placement.js";
+import { isLobbySoftKeyboardFocusPending } from "./lobby-keyboard-state.js";
+
+function syncLobbyTicketTrackSize(screen, grid, ticket, marquee, footer, isColumns) {
+  if (!grid) return;
+
+  if (
+    document.body.dataset.lobbyKeyboardOpen === "true"
+    || document.body.dataset.lobbyBrowserKeyboardOpen === "true"
+    || isLobbySoftKeyboardFocusPending()
+  ) return;
+
+  grid.style.removeProperty("--lobby-ticket-adaptive-track-size");
+  grid.style.removeProperty("--lobby-ticket-adaptive-scale");
+  if (
+    !isColumns
+    || !ticket
+    || !window.matchMedia("(min-width: 981px) and (min-height: 501px)").matches
+  ) return;
+
+  resetLobbyTicketFit(ticket);
+
+  const gridStyle = getComputedStyle(grid);
+  const cssPixels = (value) => Number.parseFloat(value);
+  const baseTrackSize = cssPixels(
+    gridStyle.getPropertyValue("--lobby-ticket-base-track-size"),
+  ) || 404;
+  const maxTrackSize = cssPixels(
+    gridStyle.getPropertyValue("--lobby-ticket-max-track-size"),
+  ) || 460;
+  const ticketShare = cssPixels(
+    gridStyle.getPropertyValue("--lobby-ticket-track-share"),
+  ) || 0.42;
+  const minHeroWidth = cssPixels(
+    gridStyle.getPropertyValue("--lobby-columns-min-hero-inline-size"),
+  ) || 540;
+  const columnGap = cssPixels(gridStyle.columnGap);
+  const paddingInline = cssPixels(gridStyle.paddingLeft) + cssPixels(gridStyle.paddingRight);
+  const borderInline = cssPixels(gridStyle.borderLeftWidth) + cssPixels(gridStyle.borderRightWidth);
+  const availableInlineSize = grid.getBoundingClientRect().width - paddingInline - borderInline;
+  const availableTrackSize = availableInlineSize - columnGap;
+  const ticketHeight = ticket.getBoundingClientRect().height;
+  const availableHeight = getLobbyColumnsAvailableHeight(screen, grid, marquee, footer);
+  const clearance = Math.min(18, Math.max(8, availableHeight * 0.05), availableHeight / 4);
+  const heightForGrowth = Math.max(0, availableHeight - clearance * 2);
+  const heightLimitedWidth = ticketHeight > 0
+    ? baseTrackSize * heightForGrowth / ticketHeight
+    : baseTrackSize;
+  const widthLimitedWidth = Math.min(
+    maxTrackSize,
+    availableTrackSize * ticketShare,
+    availableTrackSize - minHeroWidth,
+  );
+  const targetTrackSize = Math.min(
+    Math.max(baseTrackSize, widthLimitedWidth),
+    Math.max(baseTrackSize, heightLimitedWidth),
+  );
+
+  if (targetTrackSize > baseTrackSize + 0.5) {
+    grid.style.setProperty(
+      "--lobby-ticket-adaptive-track-size",
+      `${targetTrackSize.toFixed(2)}px`,
+    );
+    grid.style.setProperty(
+      "--lobby-ticket-adaptive-scale",
+      (targetTrackSize / baseTrackSize).toFixed(4),
+    );
+  }
+}
 
 export function syncLobbyContentCenter() {
   lobbyCenterFrame = 0;
@@ -37,6 +110,8 @@ export function syncLobbyContentCenter() {
     : [];
   const hero = screen?.querySelector('.lobby-screen__hero');
   const ticket = screen?.querySelector('.lobby-screen__ticket');
+
+  syncLobbyTicketTrackSize(screen, grid, ticket, marquee, footer, isColumns);
 
   // Mide siempre la geometría candidata de columnas. La transición depende
   // del espacio mínimo de ambas áreas, no del recorte de un texto concreto.

@@ -114,16 +114,8 @@
   .lobby-screen__about-button {
     position: static;
     justify-self: center;
-    width: 42px;
-    height: 42px;
-    flex: 0 0 42px;
     margin: 0;
     transform: translateY(5px);
-  }
-
-  .lobby-screen__about-button svg {
-    width: 20px;
-    height: 20px;
   }
 
   .lobby-screen__about-button:hover,

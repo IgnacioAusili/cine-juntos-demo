@@ -15,6 +15,7 @@ const TICKET_FIT_PROPERTIES = [
 export function resetLobbyTicketFit(ticket) {
   TICKET_FIT_PROPERTIES.forEach((property) => ticket?.style.removeProperty(property));
   ticket?.removeAttribute("data-lobby-ticket-fit");
+  ticket?.removeAttribute("data-lobby-ticket-fit-compressed");
 }
 
 function canFitTicket() {
@@ -25,6 +26,29 @@ function canFitTicket() {
     || document.body.dataset.lobbyKeyboardOpen === "true"
     || document.body.dataset.lobbyBrowserKeyboardOpen === "true"
   );
+}
+
+export function getLobbyColumnsAvailableBounds(screen, grid, marquee, footer) {
+  if (!screen || !grid || !footer) return null;
+
+  const screenRect = screen.getBoundingClientRect();
+  const gridRect = grid.getBoundingClientRect();
+  const footerRect = footer.getBoundingClientRect();
+  const screenContentTop = screenRect.top + screen.clientTop;
+  const screenContentBottom = screenContentTop + screen.clientHeight;
+  const upperVisibleBoundary = marquee?.getClientRects().length
+    ? marquee.getBoundingClientRect().bottom
+    : Math.max(screenContentTop, gridRect.top);
+  const lowerVisibleBoundary = Math.min(screenContentBottom, footerRect.top);
+
+  return { upperVisibleBoundary, lowerVisibleBoundary };
+}
+
+export function getLobbyColumnsAvailableHeight(screen, grid, marquee, footer) {
+  const bounds = getLobbyColumnsAvailableBounds(screen, grid, marquee, footer);
+  return bounds
+    ? Math.max(0, bounds.lowerVisibleBoundary - bounds.upperVisibleBoundary)
+    : 0;
 }
 
 function fitTicketToHeight(ticket, availableHeight) {
@@ -82,6 +106,7 @@ function fitTicketToHeight(ticket, availableHeight) {
   }
 
   if (remainingCompression > 0) {
+    ticket.dataset.lobbyTicketFitCompressed = "true";
     // Primero reducimos el boleto completo, conservando la franja a todo su alto.
     ticket.style.setProperty("--lobby-ticket-fit-height", `${targetTicketHeight.toFixed(2)}px`);
 
@@ -221,17 +246,11 @@ export function syncColumnsTicketFit(screen, grid, ticket, marquee, footer) {
   resetLobbyTicketFit(ticket);
   if (!canFitTicket()) return;
 
-  const screenRect = screen.getBoundingClientRect();
-  const gridRect = grid.getBoundingClientRect();
-  const footerRect = footer.getBoundingClientRect();
-  const screenContentTop = screenRect.top + screen.clientTop;
-  const screenContentBottom = screenContentTop + screen.clientHeight;
-  const upperVisibleBoundary = marquee?.getClientRects().length
-    ? marquee.getBoundingClientRect().bottom
-    : Math.max(screenContentTop, gridRect.top);
-  const lowerVisibleBoundary = Math.min(
-    screenContentBottom,
-    footerRect.top,
+  const { upperVisibleBoundary, lowerVisibleBoundary } = getLobbyColumnsAvailableBounds(
+    screen,
+    grid,
+    marquee,
+    footer,
   );
   const availableHeight = Math.max(0, lowerVisibleBoundary - upperVisibleBoundary);
 

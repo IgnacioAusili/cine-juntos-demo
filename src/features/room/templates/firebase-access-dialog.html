@@ -15,7 +15,7 @@
 
         <div class="room-firebase-access__body" id="firebaseAccessBody">
         <p class="room-firebase-access__intro" id="firebaseAccessDescription">
-          Para ver el contenido de manera compartida con otras personas y poder usar el chat, se necesita utilizar el servicio <a href="https://firebase.google.com/docs/database?hl=es-419" target="_blank" rel="noopener noreferrer">Firebase Realtime Database</a>. Para integrar el servicio, se necesita una ApiKey que debes obtener desde tu cuenta de Google mediante <a href="https://console.firebase.google.com/" target="_blank" rel="noopener noreferrer">Firebase Console</a>. Es completamente gratuito, con límites mensuales. Solo se necesita configurar la primera vez.
+          Para ver el contenido de manera compartida con otras personas y poder usar el chat, se necesita utilizar el servicio <a href="https://firebase.google.com/docs/database?hl=es-419" target="_blank" rel="noopener noreferrer">Firebase Realtime Database</a>. Para integrar el servicio, se necesita una ApiKey que debes obtener desde tu cuenta de Google mediante <a href="https://console.firebase.google.com/" target="_blank" rel="noopener noreferrer">Firebase Console</a>. Es completamente gratuito, con límites mensuales. Solo se necesita configurar la primera vez. En el campo podés pegar una ApiKey, el JSON de configuración completo o un enlace de invitación de Cine Juntos que ya incluya la configuración.
         </p>
 
         <div class="room-firebase-access__info-grid">
@@ -37,19 +37,19 @@
         </div>
 
         <label class="room-firebase-access__field-label" for="firebaseAccessInput">
-          <span>ApiKey o JSON de configuración</span>
+          <span>ApiKey, JSON o enlace de invitación</span>
         </label>
-        <textarea class="room-firebase-access__input" id="firebaseAccessInput" rows="2" autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="firebaseAccessStatus" placeholder="Pegá una apiKey o el JSON de configuración completo"></textarea>
+        <textarea class="room-firebase-access__input" id="firebaseAccessInput" rows="2" autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="firebaseAccessStatus" placeholder="Pegá el dato de conexión aquí"></textarea>
         <div class="room-firebase-access__status" id="firebaseAccessStatus" data-state="idle" role="status" aria-live="polite">
           <span class="room-firebase-access__status-dot" aria-hidden="true"></span>
-          <span id="firebaseAccessStatusText">Pegá una apiKey o el JSON de configuración completo para comprobar la conexión.</span>
+          <span id="firebaseAccessStatusText">La conexión se comprobará automáticamente.</span>
         </div>
         <section class="room-firebase-access__share-card" aria-labelledby="firebaseAccessShareTitle">
           <span class="room-firebase-access__share-icon" aria-hidden="true" data-lucide="link-2"></span>
           <div>
             <h3 class="room-firebase-access__share-title" id="firebaseAccessShareTitle">Tu invitación lleva el ApiKey</h3>
-            <p class="room-firebase-access__share-copy">Al compartir el <strong>link de invitación</strong>, para que los demás usuarios puedan comunicarse, en el link se cifra la <strong>ApiKey</strong> que ingresaste. De esa manera, comparten el servicio mediante <strong>TU ApiKey</strong> y la <strong>información queda guardada</strong> siempre que entren a una sala desde tu link de invitación. Si borrás la <strong>ApiKey de la URL</strong> y compartís el link, <strong>no podrán comunicarse</strong> aunque estén en la misma sala.</p>
-            <p class="room-firebase-access__privacy">La <strong>ApiKey</strong> es única para el proyecto Firebase que configuraste desde tu cuenta de Google; se cifra de forma reversible en la URL. Como el mecanismo está en el código de la app, aporta solo una <strong>ofuscación básica</strong>; compartí el enlace únicamente con <strong>gente de confianza</strong>. Podés revocarla desde Google Cloud Console en cualquier momento.</p>
+            <p class="room-firebase-access__share-copy">Al compartir el <strong>link de invitación</strong>, para que los demás usuarios puedan comunicarse se incorpora en el link de manera cifrada la <strong>ApiKey</strong> que ingresaste. De esa manera, comparten el servicio mediante <strong>TU ApiKey</strong>. Si compartis <strong>la URL</strong> sin la ApiKey, <strong>no podrán comunicarse</strong> aunque estén en la misma sala.</p>
+            <p class="room-firebase-access__privacy">La <strong>ApiKey</strong> es única de tu cuenta de Google, se cifra de manera básica y reversible. Compartí el enlace únicamente con <strong>gente de confianza</strong>. Siempre podes revocarla desde el mismo lugar donde la creaste.</p>
           </div>
         </section>
         </div>
@@ -64,13 +64,10 @@
           </div>
           <div class="room-firebase-access__actions">
             <button class="button" id="firebaseAccessLocal" type="button">Entrar sin conexión</button>
-            <span class="room-firebase-access__submit-hint" data-tooltip="Ingresá una ApiKey válida para habilitar.">
+            <span class="room-firebase-access__submit-hint" data-tooltip="Verificá la conexión para habilitar.">
               <button class="button   button--primary" id="firebaseAccessSubmit" type="button" disabled>Entrar y compartir</button>
             </span>
           </div>
         </footer>
-        <div class="room-firebase-access__scrollbar" id="firebaseAccessScrollbar" role="scrollbar" aria-label="Desplazamiento del contenido de configuración" aria-controls="firebaseAccessBody" aria-orientation="vertical" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0" hidden>
-          <span class="room-firebase-access__scrollbar-thumb" aria-hidden="true"></span>
-        </div>
       </div>
     </dialog>
