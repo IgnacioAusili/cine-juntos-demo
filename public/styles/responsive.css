@@ -86,6 +86,10 @@
     align-items: stretch;
   }
 
+  .session-toolbar__body .session-toolbar__load-button-tooltip {
+    width: 100%;
+  }
+
   .session-toolbar__body .button.button--primary {
     width: 100%;
     justify-content: center;

@@ -54,6 +54,7 @@ import { wireMobileChatKeyboardControls } from "./features/player/mobile-chat-ke
 import { wireMobileBottomChatHeader } from "./features/chat/dock/mobile-chat-header.js";
 import { wireMobileLandscapeVideoSnap } from "./features/player/mobile-landscape-video-snap.js";
 import { joinRoom, wireRoomEvents } from "./features/room/index.js";
+import { requestRoomEntry } from "./features/room/room-firebase-access.js";
 import { wireTouchHover } from "./core/touch-interactions.js";
 import { installConsoleLogCapture, wireDebugPanelTools } from "./features/diagnostics/debug-panel.js";
 import { wireMobileKeyboardDiagnostics } from "./features/diagnostics/mobile-keyboard-diagnostics.js";
@@ -150,7 +151,7 @@ if (requestedRoom) {
   window.addEventListener(
     "load",
     () => {
-      void joinRoom(requestedRoom);
+      void requestRoomEntry(requestedRoom, "join", joinRoom);
     },
     { once: true },
   );

@@ -3,7 +3,7 @@ import { state, logEvent } from "../../core/state.js";
 import { formatSeconds } from "../../core/utils.js";
 import { shouldToggleMuteFromVolumeButton } from "./controls/player-volume-layout.js";
 import { configurePlayerMedia, handleManualLoadRequest, setVideoStatus, announceVideoActivity, announceVideoLoadCompletion } from "./player-video-source.js";
-import { hasLoadedMediaSource, getFiniteDuration, rememberPlaybackPosition, clearSlowLoadPromptTracking, schedulePlaybackErrorConfirmation, clearPlaybackErrorTracking, persistPlaybackPosition, prepareVideoFingerprintAndPrompt } from "./player-media.js";
+import { hasLoadedMediaSource, hasMediaForPlaybackControls, getFiniteDuration, rememberPlaybackPosition, clearSlowLoadPromptTracking, schedulePlaybackErrorConfirmation, clearPlaybackErrorTracking, persistPlaybackPosition, prepareVideoFingerprintAndPrompt, updateLoadButtonState } from "./player-media.js";
 import { attemptPlaybackRecovery, cancelPendingPlaybackIssueDetection, clearPlaybackRecoveryTracking, pauseRoomForPlaybackIssue, publishState } from "./player-sync-logic.js";
 import { wireSeekTooltipEvents } from "./controls/player-seek-tooltip-events.js";
 import { playerRuntimeState } from "./player-runtime-state.js";
@@ -23,6 +23,8 @@ export function wirePlayerCoreEvents() {
   dom.loadVideoButton.addEventListener("click", async () => {
     await handleManualLoadRequest();
   });
+  dom.videoUrlInput?.addEventListener("input", updateLoadButtonState);
+  updateLoadButtonState();
 
   dom.playerPlayButton?.addEventListener("click", () => {
     togglePlaybackFromControls();
@@ -48,7 +50,7 @@ export function wirePlayerCoreEvents() {
 
   dom.playerDuration?.addEventListener("click", () => {
     const duration = getFiniteDuration();
-    const hasMedia = hasLoadedMediaSource();
+    const hasMedia = hasMediaForPlaybackControls();
     if (!hasMedia || duration <= 0) return;
     playerRuntimeState.isDurationShowingRemaining = !playerRuntimeState.isDurationShowingRemaining;
     syncPlayerControls();
@@ -57,7 +59,7 @@ export function wirePlayerCoreEvents() {
   dom.playerRateSelect?.addEventListener("change", () => {
     const nextRate = Number(dom.playerRateSelect.value);
     if (!Number.isFinite(nextRate) || nextRate <= 0) return;
-    if (!hasLoadedMediaSource() || isSyncControlCoolingDown("rate")) {
+    if (!hasMediaForPlaybackControls() || isSyncControlCoolingDown("rate")) {
       syncPlayerControls();
       return;
     }

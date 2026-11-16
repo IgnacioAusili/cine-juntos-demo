@@ -4,14 +4,18 @@ const SYSTEM_MESSAGE_STREAK_LIMIT = 10;
 const SYSTEM_MESSAGE_EXIT_MS = 380;
 
 export function getTrailingSystemStreak(container) {
-  const children = Array.from(container.children).filter((child) => child.classList.contains("message"));
-  let streakStart = children.length;
+  const streak = [];
+  const children = Array.from(container.children);
 
-  while (streakStart > 0 && children[streakStart - 1].classList.contains('message--system')) {
-    streakStart -= 1;
+  for (let index = children.length - 1; index >= 0; index -= 1) {
+    const child = children[index];
+    if (child.classList.contains("chat-date-separator")) break;
+    if (!child.classList.contains("message")) continue;
+    if (!child.classList.contains('message--system')) break;
+    streak.unshift(child);
   }
 
-  return children.slice(streakStart);
+  return streak;
 }
 
 export async function makeRoomForSystemMessage(container, { animateSystemGroups = true } = {}) {

@@ -119,13 +119,13 @@
 }
 
 .message--system-group-member {
-  cursor: pointer;
+  cursor: default;
   -webkit-tap-highlight-color: transparent;
 }
 
 .message--system-group-member .message__system-bubble,
 .message--system-group-member .message__system-bubble * {
-  cursor: pointer;
+  cursor: default;
   -webkit-tap-highlight-color: transparent;
 }
 

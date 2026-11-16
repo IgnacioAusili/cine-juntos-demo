@@ -2,6 +2,7 @@ import { dom } from "../../core/dom.js";
 import { state } from "../../core/state.js";
 import { setSyncStatus } from "../session/session-ui.js";
 import { sanitizeRoomInput } from "./room-input.js";
+import { encodeFirebaseConfig } from "./room-firebase-access.js";
 
 let inviteCopyFeedbackTimer = 0;
 let inviteCopyAnimationTimer = 0;
@@ -26,6 +27,9 @@ export async function copyInvite() {
   }
   const invite = new URL(window.location.href);
   invite.searchParams.set("room", roomCode);
+  const encodedConfig = await encodeFirebaseConfig();
+  if (encodedConfig) invite.searchParams.set("fb", encodedConfig);
+  else invite.searchParams.delete("fb");
   if (!await copyTextToClipboard(invite.toString())) return;
   setInviteCopyFeedback(true);
   setSyncStatus("Invitacion copiada.");
@@ -59,12 +63,13 @@ async function copyTextToClipboard(text) {
   document.body.append(fallbackInput);
   fallbackInput.focus({ preventScroll: true });
   fallbackInput.select();
-  let copied = false;
-  try {
-    copied = document.execCommand("copy");
-  } catch {
-    copied = false;
-  }
+  const copied = (() => {
+    try {
+      return document.execCommand("copy");
+    } catch {
+      return false;
+    }
+  })();
   fallbackInput.remove();
   return copied;
 }

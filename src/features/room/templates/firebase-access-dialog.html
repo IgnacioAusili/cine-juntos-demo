@@ -1,0 +1,76 @@
+    <dialog id="firebaseAccessDialog" class="app-dialog   room-firebase-access" aria-labelledby="firebaseAccessTitle" aria-describedby="firebaseAccessDescription">
+      <div class="room-firebase-access__card">
+        <div class="room-firebase-access__hero">
+          <div class="room-firebase-access__hero-icon" aria-hidden="true">
+            <span data-lucide="radio-tower"></span>
+          </div>
+          <div class="room-firebase-access__hero-copy">
+            <p class="room-firebase-access__eyebrow">Antes de entrar a la sala</p>
+            <h2 class="room-firebase-access__title" id="firebaseAccessTitle">Conexión compartida de la sala</h2>
+          </div>
+          <button class="o-dialog-close" id="firebaseAccessClose" type="button" aria-label="Cerrar diálogo">
+            <span data-lucide="x" aria-hidden="true"></span>
+          </button>
+        </div>
+
+        <div class="room-firebase-access__body" id="firebaseAccessBody">
+        <p class="room-firebase-access__intro" id="firebaseAccessDescription">
+          Para ver el contenido de manera compartida con otras personas y poder usar el chat, se necesita utilizar el servicio <a href="https://firebase.google.com/docs/database?hl=es-419" target="_blank" rel="noopener noreferrer">Firebase Realtime Database</a>. Para integrar el servicio, se necesita una ApiKey que debes obtener desde tu cuenta de Google mediante <a href="https://console.firebase.google.com/" target="_blank" rel="noopener noreferrer">Firebase Console</a>. Es completamente gratuito, con límites mensuales. Solo se necesita configurar la primera vez.
+        </p>
+
+        <div class="room-firebase-access__info-grid">
+          <section class="room-firebase-access__info-card">
+            <span class="room-firebase-access__info-index">01</span>
+            <h3 class="room-firebase-access__info-title">Copiá el JSON de configuración</h3>
+            <p class="room-firebase-access__info-copy">En <a href="https://firebase.google.com/docs/projects/api-keys?hl=es-419" target="_blank" rel="noopener noreferrer">Firebase Console → Configuración del proyecto → General → Tus apps → tu app web → Config</a>. Si pegás solo una apiKey, debe ser del proyecto de esta plataforma. Para usar el tuyo, pegá el JSON de configuración completo (apiKey, authDomain, databaseURL, projectId y appId).</p>
+          </section>
+          <section class="room-firebase-access__info-card">
+            <span class="room-firebase-access__info-index">02</span>
+            <h3 class="room-firebase-access__info-title">Activá el acceso anónimo</h3>
+            <p class="room-firebase-access__info-copy">En Firebase Authentication → Sign-in method, habilitá <a href="https://firebase.google.com/docs/auth/web/anonymous-auth?hl=es-419" target="_blank" rel="noopener noreferrer">Anonymous</a>. La app crea una cuenta temporal para cada participante y usa esa sesión para acceder a la base.</p>
+          </section>
+          <section class="room-firebase-access__info-card">
+            <span class="room-firebase-access__info-index" aria-hidden="true"><span data-lucide="badge-check"></span></span>
+            <h3 class="room-firebase-access__info-title">Creá la base y sus reglas</h3>
+            <p class="room-firebase-access__info-copy">En Databases &amp; Storage → <a href="https://firebase.google.com/docs/database/web/start?hl=es-419" target="_blank" rel="noopener noreferrer">Realtime Database</a>, creá una base. La app necesita acceso de lectura y escritura con sesiones anónimas, más específicamente, en este caso, a <code>/rooms/{roomCode}</code>. Eso puede configurarse en las <a href="https://firebase.google.com/docs/database/security?hl=es-419" target="_blank" rel="noopener noreferrer">reglas</a> de la database, pero puede que por defecto ya venga permitido el acceso a cualquier ruta.</p>
+          </section>
+        </div>
+
+        <label class="room-firebase-access__field-label" for="firebaseAccessInput">
+          <span>ApiKey o JSON de configuración</span>
+        </label>
+        <textarea class="room-firebase-access__input" id="firebaseAccessInput" rows="2" autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="firebaseAccessStatus" placeholder="Pegá una apiKey o el JSON de configuración completo"></textarea>
+        <div class="room-firebase-access__status" id="firebaseAccessStatus" data-state="idle" role="status" aria-live="polite">
+          <span class="room-firebase-access__status-dot" aria-hidden="true"></span>
+          <span id="firebaseAccessStatusText">Pegá una apiKey o el JSON de configuración completo para comprobar la conexión.</span>
+        </div>
+        <section class="room-firebase-access__share-card" aria-labelledby="firebaseAccessShareTitle">
+          <span class="room-firebase-access__share-icon" aria-hidden="true" data-lucide="link-2"></span>
+          <div>
+            <h3 class="room-firebase-access__share-title" id="firebaseAccessShareTitle">Tu invitación lleva el ApiKey</h3>
+            <p class="room-firebase-access__share-copy">Al compartir el <strong>link de invitación</strong>, para que los demás usuarios puedan comunicarse, en el link se cifra la <strong>ApiKey</strong> que ingresaste. De esa manera, comparten el servicio mediante <strong>TU ApiKey</strong> y la <strong>información queda guardada</strong> siempre que entren a una sala desde tu link de invitación. Si borrás la <strong>ApiKey de la URL</strong> y compartís el link, <strong>no podrán comunicarse</strong> aunque estén en la misma sala.</p>
+            <p class="room-firebase-access__privacy">La <strong>ApiKey</strong> es única para el proyecto Firebase que configuraste desde tu cuenta de Google; se cifra de forma reversible en la URL. Como el mecanismo está en el código de la app, aporta solo una <strong>ofuscación básica</strong>; compartí el enlace únicamente con <strong>gente de confianza</strong>. Podés revocarla desde Google Cloud Console en cualquier momento.</p>
+          </div>
+        </section>
+        </div>
+
+        <footer class="room-firebase-access__footer">
+          <div class="room-firebase-access__local-copy">
+            <span class="room-firebase-access__local-icon" aria-hidden="true" data-lucide="monitor-play"></span>
+            <div>
+              <h3 class="room-firebase-access__local-title">¿Solo querés probar la página?</h3>
+              <p class="room-firebase-access__local-description">Entrá sin conexión. Vas a poder explorarla, pero no compartir la sala con otras personas.</p>
+            </div>
+          </div>
+          <div class="room-firebase-access__actions">
+            <button class="button" id="firebaseAccessLocal" type="button">Entrar sin conexión</button>
+            <span class="room-firebase-access__submit-hint" data-tooltip="Ingresá una ApiKey válida para habilitar.">
+              <button class="button   button--primary" id="firebaseAccessSubmit" type="button" disabled>Entrar y compartir</button>
+            </span>
+          </div>
+        </footer>
+        <div class="room-firebase-access__scrollbar" id="firebaseAccessScrollbar" role="scrollbar" aria-label="Desplazamiento del contenido de configuración" aria-controls="firebaseAccessBody" aria-orientation="vertical" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0" hidden>
+          <span class="room-firebase-access__scrollbar-thumb" aria-hidden="true"></span>
+        </div>
+      </div>
+    </dialog>

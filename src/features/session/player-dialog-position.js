@@ -39,7 +39,7 @@ function positionDialog(dialog) {
 }
 
 function syncDialogCardFit(dialog) {
-  if (!dialog.open || dialog.classList.contains("player-dialog--video-hosting")) return;
+  if (!dialog.open) return;
 
   const card = dialog.querySelector(".player-dialog__card");
   const availableHeight = Number.parseFloat(

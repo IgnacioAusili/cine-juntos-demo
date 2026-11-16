@@ -26,6 +26,10 @@
   margin-bottom: 6px;
 }
 
+.chat-message-list.chat-message-list--overlay .message.message--system:has(+ .message.message--system) {
+  margin-bottom: 2px;
+}
+
 .chat-message-list.chat-message-list--overlay .message-highlight--overlay {
   position: absolute;
   pointer-events: none;

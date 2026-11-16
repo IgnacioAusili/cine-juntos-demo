@@ -35,18 +35,18 @@
   max-height: var(--player-dialog-card-max-height);
 }
 
-.player-dialog--compact:not(.player-dialog--video-hosting) > .player-dialog__card {
+.player-dialog--compact > .player-dialog__card {
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: var(--app-shell-gutter);
 }
 
-.player-dialog--compact:not(.player-dialog--video-hosting) .player-dialog__header {
+.player-dialog--compact .player-dialog__header {
   gap: var(--app-shell-gutter);
   margin-bottom: var(--app-shell-gutter);
 }
 
-.player-dialog--compact:not(.player-dialog--video-hosting) .player-dialog__message {
+.player-dialog--compact .player-dialog__message {
   margin-bottom: var(--app-shell-gutter);
 }
 
@@ -54,16 +54,22 @@
   margin: 0 0 var(--app-shell-gutter);
 }
 
-.player-dialog--video-hosting {
+.video-hosting-dialog {
   box-sizing: border-box;
   width: min(820px, calc(100vw - 32px));
+  max-width: none;
   min-height: 0;
   max-height: calc(100dvh - 32px);
+  margin: auto;
+  padding: 0;
+  border: 0;
   overflow: hidden;
+  background: transparent;
+  color: var(--text);
   overscroll-behavior: contain;
 }
 
-.player-dialog--video-hosting .player-dialog__card {
+.video-hosting-dialog .player-dialog__card {
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
@@ -74,11 +80,11 @@
   padding: 0;
 }
 
-.player-dialog--video-hosting .o-dialog-title-icon {
+.video-hosting-dialog .o-dialog-title-icon {
   color: var(--teal);
 }
 
-.player-dialog--video-hosting .player-dialog__actions .button.button--primary:hover {
+.video-hosting-dialog .player-dialog__actions .button.button--primary:hover {
   background: linear-gradient(180deg, #f5a15f, var(--amber));
   box-shadow:
     0 0 0 1px rgba(240, 140, 58, 0.24),
@@ -193,6 +199,20 @@
   color: var(--text);
 }
 
+.video-hosting-dialog__program-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25em;
+  white-space: nowrap;
+}
+
+.video-hosting-dialog__program-link img {
+  flex: 0 0 1em;
+  width: 1em;
+  height: 1em;
+  object-fit: contain;
+}
+
 .video-hosting-dialog__note {
   display: flex;
   align-items: flex-start;
@@ -219,12 +239,12 @@
 }
 
 @media (max-width: 680px) {
-  .player-dialog--video-hosting {
+  .video-hosting-dialog {
     width: calc(100vw - 16px);
     max-height: calc(100dvh - 16px);
   }
 
-  .player-dialog--video-hosting .player-dialog__card {
+  .video-hosting-dialog .player-dialog__card {
     max-height: calc(100dvh - 16px);
     display: block;
     overflow-x: hidden;
@@ -247,7 +267,7 @@
     padding: 16px 14px;
   }
 
-  .player-dialog--video-hosting .player-dialog__card::-webkit-scrollbar {
+  .video-hosting-dialog .player-dialog__card::-webkit-scrollbar {
     display: none;
   }
 }

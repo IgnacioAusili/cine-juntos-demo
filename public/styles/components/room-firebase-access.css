@@ -1,0 +1,295 @@
+.room-firebase-access {
+  box-sizing: border-box;
+  width: var(--rf-dialog-width);
+  max-width: none;
+  max-height: var(--rf-dialog-height);
+  padding: 0;
+  overflow: hidden;
+  border: var(--rf-dialog-border);
+  border-radius: var(--rf-radius);
+  background: var(--rf-dialog-surface);
+  color: var(--text);
+  box-shadow: var(--rf-dialog-shadow);
+  scrollbar-color: var(--glass-border-strong) transparent;
+}
+
+.room-firebase-access__card {
+  position: relative;
+  display: flex;
+  box-sizing: border-box;
+  max-height: var(--rf-dialog-height);
+  flex-direction: column;
+  padding: var(--rf-dialog-padding);
+  padding-bottom: 0;
+  overflow: hidden;
+}
+
+.room-firebase-access__hero {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: var(--rf-gap-medium);
+  margin-bottom: var(--rf-size-6px);
+  padding-right: var(--rf-size-42px);
+}
+
+.room-firebase-access__body {
+  flex: var(--rf-unit-one) var(--rf-unit-one) auto;
+  min-height: 0;
+  padding-bottom: var(--rf-size-12px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+
+.room-firebase-access__body::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.room-firebase-access__scrollbar {
+  position: absolute;
+  z-index: var(--rf-z-index-tooltip);
+  top: var(--rf-scrollbar-top, 0px);
+  right: var(--rf-size-6px);
+  width: var(--rf-size-12px);
+  height: var(--rf-scrollbar-height, 0px);
+  padding: 0;
+  border: 0;
+  border-radius: var(--rf-unit-half);
+  background: transparent;
+  touch-action: none;
+}
+
+.room-firebase-access__scrollbar[hidden] {
+  display: none;
+}
+
+.room-firebase-access__scrollbar-thumb {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: var(--rf-size-6px);
+  min-height: var(--rf-size-28px);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  transform: translateX(-50%);
+  transition: background-color var(--rf-duration-transition) ease;
+}
+
+.room-firebase-access__scrollbar:hover .room-firebase-access__scrollbar-thumb {
+  background: #fff;
+}
+
+.room-firebase-access__scrollbar:focus-visible {
+  outline: var(--rf-size-1px) solid var(--amber);
+  outline-offset: var(--rf-size-1px);
+}
+
+.room-firebase-access__hero-icon {
+  display: grid;
+  flex: 0 0 var(--rf-size-26px);
+  width: var(--rf-size-26px);
+  height: var(--rf-size-26px);
+  place-items: center;
+  color: var(--amber);
+}
+
+.room-firebase-access__hero-icon svg {
+  width: var(--rf-size-26px);
+  height: var(--rf-size-26px);
+  stroke-width: var(--rf-line-icon);
+}
+
+.room-firebase-access .o-dialog-close svg {
+  width: var(--rf-size-36px);
+  height: var(--rf-size-36px);
+}
+
+.room-firebase-access__hero-copy {
+  min-width: 0;
+}
+
+.room-firebase-access__eyebrow {
+  margin: 0 0 var(--rf-size-4px);
+  color: var(--amber);
+  font-size: var(--rf-small-size);
+  font-weight: var(--rf-weight-black);
+  letter-spacing: var(--rf-letter-eyebrow);
+  text-transform: uppercase;
+}
+
+.room-firebase-access__title {
+  margin: 0;
+  color: var(--text);
+  font-size: var(--rf-title-size);
+  font-weight: var(--rf-weight-heavy);
+  line-height: var(--rf-title-line-height);
+  letter-spacing: var(--rf-letter-heading);
+}
+
+.room-firebase-access__intro {
+  max-width: none;
+  margin: var(--rf-size-15px) 0 var(--rf-size-14px);
+  color: var(--text-soft);
+  font-size: var(--rf-intro-size);
+  line-height: var(--rf-body-line-height);
+}
+
+.room-firebase-access a,
+.room-firebase-access a:visited {
+  color: var(--teal);
+  text-decoration: none;
+  text-underline-offset: var(--rf-size-3px);
+}
+
+.room-firebase-access a:hover,
+.room-firebase-access a:focus-visible {
+  color: var(--text);
+  text-decoration: underline;
+}
+
+.room-firebase-access__info-grid {
+  display: grid;
+  align-items: start;
+  grid-template-columns: repeat(3, minmax(0, var(--rf-grid-unit)));
+  gap: var(--rf-gap-small);
+  margin-bottom: var(--rf-size-14px);
+}
+
+.room-firebase-access__info-card {
+  min-width: 0;
+  padding: var(--rf-size-10px);
+  border: var(--rf-size-1px) solid var(--glass-border);
+  border-radius: var(--rf-card-radius);
+  background: var(--rf-card-background);
+}
+
+.room-firebase-access__info-index {
+  display: inline-flex;
+  min-height: var(--rf-size-22px);
+  align-items: center;
+  margin-bottom: var(--rf-size-5px);
+  color: var(--teal);
+  font-size: var(--rf-small-size);
+  font-weight: var(--rf-weight-black);
+  letter-spacing: var(--rf-letter-index);
+}
+
+.room-firebase-access__info-index svg {
+  width: var(--rf-size-17px);
+  height: var(--rf-size-17px);
+}
+
+.room-firebase-access__info-title,
+.room-firebase-access__share-title,
+.room-firebase-access__local-title {
+  margin: 0;
+  color: var(--text);
+  font-size: var(--rf-size-0-83rem);
+  font-weight: var(--rf-weight-heavy);
+  line-height: var(--rf-line-card);
+}
+
+.room-firebase-access__info-copy {
+  margin: var(--rf-size-7px) 0 0;
+  color: var(--muted);
+  font-size: var(--rf-copy-size);
+  line-height: var(--rf-copy-line-height);
+}
+
+.room-firebase-access__field-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--rf-gap-small);
+  margin-bottom: var(--rf-size-8px);
+  color: var(--text);
+  font-size: var(--rf-size-0-82rem);
+  font-weight: var(--rf-weight-heavy);
+}
+
+.room-firebase-access__input {
+  display: block;
+  box-sizing: border-box;
+  width: var(--rf-width-full);
+  min-height: var(--rf-size-76px);
+  resize: vertical;
+  padding: var(--rf-size-12px) var(--rf-size-14px);
+  border: var(--rf-size-1px) solid var(--glass-border-strong);
+  border-radius: var(--rf-input-radius);
+  outline: none;
+  background: var(--rf-color-input);
+  color: var(--text);
+  font: var(--rf-input-size)/var(--rf-copy-line-height) ui-monospace, SFMono-Regular, Consolas, monospace;
+  transition: border-color var(--rf-duration-transition) ease, box-shadow var(--rf-duration-transition) ease;
+}
+
+.room-firebase-access__input::placeholder {
+  color: var(--muted-2);
+}
+
+.room-firebase-access__input:focus-visible {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 var(--rf-size-3px) var(--teal-glow-soft);
+}
+
+.room-firebase-access__status {
+  display: flex;
+  min-height: var(--rf-size-36px);
+  align-items: center;
+  gap: var(--rf-gap-small);
+  margin-top: var(--rf-size-6px);
+  padding: 0 var(--rf-size-10px);
+  border: var(--rf-size-1px) solid transparent;
+  border-radius: var(--rf-input-radius);
+  color: var(--muted);
+  font-size: var(--rf-copy-size);
+  line-height: var(--rf-copy-line-height);
+  transition: background var(--rf-duration-transition) ease, border-color var(--rf-duration-transition) ease, color var(--rf-duration-transition) ease;
+}
+
+.room-firebase-access__status-dot {
+  position: relative;
+  flex: 0 0 var(--rf-status-dot-size);
+  width: var(--rf-status-dot-size);
+  height: var(--rf-status-dot-size);
+  border-radius: var(--rf-unit-half);
+  background: var(--muted-2);
+}
+
+.room-firebase-access__status[data-state="checking"] {
+  border-color: var(--rf-color-checking-border);
+  background: var(--rf-color-checking-background);
+  color: var(--rf-color-checking-text);
+}
+
+.room-firebase-access__status[data-state="checking"] .room-firebase-access__status-dot {
+  background: var(--amber);
+  box-shadow: var(--rf-status-ring);
+  animation: room-firebase-status-pulse var(--rf-duration-pulse) ease-in-out infinite alternate;
+}
+
+.room-firebase-access__status[data-state="valid"] {
+  border-color: var(--rf-color-valid-border);
+  background: var(--rf-color-valid-background);
+  color: var(--rf-color-valid-text);
+}
+
+.room-firebase-access__status[data-state="valid"] .room-firebase-access__status-dot {
+  background: var(--teal);
+  box-shadow: var(--rf-color-valid-glow);
+}
+
+.room-firebase-access__status[data-state="invalid"] {
+  border-color: var(--rf-color-invalid-border);
+  background: var(--rf-color-invalid-background);
+  color: var(--rf-color-invalid-text);
+}
+
+.room-firebase-access__status[data-state="invalid"] .room-firebase-access__status-dot {
+  background: var(--danger);
+}
+
+\n

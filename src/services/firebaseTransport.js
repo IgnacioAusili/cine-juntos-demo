@@ -4,6 +4,15 @@ import { state, makeMemberPayload, logEvent } from "../core/state.js";
 const INITIAL_CHAT_HISTORY_PAGE_SIZE = 8;
 const CHAT_HISTORY_PAGE_SIZE = 12;
 
+function getFirebaseAppName(config) {
+  const fingerprint = `${config.apiKey}|${config.projectId}|${config.appId}`;
+  let hash = 2166136261;
+  for (let index = 0; index < fingerprint.length; index += 1) {
+    hash = Math.imul(hash ^ fingerprint.charCodeAt(index), 16777619);
+  }
+  return `cine-juntos-${(hash >>> 0).toString(36)}`;
+}
+
 export async function createFirebaseTransport(roomCode, config) {
   const [appModule, authModule, dbModule] = await Promise.all([
     import(`https://www.gstatic.com/firebasejs/${FIREBASE_VERSION}/firebase-app.js`),
@@ -11,7 +20,9 @@ export async function createFirebaseTransport(roomCode, config) {
     import(`https://www.gstatic.com/firebasejs/${FIREBASE_VERSION}/firebase-database.js`),
   ]);
 
-  const app = appModule.getApps().length ? appModule.getApps()[0] : appModule.initializeApp(config);
+  const appName = getFirebaseAppName(config);
+  const app = appModule.getApps().find((existingApp) => existingApp.name === appName)
+    || appModule.initializeApp(config, appName);
   const auth = authModule.getAuth(app);
   if (!auth.currentUser) {
     await auth.authStateReady?.();

@@ -14,6 +14,7 @@ export const dom = {
   aboutButton: document.querySelector("#aboutButton"),
   videoUrlInput: document.querySelector("#videoUrlInput"),
   loadVideoButton: document.querySelector("#loadVideoButton"),
+  loadVideoButtonTooltip: document.querySelector("#loadVideoButtonTooltip"),
   sessionToolbar: document.querySelector(".session-toolbar"),
   workspace: document.querySelector('.o-workspace'),
   videoArea: document.querySelector('.o-video-area'),

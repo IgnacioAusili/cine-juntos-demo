@@ -2,7 +2,6 @@ import { dom } from "../../core/dom.js";
 import { hideTooltip } from "../icons-tooltips.js";
 import { tooltipState } from "../tooltip/tooltip-state.js";
 import { RESTORED_POINTEROVER_SUPPRESSION_MS } from "../tooltip/tooltip-constants.js";
-import { showPlayerDialog } from "../session/player-dialog-position.js";
 
 const PAGE_SCROLL_LOCK_CLASS = "video-hosting-dialog-open";
 let pageScrollTop = 0;
@@ -18,7 +17,7 @@ export function wireVideoHostingDialog() {
     if (dialog.open) return;
     suppressFocusTooltip();
     lockPageScroll();
-    showPlayerDialog(dialog);
+    dialog.showModal();
     dom.closeVideoHostingDialogButton?.focus();
   });
 

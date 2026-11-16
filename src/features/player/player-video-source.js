@@ -6,6 +6,7 @@ import { showErrorDialog } from "../session/session-dialogs.js";
 import { clearPlaybackRecoveryTracking, publishState } from "./player-sync-logic.js";
 import { playerRuntimeState } from "./player-runtime-state.js";
 import { configurePlayerMediaSourcePort, SKIP_LOAD_REPLACE_DIALOG_KEY, getLoadedVideoSourceKey, getVideoSourceKey, updateLoadButtonState, clearSlowLoadPromptTracking, clearPlaybackErrorTracking, armSlowLoadPrompt, hasLoadedMediaSource, isVideoLoadCoolingDown, shouldConfirmLoadReplacement } from "./player-media.js";
+import { getVideoUrlValidationMessage } from "./video-url-validation.js";
 
 const VIDEO_LOAD_COOLDOWN_MS = 3000;
 const SOURCE_REPLACEMENT_GRACE_MS = 3000;
@@ -267,6 +268,12 @@ export async function handleManualLoadRequest(sourceOverride = null) {
   if (state.player.remoteStateActive || state.player.suppressVideoEvents) return;
 
   const source = sourceOverride == null ? dom.videoUrlInput.value.trim() : String(sourceOverride).trim();
+  const validationMessage = source ? getVideoUrlValidationMessage(source) : "";
+  if (validationMessage) {
+    showErrorDialog(validationMessage);
+    return;
+  }
+
   if (!source) {
     // Sin un video cargado no hay nada que reemplazar ni limpiar.
     // Evita mostrar la confirmación y deja el botón sin efecto.

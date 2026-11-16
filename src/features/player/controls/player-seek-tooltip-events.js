@@ -2,6 +2,7 @@ import { dom } from "../../../core/dom.js";
 import { state } from "../../../core/state.js";
 import { formatSeconds } from "../../../core/utils.js";
 import { hideTooltip } from "../../icons-tooltips.js";
+import { hasMediaForPlaybackControls } from "../player-media.js";
 import { hideSeekTooltip, showSeekTooltip } from "./player-seek-tooltip-view.js";
 import { seekTooltipState } from "./player-seek-tooltip-state.js";
 
@@ -10,10 +11,6 @@ const SEEK_THUMB_WIDTH = 14;
 function getFiniteDuration() {
   return Number.isFinite(dom.videoPlayer.duration) ? Math.max(0, dom.videoPlayer.duration) : 0;
 }
-function hasLoadedMediaSource() {
-  return Boolean(dom.videoPlayer.getAttribute("src"));
-}
-
 export function wireSeekTooltipEvents() {
   if (!dom.playerSeekInput || !dom.tooltipLayer) return;
 
@@ -102,7 +99,7 @@ function updateSeekTooltipFromPointer(event) {
     return;
   }
   const duration = getFiniteDuration();
-  if (!dom.playerSeekInput || !dom.tooltipLayer || !hasLoadedMediaSource() || duration <= 0) {
+  if (!dom.playerSeekInput || !dom.tooltipLayer || !hasMediaForPlaybackControls() || duration <= 0) {
     hideSeekTooltip();
     return;
   }

@@ -1,6 +1,7 @@
 import { dom } from "../../core/dom.js";
 import { updateDisplayName } from "../presence/index.js";
 import { joinRoom } from "./room-entry.js";
+import { requestRoomEntry } from "./room-firebase-access.js";
 import { leaveRoom } from "./room-exit.js";
 import { copyInvite } from "./room-invite.js";
 import {
@@ -40,7 +41,7 @@ export function wireRoomEvents() {
     dom.roomInput.value = roomCode;
     rememberLastRoom(roomCode);
     syncJoinRoomButtonState();
-    void joinRoom(pastedText);
+    void requestRoomEntry(pastedText, "join", joinRoom);
   });
 
   dom.createRoomButton.addEventListener("click", () => {
@@ -55,11 +56,11 @@ export function wireRoomEvents() {
     syncJoinRoomButtonState();
     state.session.hostRoomCode = roomCode;
     sessionStorage.setItem("cine-juntos-host-room", roomCode);
-    void joinRoom(roomCode, "create");
+    void requestRoomEntry(roomCode, "create", joinRoom);
   });
 
   dom.joinRoomButton.addEventListener("click", () => {
-    void joinRoom(dom.roomInput.value, "join");
+    void requestRoomEntry(dom.roomInput.value, "join", joinRoom);
   });
 
   dom.copyInviteButton.addEventListener("click", copyInvite);
@@ -77,7 +78,7 @@ export function wireRoomEvents() {
   });
 
   dom.roomInput.addEventListener("keydown", (event) => {
-    if (event.key === "Enter") void joinRoom(dom.roomInput.value);
+    if (event.key === "Enter") void requestRoomEntry(dom.roomInput.value, "join", joinRoom);
   });
 
   dom.lobbyNameInput.addEventListener("input", () => {

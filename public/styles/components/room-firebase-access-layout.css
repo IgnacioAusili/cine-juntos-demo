@@ -1,0 +1,207 @@
+.room-firebase-access__share-card {
+  display: grid;
+  grid-template-columns: var(--rf-size-36px) minmax(0, var(--rf-grid-unit));
+  gap: var(--rf-gap-medium);
+  margin-top: var(--rf-size-18px);
+  padding: var(--rf-size-15px);
+  border: var(--rf-size-1px) solid var(--rf-color-share-border);
+  border-radius: var(--rf-card-radius);
+  background: var(--rf-color-share-background);
+}
+
+.room-firebase-access__share-icon {
+  display: grid;
+  width: var(--rf-size-36px);
+  height: var(--rf-size-36px);
+  place-items: center;
+  border-radius: var(--radius-sm);
+  background: var(--rf-color-share-icon);
+  color: var(--amber);
+}
+
+.room-firebase-access__share-icon svg,
+.room-firebase-access__local-icon svg {
+  width: var(--rf-size-18px);
+  height: var(--rf-size-18px);
+}
+
+.room-firebase-access__share-copy,
+.room-firebase-access__privacy {
+  margin: var(--rf-size-6px) 0 0;
+  color: var(--text-soft);
+  font-size: var(--rf-copy-size);
+  line-height: var(--rf-copy-line-height);
+}
+
+.room-firebase-access__share-copy code,
+.room-firebase-access__info-copy code {
+  padding: var(--rf-size-1px) var(--rf-size-5px);
+  border: var(--rf-size-1px) solid var(--rf-color-code-border);
+  border-radius: 0;
+  background: var(--rf-color-code-background);
+  color: var(--rf-color-code-text);
+  font: inherit;
+  font-weight: var(--rf-weight-bold);
+}
+
+.room-firebase-access__share-copy code {
+  color: var(--amber);
+}
+
+.room-firebase-access__info-copy code {
+  white-space: nowrap;
+}
+
+.room-firebase-access__privacy {
+  color: var(--muted-2);
+}
+
+.room-firebase-access__footer {
+  position: relative;
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--rf-gap-large);
+  margin-top: 0;
+  padding: var(--rf-size-18px) var(--rf-size-10px);
+}
+
+.room-firebase-access__footer::before {
+  position: absolute;
+  top: var(--rf-size-6px);
+  right: 0;
+  left: 0;
+  border-top: var(--rf-size-1px) solid var(--glass-border);
+  content: "";
+}
+
+.room-firebase-access__local-copy {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: var(--rf-gap-small);
+}
+
+.room-firebase-access__local-icon {
+  display: block;
+  flex: 0 0 auto;
+  width: auto;
+  height: auto;
+  color: var(--amber);
+}
+
+.room-firebase-access__local-title {
+  font-size: var(--rf-size-0-83rem);
+}
+
+.room-firebase-access__local-description {
+  margin: var(--rf-size-3px) 0 0;
+  color: var(--muted-2);
+  font-size: var(--rf-size-0-82rem);
+  line-height: var(--rf-copy-line-height);
+}
+
+.room-firebase-access__actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--rf-gap-small);
+}
+
+.room-firebase-access__submit-hint {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.room-firebase-access__submit-hint:has(> .button:disabled) {
+  cursor: not-allowed;
+}
+
+.room-firebase-access__actions .button {
+  white-space: nowrap;
+}
+
+.room-firebase-access__actions .button:disabled {
+  cursor: not-allowed;
+  filter: saturate(var(--rf-opacity-saturated));
+  opacity: var(--rf-opacity-disabled);
+}
+
+@keyframes room-firebase-status-pulse {
+  from { transform: scale(var(--rf-scale-small)); }
+  to { transform: scale(var(--rf-unit-one)); }
+}
+
+@media (max-width: 680px) {
+  .room-firebase-access__info-grid {
+    grid-template-columns: minmax(0, var(--rf-grid-unit));
+  }
+
+  .room-firebase-access__info-card {
+    display: grid;
+    grid-template-columns: var(--rf-size-26px) minmax(0, var(--rf-grid-unit));
+    column-gap: var(--rf-gap-small);
+    padding: var(--rf-size-12px);
+  }
+
+  .room-firebase-access__info-index {
+    grid-row: span 2;
+    margin: var(--rf-size-1px) 0 0;
+  }
+
+  .room-firebase-access__info-title,
+  .room-firebase-access__info-copy {
+    grid-column: 2;
+  }
+
+  .room-firebase-access__info-copy {
+    margin-top: var(--rf-size-3px);
+  }
+
+  .room-firebase-access__footer {
+    align-items: stretch;
+    flex-direction: column;
+    gap: var(--rf-gap-medium);
+  }
+
+  .room-firebase-access__actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, var(--rf-grid-unit)));
+  }
+
+  .room-firebase-access__actions .button {
+    min-width: 0;
+    padding-inline: var(--rf-size-10px);
+    white-space: normal;
+  }
+
+  .room-firebase-access__submit-hint {
+    display: flex;
+  }
+
+  .room-firebase-access__submit-hint > .button {
+    width: var(--rf-width-full);
+  }
+}
+
+@media (max-width: 420px) {
+  .room-firebase-access__hero {
+    padding-right: var(--rf-size-28px);
+  }
+
+  .room-firebase-access__title {
+    font-size: var(--rf-size-1-25rem);
+  }
+
+  .room-firebase-access__field-label {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .room-firebase-access__actions {
+    grid-template-columns: minmax(0, var(--rf-grid-unit));
+  }
+}

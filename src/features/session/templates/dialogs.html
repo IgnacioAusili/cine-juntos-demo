@@ -67,7 +67,7 @@
 
     <dialog
       id="videoHostingDialog"
-      class="app-dialog   player-dialog   player-dialog--video-hosting"
+      class="app-dialog   video-hosting-dialog"
       aria-modal="true"
       aria-labelledby="videoHostingDialogTitle"
       aria-describedby="videoHostingDialogIntro"
@@ -84,7 +84,7 @@
         </div>
         <div class="video-hosting-dialog__content">
           <p id="videoHostingDialogIntro" class="video-hosting-dialog__intro">
-            Para poder cargar un video, se necesita un enlace HTTPS directo a un archivo de video, el mismo debes verificar que sea accesible para las demás personas de la sala. Acepta MP4, WebM, Ogg, MOV y M4V; el enlace debe abrir el archivo, no una página de reproducción.
+            Para poder cargar un video, se necesita un enlace HTTPS directo a un archivo de video. Acepta MP4, WebM, Ogg, MOV y M4V; el enlace debe abrir el archivo, no una página de reproducción.
           </p>
           <section class="video-hosting-dialog__section" aria-labelledby="videoHostingStepsTitle">
             <h3 id="videoHostingStepsTitle">Cómo prepararlo</h3>
@@ -98,7 +98,7 @@
             <h3 id="videoHostingServicesTitle">Opciones para alojarlo</h3>
             <ul>
               <li><strong>Almacenamiento + enlace directo:</strong> Servicios como Cloudflare R2, Amazon S3 o Backblaze B2. Configurá el acceso al archivo y compartí su URL; algunos permiten servirlo mediante una CDN.</li>
-              <li><strong>Tu propio servidor:</strong> Podés subir el video a tu hosting web, VPS o servidor personal y publicar un enlace HTTPS directo. Como alternativa, podés usar <a href="https://github.com/IgnacioAusili/VideoPuente" target="_blank" rel="noopener noreferrer">VideoPuente</a>, una aplicación de mi autoría que comparte un video de tu equipo mediante un enlace HTTPS; mantenela activa mientras lo ven. <a href="https://github.com/IgnacioAusili/VideoPuente/releases" target="_blank" rel="noopener noreferrer">Descargala acá</a>.</li>
+              <li><strong>Tu propio servidor:</strong> Podés subir el video a tu hosting web, VPS o servidor personal y publicar un enlace HTTPS directo. Como <strong>alternativa</strong>, podés usar <a class="video-hosting-dialog__program-link" href="https://github.com/IgnacioAusili/VideoPuente" target="_blank" rel="noopener noreferrer"><img src="./assets/branding/videopuente.svg" alt="" width="16" height="16" aria-hidden="true" /><span>VideoPuente</span></a>, un programa diseñado por mí para ese fin. El mismo te permite compartir/hostear un video de tu equipo mediante un enlace HTTPS. <a href="https://github.com/IgnacioAusili/VideoPuente/releases" target="_blank" rel="noopener noreferrer">Descargalo acá</a>.</li>
               <li><strong>Hosting de video:</strong> Bunny Stream, Cloudflare Stream o Vimeo procesan y reproducen videos. Sus enlaces de página o reproductor no sirven en este campo: necesitás que el servicio ofrezca un enlace directo a un archivo compatible.</li>
             </ul>
             <div class="video-hosting-dialog__links">
@@ -106,6 +106,7 @@
               <a href="https://developers.cloudflare.com/stream/viewing-videos/download-videos/" target="_blank" rel="noopener noreferrer">Enlaces MP4 de Cloudflare Stream</a>
               <a href="https://docs.bunny.net/docs/stream/mp4-downloads" target="_blank" rel="noopener noreferrer">Descargas MP4 de Bunny Stream</a>
               <a href="https://help.vimeo.com/hc/en-us/articles/12426150952593-How-to-access-my-video-s-direct-links" target="_blank" rel="noopener noreferrer">Enlaces directos de Vimeo</a>
+              <a href="https://github.com/IgnacioAusili/VideoPuente" target="_blank" rel="noopener noreferrer">Ver más info de VideoPuente</a>
             </div>
           </section>
           <p class="video-hosting-dialog__note">

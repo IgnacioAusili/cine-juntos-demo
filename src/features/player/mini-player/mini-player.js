@@ -15,6 +15,7 @@ import { movePlayerInterface } from "./mini-player-interface.js";
 import { trackMiniPlayerReturnHint } from "./mini-player-return-hint.js";
 import { clampMiniPlayerPosition, wireMiniPlayerDrag } from "./mini-player-drag.js";
 import { wireMiniPlayerChatPlacement } from "./mini-player-chat-placement.js";
+import { hasMediaForPlaybackControls } from "../player-media.js";
 
 let miniSurface = null;
 let pictureInPictureWindow = null;
@@ -228,7 +229,7 @@ function supportsDocumentPictureInPicture() {
 }
 
 function hasMedia() {
-  return Boolean(dom.videoPlayer.currentSrc || dom.videoPlayer.getAttribute("src"));
+  return hasMediaForPlaybackControls();
 }
 
 function wireNativePictureInPictureActions() {

@@ -119,6 +119,22 @@
   font-weight: 700;
 }
 
+#overlayMessages .message.message--system.message--system-group-member:not(.u-transitioning):hover .message__system-bubble,
+#overlayMessages .message.message--system.message--system-group-member.message-menu--open:not(.u-transitioning) .message__system-bubble {
+  color: rgba(255, 255, 255, 0.72);
+  filter: none;
+}
+
+#overlayMessages .message.message--system.message--system-group-member:not(.u-transitioning):hover .message__system-text,
+#overlayMessages .message.message--system.message--system-group-member.message-menu--open:not(.u-transitioning) .message__system-text {
+  filter: brightness(1.18);
+}
+
+#overlayMessages .message.message--system.message--system-group-member:not(.u-transitioning):hover .message__system-line,
+#overlayMessages .message.message--system.message--system-group-member.message-menu--open:not(.u-transitioning) .message__system-line {
+  background: linear-gradient(90deg, transparent, rgba(165, 176, 184, 0.82), transparent);
+}
+
 /* En el overlay, los mensajes solo con emojis tampoco llevan burbuja. */
 .player-frame[data-chat-style="float"] .chat-message-list.chat-message-list--overlay .message__bubble--emoji-only,.chat-message-list.chat-message-list--overlay .message.message--mine .message__bubble--emoji-only,.chat-message-list.chat-message-list--overlay .message:not(.message--mine) .message__bubble--emoji-only {
   display: flex;

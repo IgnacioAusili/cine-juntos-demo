@@ -451,17 +451,21 @@
                     </button>
                   </div>
                 </div>
-                <button
-                  class="button   button--primary"
-                  id="loadVideoButton"
-                  type="button"
-                  title="Cargar el video en la sala"
+                <span
+                  id="loadVideoButtonTooltip"
+                  class="session-toolbar__load-button-tooltip"
                   data-tooltip="Cargar el video en la sala"
                 >
-                  <span data-lucide="play-square"></span>
-                  <span class="button__label">Cargar</span>
-                  <span class="button__spinner" aria-hidden="true"></span>
-                </button>
+                  <button
+                    class="button   button--primary"
+                    id="loadVideoButton"
+                    type="button"
+                  >
+                    <span data-lucide="play-square"></span>
+                    <span class="button__label">Cargar</span>
+                    <span class="button__spinner" aria-hidden="true"></span>
+                  </button>
+                </span>
               </div>
             </section>
             <div class="player-frame" id="playerFrame" data-chat-style="float">
@@ -1123,7 +1127,7 @@
 
     <dialog
       id="videoHostingDialog"
-      class="app-dialog   player-dialog   player-dialog--video-hosting"
+      class="app-dialog   video-hosting-dialog"
       aria-modal="true"
       aria-labelledby="videoHostingDialogTitle"
       aria-describedby="videoHostingDialogIntro"
@@ -1140,7 +1144,7 @@
         </div>
         <div class="video-hosting-dialog__content">
           <p id="videoHostingDialogIntro" class="video-hosting-dialog__intro">
-            Para poder cargar un video, se necesita un enlace HTTPS directo a un archivo de video, el mismo debes verificar que sea accesible para las demás personas de la sala. Acepta MP4, WebM, Ogg, MOV y M4V; el enlace debe abrir el archivo, no una página de reproducción.
+            Para poder cargar un video, se necesita un enlace HTTPS directo a un archivo de video. Acepta MP4, WebM, Ogg, MOV y M4V; el enlace debe abrir el archivo, no una página de reproducción.
           </p>
           <section class="video-hosting-dialog__section" aria-labelledby="videoHostingStepsTitle">
             <h3 id="videoHostingStepsTitle">Cómo prepararlo</h3>
@@ -1154,7 +1158,7 @@
             <h3 id="videoHostingServicesTitle">Opciones para alojarlo</h3>
             <ul>
               <li><strong>Almacenamiento + enlace directo:</strong> Servicios como Cloudflare R2, Amazon S3 o Backblaze B2. Configurá el acceso al archivo y compartí su URL; algunos permiten servirlo mediante una CDN.</li>
-              <li><strong>Tu propio servidor:</strong> Podés subir el video a tu hosting web, VPS o servidor personal y publicar un enlace HTTPS directo. Como alternativa, podés usar <a href="https://github.com/IgnacioAusili/VideoPuente" target="_blank" rel="noopener noreferrer">VideoPuente</a>, una aplicación de mi autoría que comparte un video de tu equipo mediante un enlace HTTPS; mantenela activa mientras lo ven. <a href="https://github.com/IgnacioAusili/VideoPuente/releases" target="_blank" rel="noopener noreferrer">Descargala acá</a>.</li>
+              <li><strong>Tu propio servidor:</strong> Podés subir el video a tu hosting web, VPS o servidor personal y publicar un enlace HTTPS directo. Como <strong>alternativa</strong>, podés usar <a class="video-hosting-dialog__program-link" href="https://github.com/IgnacioAusili/VideoPuente" target="_blank" rel="noopener noreferrer"><img src="./assets/branding/videopuente.svg" alt="" width="16" height="16" aria-hidden="true" /><span>VideoPuente</span></a>, un programa diseñado por mí para ese fin. El mismo te permite compartir/hostear un video de tu equipo mediante un enlace HTTPS. <a href="https://github.com/IgnacioAusili/VideoPuente/releases" target="_blank" rel="noopener noreferrer">Descargalo acá</a>.</li>
               <li><strong>Hosting de video:</strong> Bunny Stream, Cloudflare Stream o Vimeo procesan y reproducen videos. Sus enlaces de página o reproductor no sirven en este campo: necesitás que el servicio ofrezca un enlace directo a un archivo compatible.</li>
             </ul>
             <div class="video-hosting-dialog__links">
@@ -1162,6 +1166,7 @@
               <a href="https://developers.cloudflare.com/stream/viewing-videos/download-videos/" target="_blank" rel="noopener noreferrer">Enlaces MP4 de Cloudflare Stream</a>
               <a href="https://docs.bunny.net/docs/stream/mp4-downloads" target="_blank" rel="noopener noreferrer">Descargas MP4 de Bunny Stream</a>
               <a href="https://help.vimeo.com/hc/en-us/articles/12426150952593-How-to-access-my-video-s-direct-links" target="_blank" rel="noopener noreferrer">Enlaces directos de Vimeo</a>
+              <a href="https://github.com/IgnacioAusili/VideoPuente" target="_blank" rel="noopener noreferrer">Ver más info de VideoPuente</a>
             </div>
           </section>
           <p class="video-hosting-dialog__note">
@@ -1305,6 +1310,82 @@
         <div class="player-dialog__actions">
           <button id="cancelVideoDownloadButton" type="button" class="button" autofocus>Cancelar</button>
           <button id="confirmVideoDownloadButton" type="button" class="button   button--warning">Descargar</button>
+        </div>
+      </div>
+    </dialog>
+    <dialog id="firebaseAccessDialog" class="app-dialog   room-firebase-access" aria-labelledby="firebaseAccessTitle" aria-describedby="firebaseAccessDescription">
+      <div class="room-firebase-access__card">
+        <div class="room-firebase-access__hero">
+          <div class="room-firebase-access__hero-icon" aria-hidden="true">
+            <span data-lucide="radio-tower"></span>
+          </div>
+          <div class="room-firebase-access__hero-copy">
+            <p class="room-firebase-access__eyebrow">Antes de entrar a la sala</p>
+            <h2 class="room-firebase-access__title" id="firebaseAccessTitle">Conexión compartida de la sala</h2>
+          </div>
+          <button class="o-dialog-close" id="firebaseAccessClose" type="button" aria-label="Cerrar diálogo">
+            <span data-lucide="x" aria-hidden="true"></span>
+          </button>
+        </div>
+
+        <div class="room-firebase-access__body" id="firebaseAccessBody">
+        <p class="room-firebase-access__intro" id="firebaseAccessDescription">
+          Para ver el contenido de manera compartida con otras personas y poder usar el chat, se necesita utilizar el servicio <a href="https://firebase.google.com/docs/database?hl=es-419" target="_blank" rel="noopener noreferrer">Firebase Realtime Database</a>. Para integrar el servicio, se necesita una ApiKey que debes obtener desde tu cuenta de Google mediante <a href="https://console.firebase.google.com/" target="_blank" rel="noopener noreferrer">Firebase Console</a>. Es completamente gratuito, con límites mensuales. Solo se necesita configurar la primera vez.
+        </p>
+
+        <div class="room-firebase-access__info-grid">
+          <section class="room-firebase-access__info-card">
+            <span class="room-firebase-access__info-index">01</span>
+            <h3 class="room-firebase-access__info-title">Copiá el JSON de configuración</h3>
+            <p class="room-firebase-access__info-copy">En <a href="https://firebase.google.com/docs/projects/api-keys?hl=es-419" target="_blank" rel="noopener noreferrer">Firebase Console → Configuración del proyecto → General → Tus apps → tu app web → Config</a>. Si pegás solo una apiKey, debe ser del proyecto de esta plataforma. Para usar el tuyo, pegá el JSON de configuración completo (apiKey, authDomain, databaseURL, projectId y appId).</p>
+          </section>
+          <section class="room-firebase-access__info-card">
+            <span class="room-firebase-access__info-index">02</span>
+            <h3 class="room-firebase-access__info-title">Activá el acceso anónimo</h3>
+            <p class="room-firebase-access__info-copy">En Firebase Authentication → Sign-in method, habilitá <a href="https://firebase.google.com/docs/auth/web/anonymous-auth?hl=es-419" target="_blank" rel="noopener noreferrer">Anonymous</a>. La app crea una cuenta temporal para cada participante y usa esa sesión para acceder a la base.</p>
+          </section>
+          <section class="room-firebase-access__info-card">
+            <span class="room-firebase-access__info-index" aria-hidden="true"><span data-lucide="badge-check"></span></span>
+            <h3 class="room-firebase-access__info-title">Creá la base y sus reglas</h3>
+            <p class="room-firebase-access__info-copy">En Databases &amp; Storage → <a href="https://firebase.google.com/docs/database/web/start?hl=es-419" target="_blank" rel="noopener noreferrer">Realtime Database</a>, creá una base. La app necesita acceso de lectura y escritura con sesiones anónimas, más específicamente, en este caso, a <code>/rooms/{roomCode}</code>. Eso puede configurarse en las <a href="https://firebase.google.com/docs/database/security?hl=es-419" target="_blank" rel="noopener noreferrer">reglas</a> de la database, pero puede que por defecto ya venga permitido el acceso a cualquier ruta.</p>
+          </section>
+        </div>
+
+        <label class="room-firebase-access__field-label" for="firebaseAccessInput">
+          <span>ApiKey o JSON de configuración</span>
+        </label>
+        <textarea class="room-firebase-access__input" id="firebaseAccessInput" rows="2" autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="firebaseAccessStatus" placeholder="Pegá una apiKey o el JSON de configuración completo"></textarea>
+        <div class="room-firebase-access__status" id="firebaseAccessStatus" data-state="idle" role="status" aria-live="polite">
+          <span class="room-firebase-access__status-dot" aria-hidden="true"></span>
+          <span id="firebaseAccessStatusText">Pegá una apiKey o el JSON de configuración completo para comprobar la conexión.</span>
+        </div>
+        <section class="room-firebase-access__share-card" aria-labelledby="firebaseAccessShareTitle">
+          <span class="room-firebase-access__share-icon" aria-hidden="true" data-lucide="link-2"></span>
+          <div>
+            <h3 class="room-firebase-access__share-title" id="firebaseAccessShareTitle">Tu invitación lleva el ApiKey</h3>
+            <p class="room-firebase-access__share-copy">Al compartir el <strong>link de invitación</strong>, para que los demás usuarios puedan comunicarse, en el link se cifra la <strong>ApiKey</strong> que ingresaste. De esa manera, comparten el servicio mediante <strong>TU ApiKey</strong> y la <strong>información queda guardada</strong> siempre que entren a una sala desde tu link de invitación. Si borrás la <strong>ApiKey de la URL</strong> y compartís el link, <strong>no podrán comunicarse</strong> aunque estén en la misma sala.</p>
+            <p class="room-firebase-access__privacy">La <strong>ApiKey</strong> es única para el proyecto Firebase que configuraste desde tu cuenta de Google; se cifra de forma reversible en la URL. Como el mecanismo está en el código de la app, aporta solo una <strong>ofuscación básica</strong>; compartí el enlace únicamente con <strong>gente de confianza</strong>. Podés revocarla desde Google Cloud Console en cualquier momento.</p>
+          </div>
+        </section>
+        </div>
+
+        <footer class="room-firebase-access__footer">
+          <div class="room-firebase-access__local-copy">
+            <span class="room-firebase-access__local-icon" aria-hidden="true" data-lucide="monitor-play"></span>
+            <div>
+              <h3 class="room-firebase-access__local-title">¿Solo querés probar la página?</h3>
+              <p class="room-firebase-access__local-description">Entrá sin conexión. Vas a poder explorarla, pero no compartir la sala con otras personas.</p>
+            </div>
+          </div>
+          <div class="room-firebase-access__actions">
+            <button class="button" id="firebaseAccessLocal" type="button">Entrar sin conexión</button>
+            <span class="room-firebase-access__submit-hint" data-tooltip="Ingresá una ApiKey válida para habilitar.">
+              <button class="button   button--primary" id="firebaseAccessSubmit" type="button" disabled>Entrar y compartir</button>
+            </span>
+          </div>
+        </footer>
+        <div class="room-firebase-access__scrollbar" id="firebaseAccessScrollbar" role="scrollbar" aria-label="Desplazamiento del contenido de configuración" aria-controls="firebaseAccessBody" aria-orientation="vertical" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0" hidden>
+          <span class="room-firebase-access__scrollbar-thumb" aria-hidden="true"></span>
         </div>
       </div>
     </dialog>

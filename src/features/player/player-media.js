@@ -4,6 +4,7 @@ import { formatSeconds, formatClockTime, PLAYBACK_ERROR_CONFIRMATION_MS } from "
 import { showErrorDialog, showResumeVideoDialog, showSlowLoadDialog } from "../session/session-ui.js";
 import { pauseRoomForPlaybackIssue } from "./player-sync-logic.js";
 import { playerRuntimeState } from "./player-runtime-state.js";
+import { getVideoUrlValidationMessage } from "./video-url-validation.js";
 
 export const SKIP_LOAD_REPLACE_DIALOG_KEY = "cine-juntos-skip-load-replace-dialog";
 const VIDEO_RESUME_STORAGE_KEY = "cine-juntos-video-resume-times";
@@ -45,7 +46,32 @@ export function rememberPlaybackPosition() {
 export function updateLoadButtonState() {
   if (!dom.loadVideoButton) return;
   const coolingDown = isVideoLoadCoolingDown();
-  dom.loadVideoButton.disabled = coolingDown;
+  const validationMessage = getVideoUrlValidationMessage(dom.videoUrlInput?.value);
+  const isInvalid = Boolean(validationMessage);
+  const buttonTooltip = validationMessage
+    || (coolingDown ? "Esperá un momento antes de cargar otro video" : "Cargar el video en la sala");
+  const isDisabled = coolingDown || isInvalid;
+
+  dom.loadVideoButton.disabled = isDisabled;
+  if (isInvalid) {
+    dom.videoUrlInput?.setAttribute("aria-invalid", "true");
+  } else {
+    dom.videoUrlInput?.removeAttribute("aria-invalid");
+  }
+  if (dom.loadVideoButtonTooltip) {
+    dom.loadVideoButtonTooltip.dataset.tooltip = buttonTooltip;
+    dom.loadVideoButtonTooltip.removeAttribute("title");
+    dom.loadVideoButtonTooltip.classList.toggle("session-toolbar__load-button-tooltip--disabled", isDisabled);
+    if (isInvalid) {
+      dom.loadVideoButtonTooltip.tabIndex = 0;
+      dom.loadVideoButtonTooltip.setAttribute("role", "group");
+      dom.loadVideoButtonTooltip.setAttribute("aria-label", validationMessage);
+    } else {
+      dom.loadVideoButtonTooltip.removeAttribute("tabindex");
+      dom.loadVideoButtonTooltip.removeAttribute("role");
+      dom.loadVideoButtonTooltip.removeAttribute("aria-label");
+    }
+  }
   dom.loadVideoButton.dataset.loading = coolingDown ? "true" : "false";
   if (!coolingDown) {
     delete dom.loadVideoButton.dataset.loading;
@@ -57,6 +83,11 @@ export function updateLoadButtonState() {
 
 export function hasLoadedMediaSource() {
   return Boolean(dom.videoPlayer.getAttribute("src"));
+}
+
+export function hasMediaForPlaybackControls() {
+  return hasLoadedMediaSource()
+    && !dom.syncStatus?.classList.contains("sync-status--error");
 }
 
 export function shouldConfirmLoadReplacement() {

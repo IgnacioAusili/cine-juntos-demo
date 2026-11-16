@@ -6,7 +6,7 @@ import { syncMiniPlayerButton } from "../mini-player/mini-player.js";
 import { closeRateSelectMenu, syncRateSelectMenu, syncRateSelectWidth } from "./player-rate-menu.js";
 import { hideSeekTooltip } from "./player-seek-tooltip-view.js";
 import { seekTooltipState } from "./player-seek-tooltip-state.js";
-import { getFiniteDuration, hasLoadedMediaSource } from "../player-media.js";
+import { getFiniteDuration, hasMediaForPlaybackControls } from "../player-media.js";
 import { playerRuntimeState } from "../player-runtime-state.js";
 
 const MOBILE_CENTER_BUTTON_LABELS = Object.freeze({
@@ -21,7 +21,7 @@ export function renderPlayerControls(forceSliderSync = false, controls) {
   const videoCurrentTime = isEnded && duration > 0
     ? duration
     : Number.isFinite(dom.videoPlayer.currentTime) ? Math.max(0, dom.videoPlayer.currentTime) : 0;
-  const hasMedia = hasLoadedMediaSource();
+  const hasMedia = hasMediaForPlaybackControls();
   const seekInputTime = Number(dom.playerSeekInput?.value);
   // En táctil el range puede no recibir foco. Mientras el dedo lo arrastra,
   // su valor es la previsualización y no debe ser pisado por `timeupdate`.

@@ -3,7 +3,7 @@ import { state, logEvent } from "../../../core/state.js";
 import { formatSeconds } from "../../../core/utils.js";
 import { setInsideChatVisible } from "../../chat/index.js";
 import { togglePageFullscreen } from "../fullscreen/fullscreen.js";
-import { getFiniteDuration, hasLoadedMediaSource } from "../player-media.js";
+import { getFiniteDuration, hasMediaForPlaybackControls } from "../player-media.js";
 import { updateSeekTooltipForValue } from "./player-seek-tooltip-view.js";
 import { renderPlayerControls, showPlaybackGestureIndicator, updateSeekVisuals } from "./player-control-display.js";
 import { playerRuntimeState } from "../player-runtime-state.js";
@@ -24,7 +24,7 @@ function isMobileCenterControlsActive() {
 }
 
 export function togglePlaybackFromControls(source = "main-player") {
-  const hasMedia = hasLoadedMediaSource();
+  const hasMedia = hasMediaForPlaybackControls();
   if (!hasMedia) {
     if (source === "mini-player") traceMiniPlayer("playback-ignored-no-media", { source });
     return;
@@ -140,7 +140,7 @@ export function handleGlobalPlayerKeydown(event) {
     return;
   }
 
-  if (!hasLoadedMediaSource()) return;
+  if (!hasMediaForPlaybackControls()) return;
 
   if (key === " " || key === "Spacebar") {
     event.preventDefault();
@@ -187,6 +187,7 @@ function isEditableTarget(element) {
 }
 
 export function seekVideoBy(deltaSeconds, source = "main-player") {
+  if (!hasMediaForPlaybackControls()) return;
   const duration = getFiniteDuration();
   const currentTime = Number.isFinite(dom.videoPlayer.currentTime)
     ? Math.max(0, dom.videoPlayer.currentTime)

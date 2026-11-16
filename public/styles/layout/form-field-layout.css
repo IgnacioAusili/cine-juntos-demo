@@ -205,6 +205,21 @@
   transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
 }
 
+.session-toolbar__load-button-tooltip {
+  display: inline-flex;
+  flex: 0 0 auto;
+  border-radius: 999px;
+}
+
+.session-toolbar__load-button-tooltip--disabled {
+  cursor: not-allowed;
+}
+
+.session-toolbar__load-button-tooltip:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 3px;
+}
+
 .session-toolbar__body .button.button--primary > .button__label,
 .session-toolbar__body .button.button--primary > svg {
   color: #000 !important;
