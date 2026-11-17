@@ -1,0 +1,148 @@
+body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__app-invite[data-density="compact"] {
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 8px;
+  width: var(--lobby-app-invite-ticket-width, min(404px, 100%));
+  min-height: clamp(44px, calc(var(--app-viewport-height, 100dvh) - 516px), 68px);
+  margin-top: clamp(28px, 3.8vh, 34px);
+  margin-bottom: 14px;
+  padding: 6px 8px;
+}
+
+body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__app-invite[data-density="compact"] .lobby-screen__app-invite-art,
+body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__app-invite[data-density="compact"] .lobby-screen__app-invite-mark-compact {
+  width: 42px;
+  height: 42px;
+}
+
+body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__app-invite[data-density="compact"] .lobby-screen__app-invite-glow,
+body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__app-invite[data-density="compact"] .lobby-screen__app-invite-phone,
+body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__app-invite[data-density="compact"] .lobby-screen__app-invite-spark,
+body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__app-invite[data-density="minimal"] .lobby-screen__app-invite-glow,
+body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__app-invite[data-density="minimal"] .lobby-screen__app-invite-phone,
+body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__app-invite[data-density="minimal"] .lobby-screen__app-invite-spark {
+  display: none;
+}
+body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__app-invite[data-density="compact"] .lobby-screen__app-invite-mark-compact {
+  display: block;
+  filter: drop-shadow(0 3px 7px rgba(0, 0, 0, 0.28));
+}
+
+body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__app-invite[data-density="compact"] .lobby-screen__app-invite-content {
+  display: grid;
+  width: 100%;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-content: center;
+  justify-items: start;
+  gap: 6px 8px;
+}
+
+body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__app-invite[data-density="compact"] .lobby-screen__app-invite-content h2 {
+  grid-column: 1 / -1;
+  font-size: 0.82rem;
+  transform: translateY(-2px);
+}
+
+body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__app-invite[data-density="compact"] .lobby-screen__app-invite-description {
+  display: block;
+  grid-column: 1;
+  align-self: center;
+  max-width: calc(100% - 82px);
+  margin: 0;
+  font-size: 0.67rem;
+  line-height: 1.15;
+  transform: translateY(-2px);
+}
+
+body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__app-invite[data-density="compact"] .lobby-screen__app-invite-copy-full {
+  display: none;
+}
+
+body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__app-invite[data-density="compact"] .lobby-screen__app-invite-copy-compact {
+  display: inline;
+}
+
+body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__app-invite[data-density="minimal"] {
+  grid-template-columns: 22px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  margin-bottom: 8px;
+  padding: 2px 8px;
+  overflow: visible;
+}
+
+body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__app-invite[data-density="minimal"] .lobby-screen__app-invite-art,
+body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__app-invite[data-density="minimal"] .lobby-screen__app-invite-mark-compact {
+  width: 24px;
+  height: 24px;
+}
+
+body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__app-invite[data-density="minimal"] .lobby-screen__app-invite-art {
+  display: grid;
+}
+
+
+
+body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__app-invite[data-density="minimal"] .lobby-screen__app-invite-mark-compact {
+  display: block;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.28));
+}
+
+body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__app-invite[data-density="minimal"] .lobby-screen__app-invite-content {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-content: center;
+  align-items: center;
+  gap: 0 6px;
+}
+
+body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__app-invite[data-density="minimal"] .lobby-screen__app-invite-content h2,
+body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__app-invite[data-density="minimal"] .lobby-screen__app-invite-copy-full,
+body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__app-invite[data-density="minimal"] .lobby-screen__app-invite-copy-compact {
+  display: none;
+}
+
+body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__app-invite[data-density="minimal"] .lobby-screen__app-invite-description {
+  grid-column: 1;
+  max-width: 100%;
+  margin: 0;
+  font-size: 0.67rem;
+  line-height: 1.15;
+}
+
+body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__app-invite[data-density="minimal"] .lobby-screen__app-invite-copy-minimal {
+  display: inline;
+}
+
+body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__app-invite[data-density="minimal"] .lobby-screen__app-invite-button {
+  position: static;
+  grid-column: 2;
+  align-self: center;
+  min-height: 22px;
+  padding: 2px 6px;
+  font-size: 0.63rem;
+}
+
+@media (max-height: 620px) {
+  body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__app-invite[data-density="compact"] {
+    grid-template-columns: 38px minmax(0, 1fr);
+    gap: 6px;
+    padding: 4px 8px;
+  }
+
+  body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__app-invite[data-density="compact"] .lobby-screen__app-invite-art,
+  body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__app-invite[data-density="compact"] .lobby-screen__app-invite-mark-compact {
+    width: 36px;
+    height: 36px;
+  }
+
+}
+
+@media (display-mode: standalone) {
+  body.page-context--lobby .lobby-screen__app-invite {
+    display: none;
+  }
+
+  body.page-context--lobby[data-lobby-flow="single-column"] .lobby-screen__app-invite {
+    display: none;
+  }
+}

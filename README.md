@@ -148,5 +148,4 @@ El link debe ser un archivo reproducible por el navegador, por ejemplo `.mp4`, `
     build-html.js
     dev-server.js
   docs/
-    PASOS_PARA_PUBLICAR.txt
 ```
