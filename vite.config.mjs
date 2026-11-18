@@ -15,5 +15,20 @@ export default defineConfig({
     emptyOutDir: true,
     assetsDir: "assets",
     assetsInlineLimit: 0,
+    rolldownOptions: {
+      output: {
+        strictExecutionOrder: true,
+        codeSplitting: {
+          groups: [
+            {
+              name: "app",
+              test: (id) => /[\\/]src[\\/]/.test(id)
+                && !/[\\/]src[\\/]main\.js(?:\?|$)/.test(id),
+              maxSize: 768 * 1024,
+            },
+          ],
+        },
+      },
+    },
   },
 });

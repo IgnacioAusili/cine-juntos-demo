@@ -21,6 +21,7 @@ export function buildContinuousBubblePath({
   radius,
   tailWidth,
   tailHeight,
+  tailSideRadius,
 }) {
   const safeWidth = Math.max(0, finiteNumber(width));
   const safeHeight = Math.max(0, finiteNumber(height));
@@ -29,12 +30,17 @@ export function buildContinuousBubblePath({
     safeWidth / 2,
     safeHeight / 2,
   );
+  const safeTailSideRadius = Math.min(
+    Math.max(0, finiteNumber(tailSideRadius, safeRadius)),
+    safeWidth / 2,
+    safeHeight / 2,
+  );
   const safeTailWidth = Math.max(0, finiteNumber(tailWidth));
   const safeTailHeight = Math.max(0, finiteNumber(tailHeight));
   const center = clampBubbleTailCenter(
     tailCenter,
     safeWidth,
-    safeRadius,
+    safeTailSideRadius,
     safeTailWidth,
   );
   const tailLeft = center - safeTailWidth / 2;
@@ -44,14 +50,14 @@ export function buildContinuousBubblePath({
     return [
       `M ${center} 0`,
       `L ${tailRight} ${safeTailHeight}`,
-      `L ${safeWidth - safeRadius} ${safeTailHeight}`,
-      `A ${safeRadius} ${safeRadius} 0 0 1 ${safeWidth} ${safeTailHeight + safeRadius}`,
+      `L ${safeWidth - safeTailSideRadius} ${safeTailHeight}`,
+      `A ${safeTailSideRadius} ${safeTailSideRadius} 0 0 1 ${safeWidth} ${safeTailHeight + safeTailSideRadius}`,
       `L ${safeWidth} ${safeTailHeight + safeHeight - safeRadius}`,
       `A ${safeRadius} ${safeRadius} 0 0 1 ${safeWidth - safeRadius} ${safeTailHeight + safeHeight}`,
       `L ${safeRadius} ${safeTailHeight + safeHeight}`,
       `A ${safeRadius} ${safeRadius} 0 0 1 0 ${safeTailHeight + safeHeight - safeRadius}`,
-      `L 0 ${safeTailHeight + safeRadius}`,
-      `A ${safeRadius} ${safeRadius} 0 0 1 ${safeRadius} ${safeTailHeight}`,
+      `L 0 ${safeTailHeight + safeTailSideRadius}`,
+      `A ${safeTailSideRadius} ${safeTailSideRadius} 0 0 1 ${safeTailSideRadius} ${safeTailHeight}`,
       `L ${tailLeft} ${safeTailHeight}`,
       "Z",
     ].join(" ");
@@ -61,13 +67,13 @@ export function buildContinuousBubblePath({
     `M ${safeRadius} 0`,
     `L ${safeWidth - safeRadius} 0`,
     `A ${safeRadius} ${safeRadius} 0 0 1 ${safeWidth} ${safeRadius}`,
-    `L ${safeWidth} ${safeHeight - safeRadius}`,
-    `A ${safeRadius} ${safeRadius} 0 0 1 ${safeWidth - safeRadius} ${safeHeight}`,
+    `L ${safeWidth} ${safeHeight - safeTailSideRadius}`,
+    `A ${safeTailSideRadius} ${safeTailSideRadius} 0 0 1 ${safeWidth - safeTailSideRadius} ${safeHeight}`,
     `L ${tailRight} ${safeHeight}`,
     `L ${center} ${safeHeight + safeTailHeight}`,
     `L ${tailLeft} ${safeHeight}`,
-    `L ${safeRadius} ${safeHeight}`,
-    `A ${safeRadius} ${safeRadius} 0 0 1 0 ${safeHeight - safeRadius}`,
+    `L ${safeTailSideRadius} ${safeHeight}`,
+    `A ${safeTailSideRadius} ${safeTailSideRadius} 0 0 1 0 ${safeHeight - safeTailSideRadius}`,
     `L 0 ${safeRadius}`,
     `A ${safeRadius} ${safeRadius} 0 0 1 ${safeRadius} 0`,
     "Z",

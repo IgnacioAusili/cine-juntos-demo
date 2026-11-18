@@ -3,6 +3,17 @@ import { isDebugMode } from "../../../core/debug-mode.js";
 
 export const MINI_PLAYER_DEBUG_TAG = "[MINI_PLAYER_TRACE]";
 
+export function describeTraceTarget(target) {
+  if (!target) return null;
+  return {
+    tag: target.tagName?.toLowerCase() || null,
+    id: target.id || null,
+    className: typeof target.className === "string" ? target.className : null,
+    type: target.type || null,
+    disabled: typeof target.disabled === "boolean" ? target.disabled : null,
+  };
+}
+
 function finiteOrNull(value) {
   return Number.isFinite(value) ? Math.round(value * 100) / 100 : null;
 }

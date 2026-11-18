@@ -2,4 +2,5 @@
 @import url("./message-formatting.css");
 @import url("./message-bubble-variants.css");
 @import url("./message-reactions.css");
+@import url("./message-reactions-timestamp-layout.css");
 @import url("./system-message-exit.css");

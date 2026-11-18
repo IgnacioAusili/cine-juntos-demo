@@ -1,0 +1,137 @@
+.message--reaction-near-time {
+  --reaction-row-size: 24px;
+  --reaction-time-row-width: 100%;
+  --reaction-time-row-gap: 12px;
+  --reaction-time-row-chip-reserve: 34px;
+  --reaction-time-row-compact-size: 18px;
+  --reaction-time-row-emoji-offset: 3px;
+  --reaction-time-row-quote-offset: 0px;
+  --reaction-time-row-order: 2;
+}
+
+.message--reaction-near-time .message__time-row {
+  position: relative;
+  display: flex;
+  box-sizing: border-box;
+  width: var(--reaction-time-row-width);
+  min-width: max-content;
+  min-height: var(--reaction-row-size);
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--reaction-time-row-gap);
+}
+
+.message--reaction-near-time .message__time-row > .message__time-anchor {
+  align-self: center;
+  flex: 0 0 auto;
+  width: auto;
+  margin-block: 0;
+  margin-inline-start: auto;
+}
+
+.message--reaction-near-time .message__reaction-tools {
+  position: relative;
+  inset: auto;
+  width: var(--reaction-control-width);
+  min-width: calc(var(--reaction-control-width) + var(--reaction-panel-offset) + var(--reaction-time-row-chip-reserve));
+  height: var(--reaction-row-size);
+  flex: 0 0 auto;
+  pointer-events: auto;
+  transform: none;
+}
+
+.message.message--reaction-near-time .message__reaction-tools {
+  inset-block-start: auto;
+  inset-inline-start: 0;
+  inset-inline-end: auto;
+}
+
+.message--reaction-near-time .message__reaction-tools--has-reactions {
+  width: max-content;
+  height: var(--reaction-row-size);
+  gap: 0;
+}
+
+.message--reaction-near-time .message__reaction-hover-sensor {
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  height: var(--reaction-row-size);
+  transform: none;
+}
+
+.message--reaction-near-time .message__reaction-tools .message__reaction-picker {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  width: var(--reaction-control-width);
+  height: var(--reaction-row-size);
+  transform: translateY(var(--reaction-picker-lower-offset));
+}
+
+.message--reaction-near-time .message__reaction-tools--has-reactions .message__reaction-picker {
+  position: relative;
+  inset: auto;
+  width: var(--reaction-control-width);
+  height: var(--reaction-row-size);
+  transform: translateY(var(--reaction-picker-lower-offset));
+}
+
+.message--reaction-near-time .message__reaction-list {
+  position: relative;
+  inset: auto;
+  width: max-content;
+  margin-inline-start: var(--reaction-panel-offset);
+  transform: none;
+}
+
+.message.message--reaction-near-time .message__reaction-tools .message__reaction-picker {
+  transform: none;
+}
+
+.message.message--reaction-near-time .message__reaction-tools--has-reactions .message__reaction-picker {
+  transform: none;
+}
+
+.message--reaction-near-time .message__bubble--emoji-only > .message__time-row {
+  order: var(--reaction-time-row-order);
+  margin-top: var(--reaction-time-row-emoji-offset);
+}
+
+.message--reaction-near-time .message__bubble--quote-only > .message__time-row {
+  margin-top: var(--reaction-time-row-quote-offset);
+}
+
+.message--reaction-near-time .message__bubble--emoji-only > .message__time-row,
+.message--reaction-near-time .message__bubble--quote-only > .message__time-row {
+  min-height: var(--reaction-time-row-compact-size);
+}
+
+.message--reaction-near-time .message__bubble--emoji-only .message__reaction-tools,
+.message--reaction-near-time .message__bubble--quote-only .message__reaction-tools {
+  --reaction-row-size: var(--reaction-time-row-compact-size);
+}
+
+.message--reaction-near-time .message__time-row .message__reaction-picker,
+.message--reaction-near-time .message__time-row .message__reaction-list {
+  z-index: var(--reaction-layer);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .message--media-only:not(.message--reaction-button-dismissed):not(.message--text-selected) .message__media-strip-shell:hover ~ .message__time-row .message__reaction-picker {
+    visibility: visible;
+    opacity: var(--reaction-visible-opacity);
+    filter: blur(var(--reaction-clear-blur));
+    pointer-events: auto;
+    transform: none;
+    transition-delay: var(--reaction-reveal-delay);
+  }
+
+  .message--reaction-near-time .message__reaction-tools:hover .message__reaction-picker {
+    visibility: visible;
+    opacity: var(--reaction-visible-opacity);
+    filter: blur(var(--reaction-clear-blur));
+    pointer-events: auto;
+    transform: none;
+    transition-delay: 0ms;
+  }
+}

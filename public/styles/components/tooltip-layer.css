@@ -7,13 +7,16 @@
   --tooltip-arrow-size: 7px;
   --tooltip-arrow-offset: 50%;
   --tooltip-arrow-fill-color: rgba(8, 10, 12, 0.97);
-  --tooltip-quote-background: rgba(8, 10, 12, 0.97);
-  --tooltip-quote-border: rgba(255, 255, 255, 0.14);
-  --tooltip-quote-tail-width: 10px;
-  --tooltip-quote-tail-depth: 5px;
-  --tooltip-quote-tail-half-width: calc(var(--tooltip-quote-tail-width) / 2);
-  --tooltip-quote-tail-inner-depth: calc(var(--tooltip-quote-tail-depth) - var(--tooltip-border-width));
-  --tooltip-quote-tail-inner-half-width: calc(var(--tooltip-quote-tail-half-width) - var(--tooltip-border-width));
+  --tooltip-side-tail-width: 12px;
+  --tooltip-side-tail-depth: 6px;
+  --tooltip-chat-radius: 10px;
+  --tooltip-chat-max-width-default: 260px;
+  --tooltip-chat-max-width: var(--tooltip-chat-max-width-default);
+  --tooltip-chat-min-height: 26px;
+  --tooltip-chat-padding-block: 4px;
+  --tooltip-chat-padding-inline: 8px;
+  --tooltip-chat-font-size: 0.72rem;
+  --tooltip-chat-line-height: 1.15;
 }
 
 /* Al acercarse a un extremo, la geometría compartida reduce el radio para
@@ -48,52 +51,17 @@
   transition: opacity 150ms ease-out, transform 150ms cubic-bezier(0.2, 0.75, 0.25, 1);
 }
 
-.tooltip-layer[data-tooltip-variant="quote"] {
-  max-width: min(120px, calc(100vw - 16px));
-  padding: 2px 5px;
+.tooltip-layer[data-tooltip-variant="chat"] {
+  display: flex;
+  align-items: center;
+  max-width: var(--tooltip-chat-max-width);
+  min-height: var(--tooltip-chat-min-height);
+  padding: var(--tooltip-chat-padding-block) var(--tooltip-chat-padding-inline);
   color: var(--text);
-  font-size: 0.66rem;
-  line-height: 1.15;
-  border: 1px solid var(--tooltip-quote-border);
-  border-radius: var(--tooltip-radius, 12px);
-  background: var(--tooltip-quote-background);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
-}
-
-.tooltip-layer[data-tooltip-variant="quote"]::before,
-.tooltip-layer[data-tooltip-variant="quote"]::after {
-  position: absolute;
-  top: 50%;
-  width: 0;
-  height: 0;
-  border-top: var(--tooltip-quote-tail-half-width) solid transparent;
-  border-bottom: var(--tooltip-quote-tail-half-width) solid transparent;
-  content: "";
-  transform: translateY(-50%);
-}
-
-.tooltip-layer[data-tooltip-variant="quote"][data-placement="left"]::before {
-  left: 100%;
-  border-left: var(--tooltip-quote-tail-depth) solid var(--tooltip-quote-border);
-}
-
-.tooltip-layer[data-tooltip-variant="quote"][data-placement="left"]::after {
-  left: 100%;
-  border-top-width: var(--tooltip-quote-tail-inner-half-width);
-  border-bottom-width: var(--tooltip-quote-tail-inner-half-width);
-  border-left: var(--tooltip-quote-tail-inner-depth) solid var(--tooltip-quote-background);
-}
-
-.tooltip-layer[data-tooltip-variant="quote"][data-placement="right"]::before {
-  right: 100%;
-  border-right: var(--tooltip-quote-tail-depth) solid var(--tooltip-quote-border);
-}
-
-.tooltip-layer[data-tooltip-variant="quote"][data-placement="right"]::after {
-  right: 100%;
-  border-top-width: var(--tooltip-quote-tail-inner-half-width);
-  border-bottom-width: var(--tooltip-quote-tail-inner-half-width);
-  border-right: var(--tooltip-quote-tail-inner-depth) solid var(--tooltip-quote-background);
+  font-size: var(--tooltip-chat-font-size);
+  line-height: var(--tooltip-chat-line-height);
+  overflow-wrap: anywhere;
+  word-break: normal;
 }
 
 .tooltip-layer__svg {
@@ -125,13 +93,17 @@
 }
 
 .tooltip-layer[data-animation-state="entering"][data-placement="left"],
-.tooltip-layer[data-animation-state="leaving"][data-placement="left"] {
+.tooltip-layer__svg[data-animation-state="entering"][data-placement="left"],
+.tooltip-layer[data-animation-state="leaving"][data-placement="left"],
+.tooltip-layer__svg[data-animation-state="leaving"][data-placement="left"] {
   opacity: 0;
   transform: translateX(5px);
 }
 
 .tooltip-layer[data-animation-state="entering"][data-placement="right"],
-.tooltip-layer[data-animation-state="leaving"][data-placement="right"] {
+.tooltip-layer__svg[data-animation-state="entering"][data-placement="right"],
+.tooltip-layer[data-animation-state="leaving"][data-placement="right"],
+.tooltip-layer__svg[data-animation-state="leaving"][data-placement="right"] {
   opacity: 0;
   transform: translateX(-5px);
 }

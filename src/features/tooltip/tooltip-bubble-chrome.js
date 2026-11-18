@@ -54,13 +54,77 @@ export function syncTooltipChrome() {
   }
 
   const layer = dom.tooltipLayer;
-  if (layer.dataset.tooltipVariant === "quote") {
-    tooltipChrome.style.visibility = "hidden";
-    tooltipChrome.style.opacity = "0";
-    return;
-  }
   const style = getComputedStyle(layer);
   const rect = layer.getBoundingClientRect();
+  if (layer.dataset.tooltipVariant === "chat") {
+    const borderWidth = parseCssPixel(style.getPropertyValue("--tooltip-border-width"), TOOLTIP_BORDER_WIDTH_PX);
+    const radius = parseCssPixel(style.getPropertyValue("--tooltip-chat-radius"), TOOLTIP_RADIUS_PX);
+    const tailWidth = parseCssPixel(style.getPropertyValue("--tooltip-side-tail-width"), TOOLTIP_TAIL_WIDTH_PX);
+    const tailDepth = parseCssPixel(style.getPropertyValue("--tooltip-side-tail-depth"), TOOLTIP_TAIL_HEIGHT_PX);
+    const contentWidth = Math.max(0, rect.width - borderWidth);
+    const contentHeight = Math.max(0, rect.height - borderWidth);
+    const tailSideRadius = Math.min(radius, Math.max(0, (contentHeight - tailWidth) / 2));
+    const placement = layer.dataset.placement || "left";
+    const tailOnLeft = placement === "right";
+    const bodyOffsetX = tailOnLeft ? tailDepth : 0;
+    const layerLeft = parseCssPixel(style.left, rect.left);
+    const layerTop = parseCssPixel(style.top, rect.top);
+    const arrowOffset = clampBubbleTailCenter(
+      readCssOffset(
+        style.getPropertyValue("--tooltip-arrow-offset"),
+        contentHeight,
+        contentHeight / 2,
+      ),
+      contentHeight,
+      0,
+      tailWidth,
+    );
+    const svgWidth = rect.width + tailDepth;
+    // Mantener la misma silueta rellena y bordeada del tooltip normal; solo
+    // se rota el sistema de coordenadas para llevar la cola al costado.
+    const requestedTailCenter = tailOnLeft
+      ? arrowOffset - borderWidth / 2
+      : contentHeight - arrowOffset + borderWidth / 2;
+    const tailCenter = clampBubbleTailCenter(requestedTailCenter, contentHeight, tailSideRadius, tailWidth);
+    const bubblePath = buildContinuousBubblePath({
+      width: contentHeight,
+      height: contentWidth,
+      tailSide: "bottom",
+      tailCenter,
+      radius,
+      tailSideRadius,
+      tailWidth,
+      tailHeight: tailDepth,
+    });
+
+    tooltipChrome.dataset.placement = placement;
+    tooltipChrome.dataset.animationState = layer.dataset.animationState || "visible";
+    tooltipChrome.style.setProperty("--tooltip-border-color", style.getPropertyValue("--tooltip-border-color").trim());
+    tooltipChrome.style.setProperty("--tooltip-border-width", `${borderWidth}px`);
+    tooltipChrome.setAttribute("width", `${svgWidth}`);
+    tooltipChrome.setAttribute("height", `${rect.height}`);
+    tooltipChrome.setAttribute("viewBox", `0 0 ${svgWidth} ${rect.height}`);
+    tooltipChrome.style.left = `${layerLeft - bodyOffsetX}px`;
+    tooltipChrome.style.top = `${layerTop}px`;
+    tooltipChrome.style.visibility = style.visibility;
+    tooltipChrome.style.removeProperty("opacity");
+    tooltipChromePath.style.fill = style.getPropertyValue("--tooltip-arrow-fill-color").trim();
+    tooltipChromePath.style.stroke = style.getPropertyValue("--tooltip-border-color").trim();
+    tooltipChromePath.style.strokeWidth = `${borderWidth}px`;
+    tooltipChromePath.style.strokeLinejoin = "round";
+    tooltipChromePath.setAttribute("d", bubblePath);
+    const pathTransform = tailOnLeft
+      ? `translate(${bodyOffsetX + borderWidth / 2 + contentWidth} ${borderWidth / 2}) rotate(90)`
+      : `translate(${borderWidth / 2} ${contentHeight + borderWidth / 2}) rotate(-90)`;
+    tooltipChromePath.setAttribute("transform", pathTransform);
+    return;
+  }
+
+  tooltipChromePath.style.removeProperty("fill");
+  tooltipChromePath.style.removeProperty("stroke");
+  tooltipChromePath.style.removeProperty("stroke-width");
+  tooltipChromePath.style.removeProperty("stroke-linejoin");
+
   const geometry = getBubbleGeometry(style, {
     borderWidth: "--tooltip-border-width",
     borderWidthPx: TOOLTIP_BORDER_WIDTH_PX,

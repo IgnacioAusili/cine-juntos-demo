@@ -21,18 +21,20 @@ export function refreshTooltipForTarget(target) {
   setTooltipVariant(context);
   dom.tooltipLayer.textContent = context.source.dataset.tooltip || "";
   if (!dom.tooltipLayer.textContent) return;
-  positionTooltip(context.anchor, isQuoteTooltipContext(context));
+  positionTooltip(context.anchor, isChatTooltipContext(context), context.source);
 }
 
-function isQuoteTooltipContext(context) {
-  return Boolean(context?.source?.matches?.(".message__quote"));
+function isChatTooltipContext(context) {
+  const source = context?.source;
+  return Boolean(source?.matches?.(".message__reply-body--quote"));
 }
 
 function setTooltipVariant(context) {
-  if (isQuoteTooltipContext(context)) {
-    dom.tooltipLayer.dataset.tooltipVariant = "quote";
+  if (isChatTooltipContext(context)) {
+    dom.tooltipLayer.dataset.tooltipVariant = "chat";
   } else {
     dom.tooltipLayer.removeAttribute("data-tooltip-variant");
+    dom.tooltipLayer.style.removeProperty("--tooltip-chat-max-width");
   }
 }
 
@@ -167,7 +169,7 @@ export function showTooltip(context) {
   window.cancelAnimationFrame(tooltipState.tooltipFrame);
   tooltipState.tooltipFrame = window.requestAnimationFrame(() => {
     if (state.ui.tooltipTarget !== context.anchor || dom.tooltipLayer.hidden) return;
-    positionTooltip(context.anchor, isQuoteTooltipContext(context));
+    positionTooltip(context.anchor, isChatTooltipContext(context), context.source);
     dom.tooltipLayer.style.visibility = "";
     void dom.tooltipLayer.offsetWidth;
     window.requestAnimationFrame(() => {
@@ -179,51 +181,66 @@ export function showTooltip(context) {
   });
 }
 
-function positionQuoteTooltip(anchor, tooltipRect) {
-  const bubble = anchor.closest?.(".message__bubble") || anchor;
-  const rect = bubble.getBoundingClientRect();
-  const anchorRect = anchor.getBoundingClientRect();
-  const quoteTailDepth = Number.parseFloat(
-    getComputedStyle(dom.tooltipLayer).getPropertyValue("--tooltip-quote-tail-depth"),
-  );
-  const gap = Number.isFinite(quoteTailDepth) ? quoteTailDepth : TOOLTIP_TAIL_HEIGHT_PX;
+function positionChatTooltip(anchor, source) {
+  const style = getComputedStyle(dom.tooltipLayer);
+  const tailDepth = Number.parseFloat(style.getPropertyValue("--tooltip-side-tail-depth"));
+  const gap = Number.isFinite(tailDepth) ? tailDepth : TOOLTIP_TAIL_HEIGHT_PX;
   const padding = TOOLTIP_VIEWPORT_PADDING;
-  const maxLeft = Math.max(padding, window.innerWidth - tooltipRect.width - padding);
-  const maxTop = Math.max(padding, window.innerHeight - tooltipRect.height - padding);
-  const leftCandidate = rect.left - tooltipRect.width - gap;
-  const rightCandidate = rect.right + gap;
-  const fitsLeft = leftCandidate >= padding;
-  const fitsRight = rightCandidate + tooltipRect.width <= window.innerWidth - padding;
-  const message = bubble.closest?.(".message");
-  const preferredSide = message?.classList.contains("message--mine") ? "left" : "right";
+  const messageBubble = source?.closest?.(".message__bubble");
+  const boundary = messageBubble || source || anchor;
+  const rect = boundary.getBoundingClientRect();
+  const citation = source?.closest?.(".message__reply");
+  const targetRect = (citation || source)?.getBoundingClientRect?.() || anchor.getBoundingClientRect();
+  const message = messageBubble?.closest?.(".message");
+  const leftSpace = Math.max(0, rect.left - padding - gap);
+  const rightSpace = Math.max(0, window.innerWidth - padding - rect.right - gap);
+  const preferredSide = message
+    ? (message.classList.contains("message--mine") ? "left" : "right")
+    : (leftSpace >= rightSpace ? "left" : "right");
+
+  // Al recalcular, primero medimos el ancho natural para elegir el lado con
+  // espacio suficiente; luego lo limitamos al espacio real de ese costado.
+  dom.tooltipLayer.style.removeProperty("--tooltip-chat-max-width");
+  const naturalWidth = dom.tooltipLayer.getBoundingClientRect().width;
+  const fitsLeft = leftSpace >= naturalWidth;
+  const fitsRight = rightSpace >= naturalWidth;
   let side = preferredSide;
 
   if (side === "left" && !fitsLeft && fitsRight) side = "right";
   else if (side === "right" && !fitsRight && fitsLeft) side = "left";
   else if (!fitsLeft && !fitsRight) {
-    const leftSpace = rect.left - padding;
-    const rightSpace = window.innerWidth - padding - rect.right;
     side = leftSpace >= rightSpace ? "left" : "right";
   }
 
-  const rawLeft = side === "left" ? leftCandidate : rightCandidate;
+  const availableWidth = side === "left" ? leftSpace : rightSpace;
+  dom.tooltipLayer.style.setProperty("--tooltip-chat-max-width", `${availableWidth}px`);
+  const tooltipRect = dom.tooltipLayer.getBoundingClientRect();
+  const maxLeft = Math.max(padding, window.innerWidth - tooltipRect.width - padding);
+  const maxTop = Math.max(padding, window.innerHeight - tooltipRect.height - padding);
+  const rawLeft = side === "left"
+    ? rect.left - tooltipRect.width - gap
+    : rect.right + gap;
   const left = Math.min(Math.max(rawLeft, padding), maxLeft);
-  const rawTop = anchorRect.top + anchorRect.height / 2 - tooltipRect.height / 2;
+  const rawTop = targetRect.top + targetRect.height / 2 - tooltipRect.height / 2;
   const top = Math.min(Math.max(rawTop, padding), maxTop);
 
   dom.tooltipLayer.style.top = `${top}px`;
   dom.tooltipLayer.style.left = `${left}px`;
-  dom.tooltipLayer.style.removeProperty("--tooltip-arrow-offset");
+  dom.tooltipLayer.style.setProperty(
+    "--tooltip-arrow-offset",
+    `${Math.round(targetRect.top + targetRect.height / 2 - top)}px`,
+  );
   dom.tooltipLayer.dataset.placement = side;
 }
 
-export function positionTooltip(anchor, quoteVariant = anchor?.classList?.contains("message__quote")) {
-  const rect = getTooltipAnchorRect(anchor);
-  const tooltipRect = dom.tooltipLayer.getBoundingClientRect();
-  if (quoteVariant) {
-    positionQuoteTooltip(anchor, tooltipRect);
+export function positionTooltip(anchor, chatVariant = false, source = anchor) {
+  if (chatVariant) {
+    positionChatTooltip(anchor, source);
     return;
   }
+
+  const rect = getTooltipAnchorRect(anchor);
+  const tooltipRect = dom.tooltipLayer.getBoundingClientRect();
   const tooltipVisualHeight = tooltipRect.height + TOOLTIP_TAIL_HEIGHT_PX;
   const maxLeft = Math.max(TOOLTIP_VIEWPORT_PADDING, window.innerWidth - tooltipRect.width - TOOLTIP_VIEWPORT_PADDING);
   const maxTop = Math.max(TOOLTIP_VIEWPORT_PADDING, window.innerHeight - tooltipRect.height - TOOLTIP_VIEWPORT_PADDING);
@@ -268,6 +285,7 @@ export function hideTooltip(force = false) {
     dom.tooltipLayer.textContent = "";
     dom.tooltipLayer.style.visibility = "";
     dom.tooltipLayer.style.removeProperty("--tooltip-arrow-offset");
+    dom.tooltipLayer.style.removeProperty("--tooltip-chat-max-width");
     dom.tooltipLayer.style.removeProperty("transition");
     setTooltipChromeTransition("");
     dom.tooltipLayer.removeAttribute("data-animation-state");

@@ -193,7 +193,6 @@ function openAccessDialog(entry, { initialConfig = null, message = "" } = {}) {
   hideTooltip(true);
   if (!dialog.open) dialog.showModal();
   moveTooltipLayersIntoDialog();
-  window.setTimeout(() => input.focus({ preventScroll: true }), 0);
   if (!message && input.value.trim()) scheduleConfigVerification({ immediate: true });
 }
 

@@ -15,6 +15,34 @@ PRINCIPIOS
 CAPAS Y RESPONSABILIDADES ACTUALES
 - `src/main.js`: composition root; inicializa y conecta los modulos de la app.
 - `src/features/`: capacidades por dominio, como chat, player, sala, presencia y sesion.
+- `src/features/player/`:
+  - `player-video-source.js` conserva la API de carga, estado y anuncios del reproductor.
+  - `player-source-replacement.js` coordina el cambio transaccional a una fuente candidata, su restauracion y la espera de metadatos.
+  - `player-media.js` mantiene claves de fuente, recuperacion y persistencia del medio.
+- `src/features/player/controls/`:
+  - `player-volume-layout.js` conserva el punto de entrada, observa los controles y calcula la orientacion y geometria responsive.
+  - `player-volume-interactions.js` maneja puntero, tacto, teclado, foco y el estado de apertura del slider.
+- `src/features/player/mini-player/`:
+  - `mini-player-interface.js`: conserva el ciclo de vida de la interfaz.
+  - `mini-player-interface-mirror.js`: crea y observa cada espejo.
+  - `mini-player-interface-mirror-interactions.js`: enruta sus interacciones.
+  - `mini-player-interface-mirror-pointer.js`: gestiona puntero, busqueda y deduplicacion del click.
+  - `mini-player-interface-mirror-sync.js`: copia el estado de los controles.
+- `src/features/chat/dock/`:
+  - `chat-dock-transitions.js` conserva el agregador publico.
+  - `chat-dock-transition-core.js` centraliza cancelacion, limpieza y anclaje del scroll.
+  - `chat-dock-transition-bottom-desktop.js` y `chat-dock-transition-bottom-mobile.js` implementan las estrategias por viewport.
+  - `chat-dock-transition-fullscreen-scroll.js` maneja el scroll nativo de fullscreen.
+  - `chat-dock-transition-controls.js` anima la geometria de los controles durante la transicion.
+  - `chat-dock-transition-switches.js` mantiene juntas las transiciones entre docks y sus mediciones de scroll.
+  - `chat-dock-transition-fullscreen-switch.js` contiene la salida, el cambio y la entrada del dock durante fullscreen.
+- `src/features/chat/composer/`:
+  - `chat-format-menu.js` conserva la API publica y conecta los eventos de los editores.
+  - `chat-format-menu-view.js` construye el DOM y expone los formatos disponibles.
+  - `chat-format-menu-position.js` gestiona los modos del menu, el submenú y el posicionamiento.
+  - `chat-format-menu-actions.js` aplica formato, crea enlaces y ejecuta acciones del portapapeles.
+  - `chat-composer-drag-drop.js` conserva la API y coordina los objetivos, el ciclo del arrastre y el auto-scroll.
+  - `chat-composer-drop-payload.js` interpreta el contenido transferido y lo incorpora al editor o a la cola de imágenes.
 - `src/index.template.html` y los parciales HTML de `src/features/`: marcado fuente organizado por capacidad.
 - `scripts/build-html.js`: resuelve los includes fuente y genera el `index.html` estatico; Vite compila esa salida y sus imports CSS/JS con nombres con hash en `dist/`.
 - `index.html`: salida generada que conserva el shell unico requerido por el hosting estatico.
@@ -52,11 +80,8 @@ TAMANO Y NOMENCLATURA
 - Crear subcarpetas `ui`, `model`, `api` o `lib` solo si aclaran una separacion real.
 
 EXCEPCIONES DE TAMANO POR COHESION
-- `player-volume-layout.js` supera 400 lineas: eventos de puntero, teclado y foco comparten estado y temporizadores por grupo; no hay un corte seguro sin introducir otra API interna.
-- `chat-dock-transition-core.js` mantiene una unica maquina de transicion para RAF, scroll y anclajes.
-- `chat-dock-transition-switches.js` conserva juntas las coreografias entre docks y sus mediciones de scroll.
+- `chat-dock-transition-switches.js` queda en el rango de 300–400 lineas porque las coreografias entre docks y las mediciones de scroll comparten el mismo estado de transicion.
 - `mobile-chat-header.js` combina teclado, actividad, dock y temporizadores en una unica maquina de estado movil.
-- `mini-player-interface.js` sincroniza controles proxy y estado DOM entre el reproductor y su superficie duplicada.
 - `player-media.js` coordina carga, recuperacion y persistencia con las mismas claves de fuente y guardas contra carreras.
 - `player-controls-layout.js` calcula ajuste, densidad y overflow en un mismo ciclo de geometria.
 - `layout-viewport-engine.js` resuelve viewport, teclado y fullscreen a partir de una misma captura de metricas.
